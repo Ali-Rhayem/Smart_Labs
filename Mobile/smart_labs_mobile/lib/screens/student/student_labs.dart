@@ -5,18 +5,17 @@ import 'package:smart_labs_mobile/widgets/bottom_navigation_bar.dart';
 import 'package:smart_labs_mobile/widgets/lab_card.dart';
 
 class StudentLabsScreen extends StatefulWidget {
-  StudentLabsScreen({super.key});
-
-  // Example neon color (adjust as needed)
-  static const Color kNeonAccent = Color(0xFFFFFF00);
+  const StudentLabsScreen({Key? key}) : super(key: key);
 
   @override
   State<StudentLabsScreen> createState() => _StudentLabsScreenState();
 }
 
 class _StudentLabsScreenState extends State<StudentLabsScreen> {
+  static const Color kNeonAccent = Color(0xFFFFFF00);
+
   // Dummy data simulating labs from DB
-  final List<Lab> sampleLabs = [
+  final List<Lab> _allLabs = [
     Lab(
       labId: '1',
       labCode: 'CHEM101',
@@ -47,12 +46,21 @@ class _StudentLabsScreenState extends State<StudentLabsScreen> {
     ),
   ];
 
+  // This list will be updated as user types in the search bar.
+  late List<Lab> _filteredLabs;
+
+  @override
+  void initState() {
+    super.initState();
+    // Initially, show all labs
+    _filteredLabs = List.from(_allLabs);
+  }
+
   @override
   Widget build(BuildContext context) {
     // Dark background
     return Scaffold(
       backgroundColor: Colors.black,
-      // Custom “AppBar” area with the same style as your screenshot
       body: SafeArea(
         child: Column(
           children: [
@@ -63,7 +71,6 @@ class _StudentLabsScreenState extends State<StudentLabsScreen> {
           ],
         ),
       ),
-      // Bottom navigation bar (to replicate the style in the mockup)
       bottomNavigationBar: const BottomNavigation(),
     );
   }
@@ -96,7 +103,7 @@ class _StudentLabsScreenState extends State<StudentLabsScreen> {
                   icon: const Icon(Icons.filter_list),
                   color: Colors.white,
                   onPressed: () {
-                    // TODO: implement filter action
+                    // TODO: implement filter action (e.g., by date, by instructor, etc.)
                   },
                 ),
               )
@@ -111,7 +118,7 @@ class _StudentLabsScreenState extends State<StudentLabsScreen> {
             ),
             child: TextField(
               style: const TextStyle(color: Colors.white),
-              cursorColor: StudentLabsScreen.kNeonAccent,
+              cursorColor: kNeonAccent,
               decoration: InputDecoration(
                 hintText: 'Search Labs...',
                 hintStyle: TextStyle(color: Colors.white.withOpacity(0.5)),
@@ -120,10 +127,9 @@ class _StudentLabsScreenState extends State<StudentLabsScreen> {
                 contentPadding:
                     const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
               ),
-              onChanged: (value) {
-                // TODO: implement search logic
-                print('Search query: $value');
-                // filter labs for me based on search query
+              onChanged: (query) {
+                // Filter labs whenever user types
+                _filterLabs(query);
               },
             ),
           ),
@@ -134,12 +140,30 @@ class _StudentLabsScreenState extends State<StudentLabsScreen> {
 
   Widget _buildLabsList(BuildContext context) {
     return ListView.builder(
-      itemCount: sampleLabs.length,
+      itemCount: _filteredLabs.length,
       padding: const EdgeInsets.only(top: 8),
       itemBuilder: (context, index) {
-        final lab = sampleLabs[index];
+        final lab = _filteredLabs[index];
         return LabCard(lab: lab);
       },
     );
+  }
+
+  // Simple filtering logic, can be expanded
+  void _filterLabs(String query) {
+    setState(() {
+      if (query.isEmpty) {
+        // If search is empty, show all labs again
+        _filteredLabs = List.from(_allLabs);
+      } else {
+        final lowerQuery = query.toLowerCase();
+        _filteredLabs = _allLabs.where((lab) {
+          // For example, search by name or code
+          final nameMatch = lab.labName.toLowerCase().contains(lowerQuery);
+          final codeMatch = lab.labCode.toLowerCase().contains(lowerQuery);
+          return nameMatch || codeMatch;
+        }).toList();
+      }
+    });
   }
 }
