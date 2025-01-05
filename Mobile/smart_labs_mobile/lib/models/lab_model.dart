@@ -1,3 +1,5 @@
+import 'package:smart_labs_mobile/models/session_model.dart';
+
 class Lab {
   final String labId;
   final String labCode;
@@ -11,6 +13,7 @@ class Lab {
   final String endTime;
   final String report;
   final String semesterId;
+  final List<Session> sessions;
 
   const Lab({
     required this.labId,
@@ -25,5 +28,6 @@ class Lab {
     required this.endTime,
     required this.report,
     required this.semesterId,
+    required this.sessions,
   });
 }
