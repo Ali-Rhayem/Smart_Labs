@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:smart_labs_mobile/models/lab_model.dart';
-import 'package:smart_labs_mobile/screens/student/lab_details.dart';
 import 'package:smart_labs_mobile/widgets/bottom_navigation_bar.dart';
 import 'package:smart_labs_mobile/widgets/lab_card.dart';
+import 'package:smart_labs_mobile/widgets/search_and_filter_header.dart';
 
 class StudentLabsScreen extends StatefulWidget {
-  const StudentLabsScreen({Key? key}) : super(key: key);
+  const StudentLabsScreen({super.key});
 
   @override
   State<StudentLabsScreen> createState() => _StudentLabsScreenState();
 }
 
 class _StudentLabsScreenState extends State<StudentLabsScreen> {
+  // Example neon color (adjust as needed)
   static const Color kNeonAccent = Color(0xFFFFFF00);
 
   // Dummy data simulating labs from DB
@@ -58,83 +59,26 @@ class _StudentLabsScreenState extends State<StudentLabsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Dark background
     return Scaffold(
+      // Dark background
       backgroundColor: Colors.black,
       body: SafeArea(
         child: Column(
           children: [
-            // Top Header with title, search bar, filter icon
-            _buildHeader(context),
+            // Reusable header
+            SearchAndFilterHeader(
+              title: 'Labs',
+              backgroundColor: Colors.black,
+              accentColor: kNeonAccent,
+              onSearchChanged: _filterLabs,
+              onFilterPressed: _showFilterDialog,
+            ),
             // Labs list
             Expanded(child: _buildLabsList(context)),
           ],
         ),
       ),
       bottomNavigationBar: const BottomNavigation(),
-    );
-  }
-
-  Widget _buildHeader(BuildContext context) {
-    return Container(
-      color: Colors.black,
-      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
-      child: Column(
-        children: [
-          // Page Title
-          Row(
-            children: [
-              Text(
-                'Labs',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const Spacer(),
-              // Filter Icon
-              Container(
-                decoration: BoxDecoration(
-                  color: const Color(0xFF1C1C1C),
-                  shape: BoxShape.circle,
-                ),
-                child: IconButton(
-                  icon: const Icon(Icons.filter_list),
-                  color: Colors.white,
-                  onPressed: () {
-                    // TODO: implement filter action (e.g., by date, by instructor, etc.)
-                  },
-                ),
-              )
-            ],
-          ),
-          const SizedBox(height: 12),
-          // Search Bar
-          Container(
-            decoration: BoxDecoration(
-              color: const Color(0xFF1C1C1C),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: TextField(
-              style: const TextStyle(color: Colors.white),
-              cursorColor: kNeonAccent,
-              decoration: InputDecoration(
-                hintText: 'Search Labs...',
-                hintStyle: TextStyle(color: Colors.white.withOpacity(0.5)),
-                prefixIcon: const Icon(Icons.search, color: Colors.white),
-                border: InputBorder.none,
-                contentPadding:
-                    const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
-              ),
-              onChanged: (query) {
-                // Filter labs whenever user types
-                _filterLabs(query);
-              },
-            ),
-          ),
-        ],
-      ),
     );
   }
 
@@ -153,17 +97,33 @@ class _StudentLabsScreenState extends State<StudentLabsScreen> {
   void _filterLabs(String query) {
     setState(() {
       if (query.isEmpty) {
-        // If search is empty, show all labs again
         _filteredLabs = List.from(_allLabs);
       } else {
         final lowerQuery = query.toLowerCase();
         _filteredLabs = _allLabs.where((lab) {
-          // For example, search by name or code
           final nameMatch = lab.labName.toLowerCase().contains(lowerQuery);
           final codeMatch = lab.labCode.toLowerCase().contains(lowerQuery);
           return nameMatch || codeMatch;
         }).toList();
       }
     });
+  }
+
+  void _showFilterDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Filter Options'),
+          content: const Text('Filter labs by date, instructor, etc.'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Close'),
+            )
+          ],
+        );
+      },
+    );
   }
 }
