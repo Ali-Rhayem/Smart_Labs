@@ -46,6 +46,13 @@ namespace backend.Controllers
         [HttpPost]
         public async Task<ActionResult<User>> CreateUser(User user)
         {
+            // Validate input
+            if (string.IsNullOrEmpty(user.Password))
+            {
+                return BadRequest("Password is required.");
+            }
+            user.Password = BCrypt.Net.BCrypt.HashPassword(user.Password);
+
             var createdUser = await _userService.CreateUser(user);
             return CreatedAtAction(nameof(GetUserById), new { id = createdUser.Id }, createdUser);
         }
@@ -86,7 +93,7 @@ namespace backend.Controllers
             // Check the user in the database
             var user = await _userService.GetUserByEmailAsync(loginRequest.Email);
 
-            if (user == null || user.Password != loginRequest.Password) // Ensure password hashing is applied
+            if (user == null || !BCrypt.Net.BCrypt.Verify(loginRequest.Password, user.Password)) // Ensure password hashing is applied
             {
                 return Unauthorized("Invalid email or password.");
             }

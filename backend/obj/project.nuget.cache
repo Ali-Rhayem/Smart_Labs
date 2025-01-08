@@ -1,9 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "86y0PmOCzlA=",
+  "dgSpecHash": "jFUe3ZrBQpw=",
   "success": true,
   "projectFilePath": "/Users/jawadalsayed/Desktop/fyp/Smart_Labs/backend/backend.csproj",
   "expectedPackageFiles": [
+    "/Users/jawadalsayed/.nuget/packages/bcrypt.net-next/4.0.3/bcrypt.net-next.4.0.3.nupkg.sha512",
     "/Users/jawadalsayed/.nuget/packages/dnsclient/1.6.1/dnsclient.1.6.1.nupkg.sha512",
     "/Users/jawadalsayed/.nuget/packages/microsoft.aspnetcore.authentication.jwtbearer/9.0.0/microsoft.aspnetcore.authentication.jwtbearer.9.0.0.nupkg.sha512",
     "/Users/jawadalsayed/.nuget/packages/microsoft.aspnetcore.openapi/9.0.0/microsoft.aspnetcore.openapi.9.0.0.nupkg.sha512",
