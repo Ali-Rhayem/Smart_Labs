@@ -5,90 +5,81 @@ import 'package:smart_labs_mobile/screens/student/lab_details.dart';
 class LabCard extends StatelessWidget {
   const LabCard({super.key, required this.lab});
   final Lab lab;
-
-  /// Neon yellow color
   static const Color kNeonAccent = Color(0xFFFFFF00);
 
   @override
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          gradient: const LinearGradient(
-            begin: Alignment.centerLeft,
-            end: Alignment.centerRight,
-            // stops array controls how quickly we transition to black
-            stops: [0, 0.03, 1],
-            colors: [
-              kNeonAccent, // Neon strip
-              Color(0xFF1C1C1C), // Transition color
-              Color(0xFF1C1C1C), // Card remains dark to the right
+      padding: const EdgeInsets.all(16),
+      decoration: const BoxDecoration(
+        color: Color(0xFF1C1C1C),
+        border: Border(
+          left: BorderSide(
+            color: kNeonAccent, // Color for left border
+            width: 4.0, // Width for left border
+          ),
+        ),
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(12.0),
+          bottomLeft: Radius.circular(12.0),
+          topRight: Radius.circular(12.0),
+          bottomRight: Radius.elliptical(12, 11), // Adjust the radius as needed
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Lab Title & “View” icon
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              // Lab Name + Subtitle
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    lab.labName,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    lab.description,
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.7),
+                      fontSize: 13,
+                    ),
+                  ),
+                ],
+              ),
+              const Spacer(),
+              IconButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (ctx) => LabDetailScreen(lab: lab),
+                    ),
+                  );
+                },
+                color: kNeonAccent,
+                icon: const Icon(
+                  Icons.chevron_right,
+                  size: 30,
+                ),
+              ),
             ],
           ),
-        ),
-        // 3) Clip the same rounded corners so child widgets don't overflow
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(12),
-          // 4) The main card content goes here
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Row of title & icon
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    // Lab title and subtitle
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          lab.labName,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          lab.description,
-                          style: TextStyle(
-                            color: Colors.white.withOpacity(0.7),
-                            fontSize: 13,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const Spacer(),
-                    IconButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (ctx) => LabDetailScreen(lab: lab),
-                          ),
-                        );
-                      },
-                      icon: const Icon(Icons.chevron_right, size: 30),
-                      color: kNeonAccent,
-                    ),
-                  ],
-                ),
-                // ... add more content below if needed ...
-              ],
-            ),
-          ),
-        ),
+        ],
       ),
     );
   }
 }
 
-// If you need a date formatter helper:
 String _formatDate(DateTime date) {
   return '${date.month}/${date.day}/${date.year}';
 }
