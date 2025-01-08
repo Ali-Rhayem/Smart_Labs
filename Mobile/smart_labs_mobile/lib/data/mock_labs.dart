@@ -22,6 +22,7 @@ final List<Lab> mockLabs = [
         date: DateTime(2023, 5, 10),
         startTime: '09:00 AM',
         endTime: '10:00 AM',
+        description: "first session",
         output: [
           StudentRecord(
             studentId: 'ST101',
@@ -44,6 +45,7 @@ final List<Lab> mockLabs = [
         date: DateTime(2023, 5, 10),
         startTime: '10:00 AM',
         endTime: '11:00 AM',
+        description: "second session",
         output: [
           StudentRecord(
             studentId: 'ST101',
@@ -82,6 +84,7 @@ final List<Lab> mockLabs = [
         date: DateTime(2023, 5, 12),
         startTime: '01:00 PM',
         endTime: '02:00 PM',
+        description: "third session",
         output: [
           StudentRecord(
             studentId: 'ST201',
@@ -104,6 +107,7 @@ final List<Lab> mockLabs = [
         date: DateTime(2023, 5, 12),
         startTime: '02:00 PM',
         endTime: '03:30 PM',
+        description: "fourth session",
         output: [
           StudentRecord(
             studentId: 'ST201',
