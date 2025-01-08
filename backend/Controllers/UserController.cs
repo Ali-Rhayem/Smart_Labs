@@ -11,11 +11,13 @@ namespace backend.Controllers
     public class UserController : ControllerBase
     {
         private readonly UserService _userService;
+        private readonly JwtTokenHelper _jwtTokenHelper;
 
         // Inject UserService into the controller
-        public UserController(UserService userService)
+        public UserController(UserService userService, JwtTokenHelper jwtTokenHelper)
         {
             _userService = userService;
+            _jwtTokenHelper = jwtTokenHelper;
         }
 
         // for testing purposes
@@ -71,5 +73,35 @@ namespace backend.Controllers
 
             return NoContent(); // 204 No Content
         }
+
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] LoginRequest loginRequest)
+        {
+            // Validate the request
+            if (loginRequest == null || string.IsNullOrEmpty(loginRequest.Email) || string.IsNullOrEmpty(loginRequest.Password))
+            {
+                return BadRequest("Email and password are required.");
+            }
+
+            // Check the user in the database
+            var user = await _userService.GetUserByEmailAsync(loginRequest.Email);
+
+            if (user == null || user.Password != loginRequest.Password) // Ensure password hashing is applied
+            {
+                return Unauthorized("Invalid email or password.");
+            }
+
+            // Generate a JWT token
+            var token = _jwtTokenHelper.GenerateToken(user.Id, user.Role);
+
+            return Ok(new
+            {
+                Token = token,
+                UserId = user.Id,
+                Role = user.Role
+            });
+        }
+
+
     }
 }
