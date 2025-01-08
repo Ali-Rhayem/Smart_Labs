@@ -22,12 +22,23 @@ public class UserService
     // for testing purposes
     public async Task<List<User>> GetAllUsers()
     {
-        return await _users.Find(_ => true).ToListAsync();
+        var projection = Builders<User>.Projection
+            .Exclude(u => u.Password)
+            .Exclude(u => u.Role)
+            .Exclude(u => u.FaceIdentityVector);
+
+        return await _users.Find(_ => true).Project<User>(projection).ToListAsync();
     }
 
     public async Task<User?> GetUserById(int id)
     {
-        return await _users.Find(user => user.Id == id).FirstOrDefaultAsync();
+        var projection = Builders<User>.Projection
+            .Exclude(u => u.Password)
+            .Exclude(u => u.Role)
+            .Exclude(u => u.FaceIdentityVector);
+
+        return await _users
+            .Find(user => user.Id == id).Project<User>(projection).FirstOrDefaultAsync();
     }
 
     public async Task<bool> UpdateUser(int id, User updatedFields)
