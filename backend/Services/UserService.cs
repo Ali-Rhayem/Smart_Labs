@@ -75,4 +75,11 @@ public class UserService
         var result = await _users.DeleteOneAsync(user => user.Id == id);
         return result.IsAcknowledged && result.DeletedCount > 0;
     }
+
+    public async Task<User> GetUserByEmailAsync(string email)
+    {
+        var projection = Builders<User>.Projection.Exclude(u => u.FaceIdentityVector);
+        return await _users.Find(u => u.Email == email).Project<User>(projection).FirstOrDefaultAsync();
+    }
+
 }
