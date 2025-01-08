@@ -17,7 +17,7 @@ class LabCard extends StatelessWidget {
         border: Border(
           left: BorderSide(
             color: kNeonAccent, // Color for left border
-            width: 4.0, // Width for left border
+            width: 5.0, // Width for left border
           ),
         ),
         borderRadius: BorderRadius.only(
