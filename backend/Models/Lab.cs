@@ -5,7 +5,7 @@ using System.Collections.Generic;
 public class Lab
 {
     [BsonId]
-    public required string Id { get; set; }
+    public int Id { get; set; }
 
     [BsonElement("Lab_Code")]
     public required string LabCode { get; set; }
