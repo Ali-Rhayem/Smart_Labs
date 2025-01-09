@@ -1,18 +1,21 @@
 using backend.helpers;
 using backend.Models;
 using MongoDB.Driver;
+using backend.Services;
 
 public class LabService
 {
     private readonly IMongoCollection<Lab> _labs;
     private readonly IMongoCollection<User> _users;
     private readonly LabHelper _labHelper;
+    private readonly UserService _userService;
 
-    public LabService(IMongoDatabase database, LabHelper labHelper)
+    public LabService(IMongoDatabase database, LabHelper labHelper, UserService userService)
     {
         _labs = database.GetCollection<Lab>("Labs");
         _users = database.GetCollection<User>("Users");
         _labHelper = labHelper;
+        _userService = userService;
     }
 
     public async Task<List<Lab>> GetAllLabsAsync()
@@ -23,6 +26,29 @@ public class LabService
     public async Task<List<Lab>> GetInstructorLabsAsync(int instructorId)
     {
         return await _labs.Find(lab => lab.Instructors.Contains(instructorId)).ToListAsync();
+    }
+
+    public async Task<List<User>> GetStudentsInLabAsync(int labId)
+    {
+        var lab = await _labs.Find(lab => lab.Id == labId).FirstOrDefaultAsync();
+        var students = new List<User>();
+        foreach (var studentId in lab.Students)
+        {
+            var student = await _userService.GetUserById(studentId);
+            students.Add(student);
+        }
+        return students;
+    }
+
+    public async Task<List<Lab>> GetStudentLabsAsync(int studentId)
+    {
+        // skip the PPE, report and Students fields
+        var projection = Builders<Lab>.Projection
+            .Exclude(l => l.Students)
+            .Exclude(l => l.PPE)
+            .Exclude(l => l.Report);
+
+        return await _labs.Find(lab => lab.Students.Contains(studentId)).Project<Lab>(projection).ToListAsync();
     }
 
     public async Task<Lab> GetLabByIdAsync(int id)

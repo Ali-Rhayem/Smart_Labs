@@ -30,7 +30,7 @@ public class UserService
         return await _users.Find(_ => true).Project<User>(projection).ToListAsync();
     }
 
-    public async Task<User?> GetUserById(int id)
+    public async Task<User> GetUserById(int id)
     {
         var projection = Builders<User>.Projection
             .Exclude(u => u.Password)
