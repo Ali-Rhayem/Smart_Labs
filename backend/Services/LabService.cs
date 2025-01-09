@@ -1,12 +1,18 @@
+using backend.helpers;
+using backend.Models;
 using MongoDB.Driver;
 
 public class LabService
 {
     private readonly IMongoCollection<Lab> _labs;
+    private readonly IMongoCollection<User> _users;
+    private readonly LabHelper _labHelper;
 
-    public LabService(IMongoDatabase database)
+    public LabService(IMongoDatabase database, LabHelper labHelper)
     {
         _labs = database.GetCollection<Lab>("Labs");
+        _users = database.GetCollection<User>("Users");
+        _labHelper = labHelper;
     }
 
     public async Task<List<Lab>> GetAllLabsAsync()
@@ -26,6 +32,15 @@ public class LabService
 
     public async Task<Lab> CreateLabAsync(Lab lab)
     {
+        // check if students exist in the database
+        foreach (var studentId in lab.Students)
+        {
+            var student = await _users.Find(user => user.Id == studentId).FirstOrDefaultAsync();
+            if (student == null)
+            {
+                _labHelper.CreateStudentIfNotExists(studentId);
+            }
+        }
         await _labs.InsertOneAsync(lab);
         return lab;
     }
@@ -58,6 +73,14 @@ public class LabService
 
     public async Task<Boolean> AddStudentToLabAsync(int labId, int studentId)
     {
+        // Check if student exists in the database
+        var student = await _users.Find(user => user.Id == studentId).FirstOrDefaultAsync();
+
+        if (student == null)
+        {
+            _labHelper.CreateStudentIfNotExists(studentId);
+        }
+
         var updateDefinition = Builders<Lab>.Update.Push(lab => lab.Students, studentId);
         var result = await _labs.UpdateOneAsync(lab => lab.Id == labId, updateDefinition);
 
