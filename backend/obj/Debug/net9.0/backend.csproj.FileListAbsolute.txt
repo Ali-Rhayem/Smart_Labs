@@ -6,8 +6,16 @@
 /Users/jawadalsayed/Desktop/fyp/Smart_Labs/backend/bin/Debug/net9.0/backend.runtimeconfig.json
 /Users/jawadalsayed/Desktop/fyp/Smart_Labs/backend/bin/Debug/net9.0/backend.dll
 /Users/jawadalsayed/Desktop/fyp/Smart_Labs/backend/bin/Debug/net9.0/backend.pdb
+/Users/jawadalsayed/Desktop/fyp/Smart_Labs/backend/bin/Debug/net9.0/BCrypt.Net-Next.dll
 /Users/jawadalsayed/Desktop/fyp/Smart_Labs/backend/bin/Debug/net9.0/DnsClient.dll
+/Users/jawadalsayed/Desktop/fyp/Smart_Labs/backend/bin/Debug/net9.0/Microsoft.AspNetCore.Authentication.JwtBearer.dll
 /Users/jawadalsayed/Desktop/fyp/Smart_Labs/backend/bin/Debug/net9.0/Microsoft.AspNetCore.OpenApi.dll
+/Users/jawadalsayed/Desktop/fyp/Smart_Labs/backend/bin/Debug/net9.0/Microsoft.IdentityModel.Abstractions.dll
+/Users/jawadalsayed/Desktop/fyp/Smart_Labs/backend/bin/Debug/net9.0/Microsoft.IdentityModel.JsonWebTokens.dll
+/Users/jawadalsayed/Desktop/fyp/Smart_Labs/backend/bin/Debug/net9.0/Microsoft.IdentityModel.Logging.dll
+/Users/jawadalsayed/Desktop/fyp/Smart_Labs/backend/bin/Debug/net9.0/Microsoft.IdentityModel.Protocols.dll
+/Users/jawadalsayed/Desktop/fyp/Smart_Labs/backend/bin/Debug/net9.0/Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
+/Users/jawadalsayed/Desktop/fyp/Smart_Labs/backend/bin/Debug/net9.0/Microsoft.IdentityModel.Tokens.dll
 /Users/jawadalsayed/Desktop/fyp/Smart_Labs/backend/bin/Debug/net9.0/Microsoft.OpenApi.dll
 /Users/jawadalsayed/Desktop/fyp/Smart_Labs/backend/bin/Debug/net9.0/MongoDB.Bson.dll
 /Users/jawadalsayed/Desktop/fyp/Smart_Labs/backend/bin/Debug/net9.0/MongoDB.Driver.dll
@@ -16,6 +24,7 @@
 /Users/jawadalsayed/Desktop/fyp/Smart_Labs/backend/bin/Debug/net9.0/Swashbuckle.AspNetCore.Swagger.dll
 /Users/jawadalsayed/Desktop/fyp/Smart_Labs/backend/bin/Debug/net9.0/Swashbuckle.AspNetCore.SwaggerGen.dll
 /Users/jawadalsayed/Desktop/fyp/Smart_Labs/backend/bin/Debug/net9.0/Swashbuckle.AspNetCore.SwaggerUI.dll
+/Users/jawadalsayed/Desktop/fyp/Smart_Labs/backend/bin/Debug/net9.0/System.IdentityModel.Tokens.Jwt.dll
 /Users/jawadalsayed/Desktop/fyp/Smart_Labs/backend/bin/Debug/net9.0/ZstdSharp.dll
 /Users/jawadalsayed/Desktop/fyp/Smart_Labs/backend/obj/Debug/net9.0/backend.csproj.AssemblyReference.cache
 /Users/jawadalsayed/Desktop/fyp/Smart_Labs/backend/obj/Debug/net9.0/backend.GeneratedMSBuildEditorConfig.editorconfig

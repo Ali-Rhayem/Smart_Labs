@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using backend.Models;
 using backend.Services;
@@ -23,6 +24,7 @@ namespace backend.Controllers
         // for testing purposes
         // GET: api/user
         [HttpGet]
+        [Authorize(Roles = "admin")]
         public async Task<ActionResult<List<User>>> GetAllUsers()
         {
             var users = await _userService.GetAllUsers();
@@ -31,6 +33,7 @@ namespace backend.Controllers
 
         // GET: api/user/{id}
         [HttpGet("{id}")]
+        [Authorize]
         public async Task<ActionResult<User>> GetUserById(int id)
         {
             var user = await _userService.GetUserById(id);
@@ -44,6 +47,7 @@ namespace backend.Controllers
         // for testing purposes
         // POST: api/user
         [HttpPost]
+        [Authorize(Roles = "admin")]
         public async Task<ActionResult<User>> CreateUser(User user)
         {
             // Validate input
@@ -59,6 +63,7 @@ namespace backend.Controllers
 
         // PUT: api/user/{id}
         [HttpPut("{id}")]
+        [Authorize(Roles = "admin,student")]
         public async Task<ActionResult> UpdateUser(int id, User updatedFields)
         {
             var result = await _userService.UpdateUser(id, updatedFields);
@@ -71,6 +76,7 @@ namespace backend.Controllers
 
         // DELETE: api/user/{id}
         [HttpDelete("{id}")]
+        [Authorize(Roles = "admin")]
         public async Task<ActionResult> DeleteUser(int id)
         {
             var result = await _userService.DeleteUser(id);
@@ -82,6 +88,7 @@ namespace backend.Controllers
         }
 
         [HttpPost("login")]
+        [AllowAnonymous]
         public async Task<IActionResult> Login([FromBody] LoginRequest loginRequest)
         {
             // Validate the request
@@ -93,7 +100,7 @@ namespace backend.Controllers
             // Check the user in the database
             var user = await _userService.GetUserByEmailAsync(loginRequest.Email);
 
-            if (user == null || !BCrypt.Net.BCrypt.Verify(loginRequest.Password, user.Password)) // Ensure password hashing is applied
+            if (user == null || !BCrypt.Net.BCrypt.Verify(loginRequest.Password, user.Password))
             {
                 return Unauthorized("Invalid email or password.");
             }
