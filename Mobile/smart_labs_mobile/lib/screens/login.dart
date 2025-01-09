@@ -219,7 +219,7 @@ class _LoginPageState extends State<LoginPage> {
       if (isDoctor) {
         Navigator.pushReplacementNamed(context, '/doctorDashboard');
       } else {
-        Navigator.pushReplacementNamed(context, '/studentLabsPage');
+        Navigator.pushReplacementNamed(context, '/main');
       }
 
       ScaffoldMessenger.of(context).showSnackBar(
