@@ -40,12 +40,22 @@ public class LabService
         return students;
     }
 
+    public async Task<List<User>> GetInstructorsInLabAsync(int labId)
+    {
+        var lab = await _labs.Find(lab => lab.Id == labId).FirstOrDefaultAsync();
+        var instructors = new List<User>();
+        foreach (var instructorId in lab.Instructors)
+        {
+            var instructor = await _userService.GetUserById(instructorId);
+            instructors.Add(instructor);
+        }
+        return instructors;
+    }
+
     public async Task<List<Lab>> GetStudentLabsAsync(int studentId)
     {
-        // skip the PPE, report and Students fields
+        // skip the report
         var projection = Builders<Lab>.Projection
-            .Exclude(l => l.Students)
-            .Exclude(l => l.PPE)
             .Exclude(l => l.Report);
 
         return await _labs.Find(lab => lab.Students.Contains(studentId)).Project<Lab>(projection).ToListAsync();
