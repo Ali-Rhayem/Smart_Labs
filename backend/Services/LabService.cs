@@ -107,17 +107,17 @@ public class LabService
 
     }
 
-    public async Task<Boolean> AddStudentToLabAsync(int labId, int studentId)
+    public async Task<Boolean> AddStudentToLabAsync(int labId, List<int> studentsId)
     {
-        // Check if student exists in the database
-        var student = await _users.Find(user => user.Id == studentId).FirstOrDefaultAsync();
-
-        if (student == null)
+        foreach (var id in studentsId)
         {
-            _labHelper.CreateStudentIfNotExists(studentId);
+            var student = await _users.Find(user => user.Id == id).FirstOrDefaultAsync();
+            if (student == null)
+            {
+                _labHelper.CreateStudentIfNotExists(id);
+            }
         }
-
-        var updateDefinition = Builders<Lab>.Update.Push(lab => lab.Students, studentId);
+        var updateDefinition = Builders<Lab>.Update.PushEach(lab => lab.Students, studentsId);
         var result = await _labs.UpdateOneAsync(lab => lab.Id == labId, updateDefinition);
 
         return result.ModifiedCount > 0;
@@ -131,9 +131,9 @@ public class LabService
         return result.ModifiedCount > 0;
     }
 
-    public async Task<Boolean> AddPPEToLabAsync(int labId, int ppeId)
+    public async Task<Boolean> EditPPEOfLabAsync(int labId, List<int> ppeId)
     {
-        var updateDefinition = Builders<Lab>.Update.Push(lab => lab.PPE, ppeId);
+        var updateDefinition = Builders<Lab>.Update.Set(lab => lab.PPE, ppeId);
         var result = await _labs.UpdateOneAsync(lab => lab.Id == labId, updateDefinition);
 
         return result.ModifiedCount > 0;
@@ -155,16 +155,9 @@ public class LabService
         return result.ModifiedCount > 0;
     }
 
-    public async Task<Boolean> RemovePPEFromLabAsync(int labId, int ppeId)
+    public async Task<Boolean> DeleteLabAsync(int id)
     {
-        var updateDefinition = Builders<Lab>.Update.Pull(lab => lab.PPE, ppeId);
-        var result = await _labs.UpdateOneAsync(lab => lab.Id == labId, updateDefinition);
-
-        return result.ModifiedCount > 0;
-    }
-
-    public async Task DeleteLabAsync(int id)
-    {
-        await _labs.DeleteOneAsync(lab => lab.Id == id);
+        var result = await _labs.DeleteOneAsync(lab => lab.Id == id);
+        return result.DeletedCount > 0;
     }
 }
