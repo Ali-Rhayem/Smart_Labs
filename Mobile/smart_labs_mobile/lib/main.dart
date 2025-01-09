@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:smart_labs_mobile/screens/doctor/doctor_dashboard.dart';
 import 'package:smart_labs_mobile/screens/login.dart';
+import 'package:smart_labs_mobile/screens/main_wrapper.dart';
 import 'package:smart_labs_mobile/screens/student/student_dashboard.dart';
 import 'package:smart_labs_mobile/screens/student/student_labs.dart';
 
@@ -66,15 +67,14 @@ class MyApp extends StatelessWidget {
       title: 'Smart Labs',
       theme: buildLightTheme(),
       darkTheme: buildDarkTheme(),
-      // You can switch this to ThemeMode.light or ThemeMode.dark
-      // to force a particular theme. Or keep it system-driven:
       themeMode: ThemeMode.dark,
       initialRoute: '/login',
       routes: {
         '/login': (context) => const LoginPage(),
+        '/main': (context) => const MainWrapper(),
         '/studentDashboard': (context) => const StudentDashboardScreen(),
         '/doctorDashboard': (context) => const DoctorDashboardScreen(),
-        '/studentLabsPage': (context) =>const StudentLabsScreen(),
+        '/studentLabsPage': (context) => const StudentLabsScreen(),
       },
     );
   }
