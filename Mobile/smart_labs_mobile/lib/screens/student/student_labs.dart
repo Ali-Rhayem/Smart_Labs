@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:smart_labs_mobile/data/mock_labs.dart';
 import 'package:smart_labs_mobile/models/lab_model.dart';
-import 'package:smart_labs_mobile/widgets/bottom_navigation_bar.dart';
 import 'package:smart_labs_mobile/widgets/lab_card.dart';
 import 'package:smart_labs_mobile/widgets/search_and_filter_header.dart';
 
@@ -15,37 +15,7 @@ class _StudentLabsScreenState extends State<StudentLabsScreen> {
   // Example neon color (adjust as needed)
   static const Color kNeonAccent = Color(0xFFFFFF00);
 
-  // Dummy data simulating labs from DB
-  final List<Lab> _allLabs = [
-    Lab(
-      labId: '1',
-      labCode: 'CHEM101',
-      labName: 'Intro to Chemistry',
-      description: 'Lab safety & fundamentals',
-      ppe: 'Gloves, Goggles',
-      instructors: ['Dr. Smith', 'Dr. Johnson'],
-      students: ['John Doe', 'Jane Smith'],
-      date: DateTime(2023, 5, 10),
-      startTime: '09:00 AM',
-      endTime: '11:00 AM',
-      report: 'N/A',
-      semesterId: 'SEM2023A',
-    ),
-    Lab(
-      labId: '2',
-      labCode: 'BIO202',
-      labName: 'Advanced Biology',
-      description: 'Dissection & microscope usage',
-      ppe: 'Lab Coat, Gloves, Goggles',
-      instructors: ['Dr. Brown'],
-      students: ['Alice Green', 'Bob Grey'],
-      date: DateTime(2023, 5, 12),
-      startTime: '01:00 PM',
-      endTime: '03:30 PM',
-      report: 'N/A',
-      semesterId: 'SEM2023A',
-    ),
-  ];
+  final List<Lab> _allLabs = mockLabs;
 
   // This list will be updated as user types in the search bar.
   late List<Lab> _filteredLabs;
@@ -61,14 +31,16 @@ class _StudentLabsScreenState extends State<StudentLabsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       // Dark background
-      backgroundColor: Colors.black,
+      // backgroundColor: Colors.black,
+      backgroundColor: const Color(0xFF121212),
       body: SafeArea(
         child: Column(
           children: [
             // Reusable header
             SearchAndFilterHeader(
               title: 'Labs',
-              backgroundColor: Colors.black,
+              // backgroundColor: Colors.black,
+              backgroundColor: const Color(0xFF121212),
               accentColor: kNeonAccent,
               onSearchChanged: _filterLabs,
               onFilterPressed: _showFilterDialog,
@@ -78,7 +50,6 @@ class _StudentLabsScreenState extends State<StudentLabsScreen> {
           ],
         ),
       ),
-      bottomNavigationBar: const BottomNavigation(),
     );
   }
 
