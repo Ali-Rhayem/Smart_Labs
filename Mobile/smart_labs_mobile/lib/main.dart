@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:smart_labs_mobile/screens/doctor/doctor_dashboard.dart';
+import 'package:smart_labs_mobile/screens/doctor/doctor_main_wrapper.dart';
 import 'package:smart_labs_mobile/screens/login.dart';
-import 'package:smart_labs_mobile/screens/main_wrapper.dart';
+import 'package:smart_labs_mobile/screens/student/student_main_wrapper.dart';
 import 'package:smart_labs_mobile/screens/student/student_dashboard.dart';
 import 'package:smart_labs_mobile/screens/student/student_labs.dart';
 
@@ -71,7 +72,8 @@ class MyApp extends StatelessWidget {
       initialRoute: '/login',
       routes: {
         '/login': (context) => const LoginPage(),
-        '/main': (context) => const MainWrapper(),
+        '/studentMain': (context) => const StudentMainWrapper(),
+        '/doctorMain': (context) => const DoctorMainWrapper(),
         '/studentDashboard': (context) => const StudentDashboardScreen(),
         '/doctorDashboard': (context) => const DoctorDashboardScreen(),
         '/studentLabsPage': (context) => const StudentLabsScreen(),
