@@ -4,14 +4,14 @@ import 'package:smart_labs_mobile/screens/profile.dart';
 import 'package:smart_labs_mobile/screens/student/student_dashboard.dart';
 import 'package:smart_labs_mobile/screens/student/student_labs.dart';
 
-class MainWrapper extends StatefulWidget {
-  const MainWrapper({super.key});
+class StudentMainWrapper extends StatefulWidget {
+  const StudentMainWrapper({super.key});
 
   @override
-  State<MainWrapper> createState() => _MainWrapperState();
+  State<StudentMainWrapper> createState() => _StudentMainWrapperState();
 }
 
-class _MainWrapperState extends State<MainWrapper> {
+class _StudentMainWrapperState extends State<StudentMainWrapper> {
   int _currentIndex = 0;
 
   // For demonstration, we create a mock user.
