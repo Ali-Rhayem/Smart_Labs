@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:smart_labs_mobile/providers/user_provider.dart';
 import 'package:smart_labs_mobile/screens/doctor/doctor_dashboard.dart';
 import 'package:smart_labs_mobile/screens/doctor/doctor_main_wrapper.dart';
 import 'package:smart_labs_mobile/screens/login.dart';
@@ -64,20 +66,25 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Smart Labs',
-      theme: buildLightTheme(),
-      darkTheme: buildDarkTheme(),
-      themeMode: ThemeMode.dark,
-      initialRoute: '/login',
-      routes: {
-        '/login': (context) => const LoginPage(),
-        '/studentMain': (context) => const StudentMainWrapper(),
-        '/doctorMain': (context) => const DoctorMainWrapper(),
-        '/studentDashboard': (context) => const StudentDashboardScreen(),
-        '/doctorDashboard': (context) => const DoctorDashboardScreen(),
-        '/studentLabsPage': (context) => const StudentLabsScreen(),
-      },
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => UserProvider()),
+      ],
+      child: MaterialApp(
+        title: 'Smart Labs',
+        theme: buildLightTheme(),
+        darkTheme: buildDarkTheme(),
+        themeMode: ThemeMode.dark,
+        initialRoute: '/login',
+        routes: {
+          '/login': (context) => const LoginPage(),
+          '/studentMain': (context) => const StudentMainWrapper(),
+          '/doctorMain': (context) => const DoctorMainWrapper(),
+          '/studentDashboard': (context) => const StudentDashboardScreen(),
+          '/doctorDashboard': (context) => const DoctorDashboardScreen(),
+          '/studentLabsPage': (context) => const StudentLabsScreen(),
+        },
+      ),
     );
   }
 }
