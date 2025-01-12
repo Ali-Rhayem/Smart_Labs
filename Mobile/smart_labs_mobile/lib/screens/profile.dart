@@ -121,6 +121,7 @@ class ProfileScreen extends StatelessWidget {
                 style: TextStyle(color: Colors.red),
               ),
               onTap: () {
+                Navigator.pushReplacementNamed(context, '/login');
                 // TODO: Handle logout
               },
             ),
