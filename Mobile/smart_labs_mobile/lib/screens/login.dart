@@ -1,4 +1,8 @@
+import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
+import 'package:smart_labs_mobile/models/user_model.dart';
+import 'package:smart_labs_mobile/providers/user_provider.dart';
+import 'package:smart_labs_mobile/services/auth_service.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -8,7 +12,9 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  final AuthService _authService = AuthService();
   final _formKey = GlobalKey<FormState>();
+  bool _isLoading = false;
   bool _isObscured = true;
   String _email = '';
   String _password = '';
@@ -227,4 +233,48 @@ class _LoginPageState extends State<LoginPage> {
       );
     }
   }
+
+  // Future<void> _submitForm() async {
+  //   if (_formKey.currentState!.validate()) {
+  //     _formKey.currentState!.save();
+      
+  //     setState(() => _isLoading = true);
+      
+  //     final result = await _authService.login(_email, _password);
+      
+  //     setState(() => _isLoading = false);
+      
+  //     if (result['success']) {
+  //       // Create user object from response data
+  //       final userData = result['user'];
+  //       final user = User(
+  //         id: userData['id'],
+  //         name: userData['name'],
+  //         email: userData['email'],
+  //         role: userData['role'],
+  //         password: userData['password'],
+  //         major: userData['major'],
+  //         faculty: userData['faculty'],
+  //         imageUrl: userData['imageUrl'],
+  //         faceIdentityVector: userData['faceIdentityVector'],
+  //         // ... other fields
+  //       );
+        
+  //       // Update user provider
+  //       Provider.of<UserProvider>(context, listen: false).setUser(user);
+        
+  //       // Navigate based on role
+  //       if (user.role == 'doctor') {
+  //         Navigator.pushReplacementNamed(context, '/doctorMain');
+  //       } else {
+  //         Navigator.pushReplacementNamed(context, '/studentMain');
+  //       }
+  //     } else {
+  //       // Show error message
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         SnackBar(content: Text(result['message'])),
+  //       );
+  //     }
+  //   }
+  // }
 }
