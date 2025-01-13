@@ -222,7 +222,9 @@ namespace backend.Controllers
             if (userRoleClaim!.Value == "instructor")
             {
                 var lab = await _labService.GetLabByIdAsync(labId);
-                if (lab == null || !lab.Instructors.Contains(int.Parse(userIdClaim!.Value)))
+                if (lab == null)
+                    return NotFound();
+                if (!lab.Instructors.Contains(int.Parse(userIdClaim!.Value)))
                 {
                     return Unauthorized();
                 }
@@ -245,16 +247,19 @@ namespace backend.Controllers
             var userIdClaim = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier);
             var lab = await _labService.GetLabByIdAsync(labId);
 
+            if (lab == null)
+                return NotFound();
+
             if (userRoleClaim!.Value == "instructor")
             {
-                if (lab == null || !lab.Instructors.Contains(int.Parse(userIdClaim!.Value)))
+                if (!lab.Instructors.Contains(int.Parse(userIdClaim!.Value)))
                 {
                     return Unauthorized();
                 }
             }
 
             // check if instructor in lab
-            if (lab == null || lab.Instructors.Contains(instructorId))
+            if (lab.Instructors.Contains(instructorId))
             {
                 return BadRequest();
             }
@@ -273,11 +278,14 @@ namespace backend.Controllers
         {
             var userRoleClaim = HttpContext.User.FindFirst(ClaimTypes.Role);
             var userIdClaim = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier);
+            var lab = await _labService.GetLabByIdAsync(labId);
+
+            if (lab == null)
+                return NotFound();
 
             if (userRoleClaim!.Value == "instructor")
             {
-                var lab = await _labService.GetLabByIdAsync(labId);
-                if (lab == null || !lab.Instructors.Contains(int.Parse(userIdClaim!.Value)))
+                if (!lab.Instructors.Contains(int.Parse(userIdClaim!.Value)))
                 {
                     return Unauthorized();
                 }
@@ -294,15 +302,18 @@ namespace backend.Controllers
         // POST: api/lab/{labId}/ppe
         [HttpPost("{labId}/ppe")]
         [Authorize(Roles = "admin,instructor")]
-        public async Task<ActionResult> EditPPEToLab(int labId, List<int> ppeId)
+        public async Task<ActionResult> EditPPEOfLab(int labId, List<int> ppeId)
         {
             var userRoleClaim = HttpContext.User.FindFirst(ClaimTypes.Role);
             var userIdClaim = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier);
+            var lab = await _labService.GetLabByIdAsync(labId);
+
+            if (lab == null)
+                return NotFound();
 
             if (userRoleClaim!.Value == "instructor")
             {
-                var lab = await _labService.GetLabByIdAsync(labId);
-                if (lab == null || !lab.Instructors.Contains(int.Parse(userIdClaim!.Value)))
+                if (!lab.Instructors.Contains(int.Parse(userIdClaim!.Value)))
                 {
                     return Unauthorized();
                 }

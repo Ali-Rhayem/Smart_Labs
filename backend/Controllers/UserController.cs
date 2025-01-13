@@ -47,7 +47,7 @@ namespace backend.Controllers
         // for testing purposes
         // POST: api/user
         [HttpPost]
-        [Authorize(Roles = "admin")]
+        // [Authorize(Roles = "admin")]
         public async Task<ActionResult<User>> CreateUser(User user)
         {
             // Validate input
