@@ -28,10 +28,14 @@ public class LabService
         return await _labs.Find(lab => lab.Instructors.Contains(instructorId)).ToListAsync();
     }
 
-    public async Task<List<User>> GetStudentsInLabAsync(int labId)
+    public async Task<List<User>?> GetStudentsInLabAsync(int labId)
     {
         var lab = await _labs.Find(lab => lab.Id == labId).FirstOrDefaultAsync();
         var students = new List<User>();
+        if (lab == null)
+        {
+            return null;
+        }
         foreach (var studentId in lab.Students)
         {
             var student = await _userService.GetUserById(studentId);

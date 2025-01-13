@@ -78,6 +78,10 @@ namespace backend.Controllers
         public async Task<ActionResult<List<User>>> GetStudentsInLab(int labId)
         {
             var students = await _labService.GetStudentsInLabAsync(labId);
+            if (students == null)
+            {
+                return NotFound();
+            }
             return Ok(students);
         }
 
