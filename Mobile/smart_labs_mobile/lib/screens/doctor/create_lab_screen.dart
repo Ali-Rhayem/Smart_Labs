@@ -12,10 +12,19 @@ class _CreateLabScreenState extends State<CreateLabScreen> {
   late TextEditingController _labNameController;
   late TextEditingController _labCodeController;
   late TextEditingController _descriptionController;
-  late TextEditingController _ppeController;
-  DateTime _selectedDate = DateTime.now();
+  int _selectedWeekday = DateTime.now().weekday;
   TimeOfDay _startTime = TimeOfDay.now();
   TimeOfDay _endTime = TimeOfDay.now();
+
+  final List<String> _ppeOptions = [
+    'Lab Coat',
+    'Safety Goggles',
+    'Gloves',
+    'Face Mask',
+    'Closed-toe Shoes',
+    'All of the above',
+  ];
+  List<String> _selectedPPE = [];
 
   @override
   void initState() {
@@ -23,7 +32,6 @@ class _CreateLabScreenState extends State<CreateLabScreen> {
     _labNameController = TextEditingController();
     _labCodeController = TextEditingController();
     _descriptionController = TextEditingController();
-    _ppeController = TextEditingController();
   }
 
   @override
@@ -31,7 +39,6 @@ class _CreateLabScreenState extends State<CreateLabScreen> {
     _labNameController.dispose();
     _labCodeController.dispose();
     _descriptionController.dispose();
-    _ppeController.dispose();
     super.dispose();
   }
 
@@ -72,15 +79,12 @@ class _CreateLabScreenState extends State<CreateLabScreen> {
                     value?.isEmpty ?? true ? 'Please enter description' : null,
               ),
               const SizedBox(height: 16),
-              _buildTextField(
-                controller: _ppeController,
-                label: 'Required PPE',
-                validator: (value) =>
-                    value?.isEmpty ?? true ? 'Please enter required PPE' : null,
-              ),
-              const SizedBox(height: 24),
-              _buildDateTimePicker(),
-              const SizedBox(height: 32),
+              _buildPPEDropdown(),
+              const SizedBox(height: 16),
+              _buildWeekdaySelector(),
+              const SizedBox(height: 16),
+              _buildTimeSelectors(),
+              const SizedBox(height: 16),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
@@ -138,12 +142,118 @@ class _CreateLabScreenState extends State<CreateLabScreen> {
     );
   }
 
-  Widget _buildDateTimePicker() {
+  Widget _buildPPEDropdown() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'Schedule',
+          'Required PPE',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 16),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: _ppeOptions.map((String ppe) {
+            final isSelected = _selectedPPE.contains(ppe);
+            return FilterChip(
+              label: Text(
+                ppe,
+                style: TextStyle(
+                  color: isSelected ? Colors.black : Colors.white,
+                ),
+              ),
+              selected: isSelected,
+              onSelected: (bool selected) {
+                setState(() {
+                  if (selected) {
+                    _selectedPPE.add(ppe);
+                    print(_selectedPPE);
+                  } else {
+                    _selectedPPE.remove(ppe);
+                    print(_selectedPPE);
+                  }
+                });
+              },
+              backgroundColor: const Color(0xFF1C1C1C),
+              selectedColor: const Color(0xFFFFFF00),
+              checkmarkColor: Colors.black,
+              side: const BorderSide(color: Colors.white24),
+            );
+          }).toList(),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildWeekdaySelector() {
+    final weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Day of Week',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 16),
+        Container(
+          height: 50,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: weekdays.length,
+            itemBuilder: (context, index) {
+              return Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: InkWell(
+                  onTap: () {
+                    setState(() {
+                      _selectedWeekday = index + 1;
+                    });
+                  },
+                  child: Container(
+                    width: 45,
+                    decoration: BoxDecoration(
+                      color: _selectedWeekday == index + 1
+                          ? const Color(0xFFFFFF00)
+                          : const Color(0xFF1C1C1C),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.white24),
+                    ),
+                    child: Center(
+                      child: Text(
+                        weekdays[index],
+                        style: TextStyle(
+                          color: _selectedWeekday == index + 1
+                              ? Colors.black
+                              : Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTimeSelectors() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Lab Schedule',
           style: TextStyle(
             color: Colors.white,
             fontSize: 16,
@@ -154,102 +264,80 @@ class _CreateLabScreenState extends State<CreateLabScreen> {
         Row(
           children: [
             Expanded(
-              child: _buildDateTimeButton(
-                icon: Icons.calendar_today,
-                label: 'Date',
-                value:
-                    '${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}',
-                onPressed: _selectDate,
+              child: InkWell(
+                onTap: () => _selectTime(true),
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF1C1C1C),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.white24),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Start Time',
+                        style: TextStyle(
+                          color: Colors.white70,
+                          fontSize: 12,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        _startTime.format(context),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
             const SizedBox(width: 16),
             Expanded(
-              child: _buildDateTimeButton(
-                icon: Icons.access_time,
-                label: 'Start Time',
-                value: _startTime.format(context),
-                onPressed: () => _selectTime(true),
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: _buildDateTimeButton(
-                icon: Icons.access_time,
-                label: 'End Time',
-                value: _endTime.format(context),
-                onPressed: () => _selectTime(false),
+              child: InkWell(
+                onTap: () => _selectTime(false),
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF1C1C1C),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.white24),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'End Time',
+                        style: TextStyle(
+                          color: Colors.white70,
+                          fontSize: 12,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        _endTime.format(context),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
           ],
         ),
       ],
     );
-  }
-
-  Widget _buildDateTimeButton({
-    required IconData icon,
-    required String label,
-    required String value,
-    required VoidCallback onPressed,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(color: Colors.white70),
-        ),
-        const SizedBox(height: 8),
-        InkWell(
-          onTap: onPressed,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            decoration: BoxDecoration(
-              color: const Color(0xFF1C1C1C),
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: Colors.white24),
-            ),
-            child: Row(
-              children: [
-                Icon(icon, color: Colors.white70, size: 20),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    value,
-                    style: const TextStyle(color: Colors.white),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Future<void> _selectDate() async {
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: _selectedDate,
-      firstDate: DateTime.now(),
-      lastDate: DateTime.now().add(const Duration(days: 365)),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.dark(
-              primary: Color(0xFFFFFF00),
-              onPrimary: Colors.black,
-              surface: Color(0xFF1C1C1C),
-              onSurface: Colors.white,
-            ),
-          ),
-          child: child!,
-        );
-      },
-    );
-    if (picked != null) {
-      setState(() => _selectedDate = picked);
-    }
   }
 
   Future<void> _selectTime(bool isStartTime) async {
@@ -283,6 +371,10 @@ class _CreateLabScreenState extends State<CreateLabScreen> {
 
   void _submitForm() {
     if (_formKey.currentState?.validate() ?? false) {
+      if (_selectedPPE.isEmpty) {
+        setState(() {}); // Trigger rebuild to show error message
+        return;
+      }
       // TODO: Implement lab creation logic
       Navigator.pop(context);
     }
