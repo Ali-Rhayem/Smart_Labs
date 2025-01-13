@@ -109,9 +109,9 @@ public class LabService
             }
         }
 
-        await _labs.UpdateOneAsync(lab => lab.Id == id, builder.Combine(updateDefinition));
+        var result = await _labs.UpdateOneAsync(lab => lab.Id == id, builder.Combine(updateDefinition));
 
-        return true;
+        return result.ModifiedCount > 0;
 
     }
 
