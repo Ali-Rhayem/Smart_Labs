@@ -3,6 +3,7 @@ using backend.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using backend.helpers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,6 +25,9 @@ builder.Services.AddScoped(sp =>
 });
 
 builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<LabService>();
+builder.Services.AddScoped<LabHelper>();
+
 builder.Services.AddSingleton<JwtTokenHelper>();
 builder.Services.AddControllers();
 
