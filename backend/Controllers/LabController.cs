@@ -91,6 +91,10 @@ namespace backend.Controllers
         public async Task<ActionResult<List<User>>> GetInstructorsInLab(int labId)
         {
             var instructors = await _labService.GetInstructorsInLabAsync(labId);
+            if (instructors == null)
+            {
+                return NotFound();
+            }
             return Ok(instructors);
         }
 

@@ -44,10 +44,14 @@ public class LabService
         return students;
     }
 
-    public async Task<List<User>> GetInstructorsInLabAsync(int labId)
+    public async Task<List<User>?> GetInstructorsInLabAsync(int labId)
     {
         var lab = await _labs.Find(lab => lab.Id == labId).FirstOrDefaultAsync();
         var instructors = new List<User>();
+        if (lab == null)
+        {
+            return null;
+        }
         foreach (var instructorId in lab.Instructors)
         {
             var instructor = await _userService.GetUserById(instructorId);
