@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using backend.Models;
+using backend.Services;
 
 namespace backend.Controllers
 {
@@ -11,10 +12,12 @@ namespace backend.Controllers
     public class LabController : ControllerBase
     {
         private readonly LabService _labService;
+        private readonly UserService _userService;
 
-        public LabController(LabService labService)
+        public LabController(LabService labService, UserService userService)
         {
             _labService = labService;
+            _userService = userService;
         }
 
 
@@ -29,14 +32,20 @@ namespace backend.Controllers
 
         // GET: api/lab/instructor/{instructorId}
         [HttpGet("instructor/{instructorId}")]
-        [Authorize(Roles = "instructor")]
+        [Authorize(Roles = "instructor,admin")]
         public async Task<ActionResult<List<Lab>>> GetInstructorLabs(int instructorId)
         {
             var userIdClaim = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier);
+            var userRoleClaim = HttpContext.User.FindFirst(ClaimTypes.Role);
             // check if instructor is the same as the logged in user
-            if (userIdClaim == null || userIdClaim.Value != instructorId.ToString())
+            if (userIdClaim == null || (userIdClaim.Value != instructorId.ToString() && userRoleClaim!.Value != "admin"))
             {
                 return Unauthorized();
+            }
+            var user = await _userService.GetUserById(instructorId);
+            if (user.Role != "instructor")
+            {
+                return BadRequest();
             }
             var labs = await _labService.GetInstructorLabsAsync(instructorId);
             return Ok(labs);
@@ -44,12 +53,13 @@ namespace backend.Controllers
 
         // GET: api/lab/student/{studentId}
         [HttpGet("student/{studentId}")]
-        [Authorize(Roles = "student")]
+        [Authorize(Roles = "student, admin")]
         public async Task<ActionResult<List<Lab>>> GetStudentLabs(int studentId)
         {
             var userIdClaim = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier);
+            var userRoleClaim = HttpContext.User.FindFirst(ClaimTypes.Role);
             // check if student is the same as the logged in user
-            if (userIdClaim == null || userIdClaim.Value != studentId.ToString())
+            if (userIdClaim == null || (userIdClaim.Value != studentId.ToString() && userRoleClaim!.Value != "admin"))
             {
                 return Unauthorized();
             }
@@ -147,8 +157,8 @@ namespace backend.Controllers
             return NoContent();
         }
 
-        // POST: api/lab/{labId}/students/{studentId}
-        [HttpPost("{labId}/students/{studentId}")]
+        // POST: api/lab/{labId}/students
+        [HttpPost("{labId}/students")]
         [Authorize(Roles = "admin,instructor")]
         public async Task<ActionResult> AddStudentToLab(int labId, List<int> studentsId)
         {
@@ -264,10 +274,10 @@ namespace backend.Controllers
             return NoContent();
         }
 
-        // POST: api/lab/{labId}/ppe/{ppeId}
-        [HttpPost("{labId}/ppe/{ppeId}")]
+        // POST: api/lab/{labId}/ppe
+        [HttpPost("{labId}/ppe")]
         [Authorize(Roles = "admin,instructor")]
-        public async Task<ActionResult> AddPPEToLab(int labId, List<int> ppeId)
+        public async Task<ActionResult> EditPPEToLab(int labId, List<int> ppeId)
         {
             var userRoleClaim = HttpContext.User.FindFirst(ClaimTypes.Role);
             var userIdClaim = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier);
