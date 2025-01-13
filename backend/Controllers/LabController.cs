@@ -63,6 +63,11 @@ namespace backend.Controllers
             {
                 return Unauthorized();
             }
+            var user = await _userService.GetUserById(studentId);
+            if (user.Role != "student")
+            {
+                return BadRequest();
+            }
             var labs = await _labService.GetStudentLabsAsync(studentId);
             return Ok(labs);
         }
