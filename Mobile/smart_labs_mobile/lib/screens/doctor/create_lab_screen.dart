@@ -12,6 +12,7 @@ class _CreateLabScreenState extends State<CreateLabScreen> {
   late TextEditingController _labNameController;
   late TextEditingController _labCodeController;
   late TextEditingController _descriptionController;
+  late TextEditingController _studentInputController;
   int _selectedWeekday = DateTime.now().weekday;
   TimeOfDay _startTime = TimeOfDay.now();
   TimeOfDay _endTime = TimeOfDay.now();
@@ -25,6 +26,7 @@ class _CreateLabScreenState extends State<CreateLabScreen> {
     'All of the above',
   ];
   List<String> _selectedPPE = [];
+  List<String> _selectedStudents = [];
 
   @override
   void initState() {
@@ -32,6 +34,7 @@ class _CreateLabScreenState extends State<CreateLabScreen> {
     _labNameController = TextEditingController();
     _labCodeController = TextEditingController();
     _descriptionController = TextEditingController();
+    _studentInputController = TextEditingController();
   }
 
   @override
@@ -39,6 +42,7 @@ class _CreateLabScreenState extends State<CreateLabScreen> {
     _labNameController.dispose();
     _labCodeController.dispose();
     _descriptionController.dispose();
+    _studentInputController.dispose();
     super.dispose();
   }
 
@@ -84,6 +88,8 @@ class _CreateLabScreenState extends State<CreateLabScreen> {
               _buildWeekdaySelector(),
               const SizedBox(height: 16),
               _buildTimeSelectors(),
+              const SizedBox(height: 16),
+              _buildStudentInput(),
               const SizedBox(height: 16),
               SizedBox(
                 width: double.infinity,
@@ -369,13 +375,96 @@ class _CreateLabScreenState extends State<CreateLabScreen> {
     }
   }
 
+  Widget _buildStudentInput() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Add Students',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 16),
+        Row(
+          children: [
+            Expanded(
+              child: TextFormField(
+                controller: _studentInputController,
+                style: const TextStyle(color: Colors.white),
+                decoration: InputDecoration(
+                  hintText: 'Enter student ID',
+                  hintStyle: const TextStyle(color: Colors.white54),
+                  filled: true,
+                  fillColor: const Color(0xFF1C1C1C),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: const BorderSide(color: Colors.white24),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: const BorderSide(color: Colors.white24),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: const BorderSide(color: Color(0xFFFFFF00)),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            IconButton(
+              onPressed: () {
+                if (_studentInputController.text.isNotEmpty) {
+                  setState(() {
+                    _selectedStudents.add(_studentInputController.text);
+                    _studentInputController.clear();
+                  });
+                }
+              },
+              icon: const Icon(Icons.add, color: Color(0xFFFFFF00)),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: _selectedStudents.map((student) {
+            return Chip(
+              label: Text(
+                student,
+                style: const TextStyle(color: Colors.black),
+              ),
+              backgroundColor: const Color(0xFFFFFF00),
+              side: const BorderSide(color: Colors.black),
+              labelStyle: const TextStyle(color: Colors.black),
+              deleteIcon: const Icon(Icons.close, size: 18, color: Colors.black),
+              onDeleted: () {
+                setState(() {
+                  _selectedStudents.remove(student);
+                });
+              },
+            );
+          }).toList(),
+        ),
+      ],
+    );
+  }
+
   void _submitForm() {
     if (_formKey.currentState?.validate() ?? false) {
       if (_selectedPPE.isEmpty) {
         setState(() {}); // Trigger rebuild to show error message
         return;
       }
-      // TODO: Implement lab creation logic
+      if (_selectedStudents.isEmpty) {
+        // You might want to show an error message here
+        return;
+      }
+      // TODO: Implement lab creation logic with students
       Navigator.pop(context);
     }
   }
