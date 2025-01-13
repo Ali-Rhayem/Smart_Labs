@@ -178,6 +178,10 @@ namespace backend.Controllers
             var userRoleClaim = HttpContext.User.FindFirst(ClaimTypes.Role);
             var userIdClaim = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier);
             var lab = await _labService.GetLabByIdAsync(labId);
+            if (lab == null)
+            {
+                return NotFound();
+            }
             if (userRoleClaim!.Value == "instructor")
             {
                 if (lab == null || !lab.Instructors.Contains(int.Parse(userIdClaim!.Value)))
@@ -189,7 +193,7 @@ namespace backend.Controllers
             // check if student in lab
             foreach (var studentId in studentsId)
             {
-                if (lab == null || lab.Students.Contains(studentId))
+                if (lab.Students.Contains(studentId))
                 {
                     studentsId.Remove(studentId);
                 }
