@@ -40,6 +40,7 @@ public class LabHelper
             return true;
         }
 
+        var password = GenerateTempPassword();
         // If student does not exist, create a new student
         var newStudent = new User
         {
@@ -47,14 +48,14 @@ public class LabHelper
             Email = studentId + "@mu.edu.lb",
             Name = "Student_" + studentId,
             Role = "student",
-            Password = GenerateTempPassword()
+            Password = BCrypt.Net.BCrypt.HashPassword(password),
         };
 
         // insert student into the database
         _users.InsertOne(newStudent);
 
         // send email to student with temp password
-        SendEmail(newStudent.Email, newStudent.Password);
+        SendEmail(newStudent.Email, password);
 
         return true;
 
@@ -116,7 +117,7 @@ public class LabHelper
         string ApplicationName = "smart_lab";
         var EmailSettings = _configuration.GetSection("EmailSettings");
         var appDir = AppDomain.CurrentDomain.BaseDirectory;
-        var credPath = Path.Combine(appDir,"gmail_api", "credentials");
+        var credPath = Path.Combine(appDir, "gmail_api", "credentials");
         var tokenPath = Path.Combine(appDir, "gmail_api", "token.json");
         // Load credentials.json file
         UserCredential credential;
