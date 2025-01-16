@@ -88,4 +88,11 @@ def facenet_embed(img_rgb: np.ndarray):
         return None
     
 def best_similarity(face_embedding, known_embeddings):
-    pass
+    face_embedding = np.array(face_embedding) 
+    known_embeddings = np.array(known_embeddings) 
+
+    face_norm = face_embedding / np.linalg.norm(face_embedding)
+    known_norms = known_embeddings / np.linalg.norm(known_embeddings, axis=1, keepdims=True)
+
+    similarity_scores = np.dot(known_norms, face_norm.T)
+    return similarity_scores
