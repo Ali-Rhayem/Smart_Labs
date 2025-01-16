@@ -1,18 +1,18 @@
-import 'package:flutter/foundation.dart';
-import 'package:smart_labs_mobile/models/user_model.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../models/user_model.dart';
 
-class UserProvider extends ChangeNotifier {
-  User? _user;
-  
-  User? get user => _user;
-  
+final userProvider = StateNotifierProvider<UserNotifier, User?>((ref) {
+  return UserNotifier();
+});
+
+class UserNotifier extends StateNotifier<User?> {
+  UserNotifier() : super(null);
+
   void setUser(User user) {
-    _user = user;
-    notifyListeners();
+    state = user;
   }
-  
+
   void clearUser() {
-    _user = null;
-    notifyListeners();
+    state = null;
   }
-} 
+}
