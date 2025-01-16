@@ -43,3 +43,6 @@ def analyze_image(image):
     results = model.predict(source=image_array)
     
     return results
+
+def resize_base64_image_to_image(base64_str, target_size=(640, 640)):
+    pass
