@@ -29,3 +29,6 @@ def display_image(img_rgb):
     plt.imshow(img_rgb)
     plt.axis('off')  # Hide the axes for better visualization
     plt.show()
+    
+def analyze_image(image):
+    pass
