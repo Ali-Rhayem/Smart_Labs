@@ -75,7 +75,14 @@ def facenet_embed(img_rgb: np.ndarray):
             )
         ])
 
-        
+        img_pil = Image.fromarray(img_rgb)
+
+        img_tensor = preprocess(img_pil).unsqueeze(0) 
+
+        with torch.no_grad():
+            embeddings = model(img_tensor).cpu().numpy()
+
+        return embeddings
     except Exception as e:
         print(f"Error generating embeddings: {e}")
         return None
