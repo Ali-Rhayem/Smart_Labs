@@ -25,3 +25,10 @@ def produce(message):
         else:
             print('Message delivered to {} [{}]'.format(msg.topic(), msg.partition()))
 
+    # Configuring the Kafka producer
+    conf = {
+        'bootstrap.servers': 'localhost:9092',  # Replace with your Kafka server address
+        'client.id': 'python-producer'
+    }
+    producer = Producer(conf)
+
