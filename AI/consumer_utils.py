@@ -181,3 +181,9 @@ def overlap_percentage(bbox1, bbox2):
     percentage_inside = (inter_area / smaller_area) * 100
 
     return percentage_inside
+
+def bbox_area(bbox):
+    x1, y1, x2, y2 = bbox
+    width = max(0, x2 - x1)
+    height = max(0, y2 - y1)
+    return width * height
