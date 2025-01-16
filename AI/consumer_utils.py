@@ -107,3 +107,6 @@ def load_user_profiles():
     ]
 
     usersProfiles = list(users_collection.aggregate(pipeline))
+
+def find_best_match(face_embedding):
+    pass
