@@ -2,6 +2,8 @@ from confluent_kafka import Producer
 import sys
 import base64
 import os
+from dotenv import load_dotenv
+load_dotenv()
 
 def images_to_base64(image_path):
     if not os.path.exists(image_path):
@@ -27,7 +29,7 @@ def produce(message):
 
     # Configuring the Kafka producer
     conf = {
-        'bootstrap.servers': 'localhost:9092',  # Replace with your Kafka server address
+        'bootstrap.servers': os.getenv("BOOTSTRAP_SERVERS"),  # Replace with your Kafka server address
         'client.id': 'python-producer'
     }
     producer = Producer(conf)
