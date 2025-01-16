@@ -19,4 +19,9 @@ def images_to_base64(image_path):
             print(f"Could not process file {filename}: {e}")
             
 def produce(message):
-    pass
+    def delivery_report(err, msg):
+        if err is not None:
+            print('Message delivery failed: {}'.format(err))
+        else:
+            print('Message delivered to {} [{}]'.format(msg.topic(), msg.partition()))
+
