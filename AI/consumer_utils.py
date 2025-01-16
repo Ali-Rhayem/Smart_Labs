@@ -96,3 +96,6 @@ def best_similarity(face_embedding, known_embeddings):
 
     similarity_scores = np.dot(known_norms, face_norm.T)
     return similarity_scores
+
+def load_user_profiles():
+    pass
