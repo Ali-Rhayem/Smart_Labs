@@ -165,6 +165,21 @@ try:
                     people = []
                     pprint(person_objs)
                     
+                    # Prepare the data to be inserted into the database
+                    for person in person_objs:
+                        person_data = {
+                            "id": person["_id"],
+                            "name": person["identity"],
+                            "ppe": {}
+                        }
+                        for ppe in required_ppe:
+                            if ppe not in person.keys():
+                                person_data["ppe"][ppe] = 0
+                            else:
+                                person_data["ppe"][ppe] = 1
+
+                        people.append(person_data)
+
                     
 
                 except Exception as e:
