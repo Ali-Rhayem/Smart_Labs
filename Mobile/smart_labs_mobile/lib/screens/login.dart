@@ -1,3 +1,4 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 import 'package:smart_labs_mobile/models/user_model.dart';
@@ -5,14 +6,14 @@ import 'package:smart_labs_mobile/providers/user_provider.dart';
 import 'package:smart_labs_mobile/services/auth_service.dart';
 import 'package:smart_labs_mobile/utils/secure_storage.dart';
 
-class LoginPage extends StatefulWidget {
+class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  ConsumerState<LoginPage> createState() => _LoginPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _LoginPageState extends ConsumerState<LoginPage> {
   final AuthService _authService = AuthService();
   final SecureStorage _secureStorage = SecureStorage();
   final _formKey = GlobalKey<FormState>();
@@ -251,8 +252,7 @@ class _LoginPageState extends State<LoginPage> {
           faceIdentityVector: userDetails['faceIdentityVector'],
         );
 
-        Provider.of<UserProvider>(context, listen: false).setUser(user);
-
+        ref.read(userProvider.notifier).setUser(user);
         if (userData['role'] == 'doctor' || userData['role'] == 'admin') {
           Navigator.pushReplacementNamed(context, '/doctorMain');
         } else {
