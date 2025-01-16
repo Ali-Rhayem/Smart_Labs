@@ -42,6 +42,14 @@ try:
                     date = data["date"]
                     time_data = data["time"]
                     
+                    image = resize_base64_image_to_image(image_base64)
+                    results = analyze_image(image)
+                    
+                    person_objs = []
+                    faces = []
+                    other_objs = []
+                    
+                    
                     
 
                 except Exception as e:
