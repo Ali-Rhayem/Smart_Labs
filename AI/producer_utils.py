@@ -17,3 +17,6 @@ def images_to_base64(image_path):
             
         except Exception as e:
             print(f"Could not process file {filename}: {e}")
+            
+def produce(message):
+    pass
