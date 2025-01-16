@@ -45,4 +45,19 @@ def analyze_image(image):
     return results
 
 def resize_base64_image_to_image(base64_str, target_size=(640, 640)):
-    pass
+    try:
+        image_data = base64.b64decode(base64_str)
+
+        np_arr = np.frombuffer(image_data, np.uint8)
+        img = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+
+        if img is None:
+            raise ValueError("Failed to decode the image. Ensure the Base64 input is valid.")
+
+        resized_img = cv2.resize(img, target_size)
+
+        return resized_img
+
+    except Exception as e:
+        print(f"Error resizing image: {e}")
+        return None
