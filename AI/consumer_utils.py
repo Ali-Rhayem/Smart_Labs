@@ -119,3 +119,7 @@ def find_best_match(face_embedding):
     best_match_id = usersProfiles[best_match_index]["_id"]
     similarity_score = similarities[best_match_index]
     return best_match_id, best_match_name, similarity_score
+
+def recognize_face(image, bounding_box):
+    pass
+  
