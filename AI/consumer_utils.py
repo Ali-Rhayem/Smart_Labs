@@ -131,4 +131,12 @@ def recognize_face(image, bounding_box):
     
     face_crop = image[y1:y2, x1:x2]
     
+    img_rgb = cv2.cvtColor(face_crop, cv2.COLOR_BGR2RGB)
+    
+    # plt.imshow(img_rgb)
+    
+    face_embedding = facenet_embed(img_rgb)
+    
+    best_id, best_name, score = find_best_match(face_embedding)
+    
   
