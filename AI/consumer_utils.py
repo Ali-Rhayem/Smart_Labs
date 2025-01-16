@@ -187,3 +187,66 @@ def bbox_area(bbox):
     width = max(0, x2 - x1)
     height = max(0, y2 - y1)
     return width * height
+
+def draw_objects(image, all_persons):
+
+    image_copy = image.copy()
+
+    def get_random_color():
+        return tuple(random.randint(0, 255) for _ in range(3))
+    
+    for person in all_persons:
+        if "identity" not in person:
+            continue
+        
+        color = get_random_color()
+
+        if "person" in person:
+            x1, y1, x2, y2 = map(int, person["person"])
+            cv2.rectangle(image_copy, (x1, y1), (x2, y2), color, 2)
+            cv2.putText(image_copy, "person", (x1, y1 - 10), 
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+        
+        if "face" in person:
+            face_x1, face_y1, face_x2, face_y2 = map(int, person["face"])
+            cv2.rectangle(image_copy, (face_x1, face_y1), (face_x2, face_y2), color, 2)
+            cv2.putText(image_copy, person["identity"], (face_x1, face_y1 - 10), 
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+            
+        if "helmet" in person:
+            helmet_x1, helmet_y1, helmet_x2, helmet_y2 = map(int, person["helmet"])
+            cv2.rectangle(image_copy, (helmet_x1, helmet_y1), (helmet_x2, helmet_y2), color, 2)
+            cv2.putText(image_copy, "helmet", (helmet_x1, helmet_y1 - 10), 
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+        
+        if "goggles" in person:
+            goggles_x1, goggles_y1, goggles_x2, goggles_y2 = map(int, person["goggles"])
+            cv2.rectangle(image_copy, (goggles_x1, goggles_y1), (goggles_x2, goggles_y2), color, 2)
+            cv2.putText(image_copy, "goggles", (goggles_x1, goggles_y1 - 10), 
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+            
+        if "mask" in person:
+            mask_x1, mask_y1, mask_x2, mask_y2 = map(int, person["mask"])
+            cv2.rectangle(image_copy, (mask_x1, mask_y1), (mask_x2, mask_y2), color, 2)
+            cv2.putText(image_copy, "mask", (mask_x1, mask_y1 - 10), 
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+            
+        if "lab coat" in person:
+            lab_coat_x1, lab_coat_y1, lab_coat_x2, lab_coat_y2 = map(int, person["lab coat"])
+            cv2.rectangle(image_copy, (lab_coat_x1, lab_coat_y1), (lab_coat_x2, lab_coat_y2), color, 2)
+            cv2.putText(image_copy, "lab coat", (lab_coat_x1, lab_coat_y1 - 10), 
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+        
+        if "gloves" in person:
+            for glove_bbox in person["gloves"]:
+                gloves_x1, gloves_y1, gloves_x2, gloves_y2 = map(int, glove_bbox)
+                cv2.rectangle(image_copy, (gloves_x1, gloves_y1), (gloves_x2, gloves_y2), color, 2)
+                cv2.putText(image_copy, "gloves", (gloves_x1, gloves_y1 - 10), 
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+    
+    plt.imshow(cv2.cvtColor(image_copy, cv2.COLOR_BGR2RGB))
+    plt.axis("off")
+    plt.title("Image with Bounding Boxes")
+    plt.show()
+    
+    return image_copy
