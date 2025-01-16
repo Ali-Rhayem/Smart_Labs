@@ -61,3 +61,6 @@ def resize_base64_image_to_image(base64_str, target_size=(640, 640)):
     except Exception as e:
         print(f"Error resizing image: {e}")
         return None
+    
+def facenet_embed(img_rgb: np.ndarray):
+    pass
