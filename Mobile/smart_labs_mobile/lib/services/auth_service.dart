@@ -1,44 +1,30 @@
-import 'dart:convert';
-import 'package:http/http.dart' as http;
 import '../utils/secure_storage.dart';
+import 'api_service.dart';
 
 class AuthService {
-  final String baseUrl = 'YOUR_API_BASE_URL';
+  final ApiService _apiService = ApiService();
   final SecureStorage _secureStorage = SecureStorage();
 
   Future<Map<String, dynamic>> login(String email, String password) async {
-    try {
-      final response = await http.post(
-        Uri.parse('$baseUrl/login'),
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode({
-          'email': email,
-          'password': password,
-        }),
-      );
+    print("login");
+    final response = await _apiService.post(
+      '/User/login',
+      {'email': email, 'password': password},
+      requiresAuth: false,
+    );
+    print(response);
 
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        final token = data['token'];
-        final userData = data['user'];
-        
-        // Store the token
-        await _secureStorage.storeToken(token);
-        
-        return {
-          'success': true,
-          'user': userData,
-        };
-      } else {
-        return {
-          'success': false,
-          'message': 'Invalid credentials',
-        };
-      }
-    } catch (e) {
+    if (response['success']) {
+      final data = response['data'];
+      await _secureStorage.storeToken(data['token']);
+      return {
+        'success': true,
+        'user': data['user'],
+      };
+    } else {
       return {
         'success': false,
-        'message': 'Connection error',
+        'message': response['message'] ?? 'Login failed',
       };
     }
   }
@@ -46,4 +32,4 @@ class AuthService {
   Future<void> logout() async {
     await _secureStorage.deleteToken();
   }
-} 
+}
