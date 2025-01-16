@@ -161,6 +161,10 @@ try:
                                 person_objs[index]["gloves"] = []
                             person_objs[index]["gloves"].append(object_bbox)
 
+                    # draw_objects(image, person_objs)
+                    people = []
+                    pprint(person_objs)
+                    
                     
 
                 except Exception as e:
