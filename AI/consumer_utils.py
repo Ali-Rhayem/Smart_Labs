@@ -138,5 +138,23 @@ def recognize_face(image, bounding_box):
     face_embedding = facenet_embed(img_rgb)
     
     best_id, best_name, score = find_best_match(face_embedding)
-    
+    if score[0] < 0.5:
+        anonymous_collection = db['Anonymous']
+        anonymous_count = anonymous_collection.count_documents({})
+        anonymous_id = anonymous_count + 1
+        # Save the face image
+        img_pil = Image.fromarray(img_rgb)
+        img_path = f"./anonymous_faces/anonymous_{anonymous_id}.png"
+        img_pil.save(img_path)
+        
+        anonymous_collection.insert_one({
+            "id": anonymous_id,
+            "name": f"Anonymous_{anonymous_id}",
+            "embedding": face_embedding.tolist(),
+            "face_path": img_path
+        })
+        best_name = "Anonymous_{anonymous_id}"
+        best_id = anonymous_id
+        
+    return best_id, best_name, score[0]
   
