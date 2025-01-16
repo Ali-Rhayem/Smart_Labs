@@ -98,4 +98,12 @@ def best_similarity(face_embedding, known_embeddings):
     return similarity_scores
 
 def load_user_profiles():
-    pass
+    global usersProfiles
+    users_collection = db['Users'] 
+    
+    pipeline = [
+        {"$unwind": "$embeddings"},
+        {"$project": {"_id":1, "name": 1, "embeddings": 1}}
+    ]
+
+    usersProfiles = list(users_collection.aggregate(pipeline))
