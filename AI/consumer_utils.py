@@ -109,4 +109,13 @@ def load_user_profiles():
     usersProfiles = list(users_collection.aggregate(pipeline))
 
 def find_best_match(face_embedding):
-    pass
+    global usersProfiles
+    if usersProfiles == None:
+        load_user_profiles()
+    known_embeddings = [user["embeddings"] for user in usersProfiles]
+    similarities = best_similarity(face_embedding, known_embeddings)
+    best_match_index = np.argmax(similarities)
+    best_match_name = usersProfiles[best_match_index]["name"]
+    best_match_id = usersProfiles[best_match_index]["_id"]
+    similarity_score = similarities[best_match_index]
+    return best_match_id, best_match_name, similarity_score
