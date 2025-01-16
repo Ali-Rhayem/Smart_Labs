@@ -19,3 +19,6 @@ db = client[os.getenv("MONGO_DB")]
 model = None
 usersProfiles = None
 model_path = './models/yolov8_ppe3.pt'
+
+def display_image(img_rgb):
+    pass
