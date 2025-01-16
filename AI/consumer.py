@@ -50,6 +50,41 @@ try:
                     other_objs = []
                     
                     
+                    # Extracting objects from the image
+                    for bbox in results[0].boxes:
+                        try:
+                            x1, y1, x2, y2 = bbox.xyxy[0]
+                            x1 = float(x1)
+                            y1 = float(y1)
+                            x2 = float(x2)
+                            y2 = float(y2)
+                            confidence = bbox.conf
+                            class_id = int(bbox.cls)
+                            class_name = results[0].names[class_id].lower()
+
+                            if confidence < 0.5:
+                                continue
+
+                            obj = {
+                                "class_name": class_name,
+                                "confidence": confidence,
+                                "bounding_box": (x1, y1, x2, y2)
+                            }
+
+                            if class_name == "person":
+                                obj["person"] = obj.pop("bounding_box")
+                                person_objs.append(obj)
+                            elif class_name == "face":
+                                obj["_id"], obj["identity"], obj["identity_confidence"] = recognize_face(image, obj["bounding_box"])
+
+                                if not obj["identity"].split("_")[0] == "Anonymous":
+                                    faces.append(obj)
+                            else:
+                                other_objs.append(obj)
+                        except Exception as e:
+                            print(f"Error processing bounding box: {e}")
+                            continue
+
                     
 
                 except Exception as e:
