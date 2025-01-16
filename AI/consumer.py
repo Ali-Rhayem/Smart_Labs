@@ -195,7 +195,11 @@ try:
                         "people": people
                     }
 
-                    
+                    # Update the session to insert to outputs
+                    sessions.update_one(
+                        {"_id": session_id, "lab_id": lab_id, "date": date},
+                        {"$push": {"outputs": session_entry}}
+                    )
 
                 except Exception as e:
                     print(f"Error processing message: {e}")
