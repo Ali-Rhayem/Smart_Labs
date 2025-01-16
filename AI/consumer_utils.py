@@ -63,4 +63,9 @@ def resize_base64_image_to_image(base64_str, target_size=(640, 640)):
         return None
     
 def facenet_embed(img_rgb: np.ndarray):
-    pass
+    try:
+        model = InceptionResnetV1(pretrained='vggface2').eval()
+        
+    except Exception as e:
+        print(f"Error generating embeddings: {e}")
+        return None
