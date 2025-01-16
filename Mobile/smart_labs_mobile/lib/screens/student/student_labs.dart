@@ -32,7 +32,7 @@ class _StudentLabsScreenState extends State<StudentLabsScreen> {
     return Scaffold(
       // Dark background
       // backgroundColor: Colors.black,
-      backgroundColor: const Color(0xFF121212),
+      backgroundColor: const Color.fromRGBO(18, 18, 18, 1),
       body: SafeArea(
         child: Column(
           children: [

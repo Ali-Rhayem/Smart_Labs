@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:smart_labs_mobile/models/user_model.dart';
 import 'package:smart_labs_mobile/providers/user_provider.dart';
 import 'package:smart_labs_mobile/services/auth_service.dart';
+import 'package:smart_labs_mobile/utils/secure_storage.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -13,6 +14,7 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   final AuthService _authService = AuthService();
+  final SecureStorage _secureStorage = SecureStorage();
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
   bool _isObscured = true;
@@ -40,7 +42,7 @@ class _LoginPageState extends State<LoginPage> {
             onPrimary: Colors.black,
           ),
       textTheme: Theme.of(context).textTheme.apply(
-            bodyColor: Colors.white,  // default text color
+            bodyColor: Colors.white, // default text color
             displayColor: Colors.white,
           ),
       // ElevatedButtonTheme with neon accent
@@ -75,7 +77,8 @@ class _LoginPageState extends State<LoginPage> {
         body: SafeArea(
           child: Center(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32.0),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32.0),
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 400),
                 child: Column(
@@ -213,68 +216,61 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  void _submitForm() {
-    final form = _formKey.currentState;
-    if (form != null && form.validate()) {
-      form.save();
+  Future<void> _submitForm() async {
+    if (!_formKey.currentState!.validate()) return;
 
-      // Dummy role determination:
-      bool isDoctor = _email.toLowerCase().contains('doctor');
+    _formKey.currentState!.save();
+    setState(() => _isLoading = true);
 
-      // Navigate to the respective dashboard
-      if (isDoctor) {
-        Navigator.pushReplacementNamed(context, '/doctorMain');
+    final result = await _authService.login(_email, _password);
+
+    // Check if widget is still mounted before proceeding
+    if (!mounted) return;
+
+    if (result['success']) {
+      final userData = result['data'];
+      final String? role = await _secureStorage.readRole();
+      final String? id = await _secureStorage.readId();
+
+      final userResult = await _authService.getUserById(id!);
+
+      // Check mounted again after second async operation
+      if (!mounted) return;
+
+      if (userResult['success']) {
+        final userDetails = userResult['data'];
+        final user = User(
+          id: userDetails['id'],
+          name: userDetails['name'],
+          email: userDetails['email'],
+          password: '',
+          major: userDetails['major'],
+          faculty: userDetails['faculty'],
+          imageUrl: userDetails['imageUrl'],
+          role: role!,
+          faceIdentityVector: userDetails['faceIdentityVector'],
+        );
+
+        Provider.of<UserProvider>(context, listen: false).setUser(user);
+
+        if (userData['role'] == 'doctor' || userData['role'] == 'admin') {
+          Navigator.pushReplacementNamed(context, '/doctorMain');
+        } else {
+          Navigator.pushReplacementNamed(context, '/studentMain');
+        }
       } else {
-        Navigator.pushReplacementNamed(context, '/studentMain');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text(
+                  userResult['message'] ?? 'Failed to fetch user details')),
+        );
       }
-
+    } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Logging in as $_email...')),
+        SnackBar(content: Text(result['message'])),
       );
     }
-  }
 
-  // Future<void> _submitForm() async {
-  //   if (_formKey.currentState!.validate()) {
-  //     _formKey.currentState!.save();
-      
-  //     setState(() => _isLoading = true);
-      
-  //     final result = await _authService.login(_email, _password);
-      
-  //     setState(() => _isLoading = false);
-      
-  //     if (result['success']) {
-  //       // Create user object from response data
-  //       final userData = result['user'];
-  //       final user = User(
-  //         id: userData['id'],
-  //         name: userData['name'],
-  //         email: userData['email'],
-  //         role: userData['role'],
-  //         password: userData['password'],
-  //         major: userData['major'],
-  //         faculty: userData['faculty'],
-  //         imageUrl: userData['imageUrl'],
-  //         faceIdentityVector: userData['faceIdentityVector'],
-  //         // ... other fields
-  //       );
-        
-  //       // Update user provider
-  //       Provider.of<UserProvider>(context, listen: false).setUser(user);
-        
-  //       // Navigate based on role
-  //       if (user.role == 'doctor') {
-  //         Navigator.pushReplacementNamed(context, '/doctorMain');
-  //       } else {
-  //         Navigator.pushReplacementNamed(context, '/studentMain');
-  //       }
-  //     } else {
-  //       // Show error message
-  //       ScaffoldMessenger.of(context).showSnackBar(
-  //         SnackBar(content: Text(result['message'])),
-  //       );
-  //     }
-  //   }
-  // }
+    setState(() => _isLoading = false);
+  }
 }

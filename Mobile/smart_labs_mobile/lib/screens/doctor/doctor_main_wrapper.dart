@@ -18,7 +18,7 @@ class _DoctorMainWrapperState extends State<DoctorMainWrapper> {
   // For demonstration, we create a mock user.
   // In a real app, you might fetch this from your auth provider, or pass it in as a parameter.
   final User _mockUser = User(
-    id: '1',
+    id: 1,
     name: 'John Doe',
     email: 'john.doe@example.com',
     password: 'password123',
@@ -26,7 +26,7 @@ class _DoctorMainWrapperState extends State<DoctorMainWrapper> {
     faculty: 'Engineering',
     imageUrl: 'https://picsum.photos/200', // or a real image URL
     role: 'student',
-    faceIdentityVector: 'faceVector...',
+    faceIdentityVector: [1, 2, 3],
   );
 
   // A list of pages in the same order as the BottomNavigationBar items.

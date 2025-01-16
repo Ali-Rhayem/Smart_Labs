@@ -1,4 +1,5 @@
 import '../utils/secure_storage.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
 import 'api_service.dart';
 
 class AuthService {
@@ -6,20 +7,30 @@ class AuthService {
   final SecureStorage _secureStorage = SecureStorage();
 
   Future<Map<String, dynamic>> login(String email, String password) async {
-    print("login");
     final response = await _apiService.post(
       '/User/login',
       {'email': email, 'password': password},
       requiresAuth: false,
     );
-    print(response);
 
     if (response['success']) {
-      final data = response['data'];
-      await _secureStorage.storeToken(data['token']);
+      final token = response['data']['token'];
+      await _secureStorage.storeToken(token);
+
+      // Decode the token
+      Map<String, dynamic> decodedToken = JwtDecoder.decode(token);
+      var id = decodedToken['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'];
+      var role = decodedToken['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
+      await _secureStorage.storeId(id);
+      await _secureStorage.storeRole(role);
+
       return {
         'success': true,
-        'user': data['user'],
+        'data': {
+          'id': id,
+          'role': role,
+          // Add other fields if necessary
+        },
       };
     } else {
       return {
@@ -31,5 +42,21 @@ class AuthService {
 
   Future<void> logout() async {
     await _secureStorage.deleteToken();
+  }
+
+  Future<Map<String, dynamic>> getUserById(String userId) async {
+    final response = await _apiService.get('/User/$userId');
+
+    if (response['success']) {
+      return {
+        'success': true,
+        'data': response['data'],
+      };
+    } else {
+      return {
+        'success': false,
+        'message': response['message'] ?? 'Failed to fetch user details',
+      };
+    }
   }
 }
