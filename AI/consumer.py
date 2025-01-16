@@ -113,7 +113,22 @@ try:
                     # Deleting people without faces
                     person_objs = [person for person in person_objs if "face" in person]
 
-                    
+                    # Assigning other objects to people
+                    for obj in other_objs:
+                        # Assigning helmets, goggles, mask to people
+                        if obj["class_name"] in ["helmet", "goggles", "mask"]:
+                            object_bbox = obj["bounding_box"]
+                            class_name = obj["class_name"]
+                            oxm = (object_bbox[0] + object_bbox[2]) / 2
+                            for person in person_objs:
+                                person_bbox = person["person"]
+                                fx1, fy1, fx2, fy2 = person["face"]
+                                if overlap_percentage(object_bbox, person_bbox) > 90:
+                                    if fx1 <= oxm <= fx2:
+                                        person[class_name] = object_bbox
+                                        break
+
+                        
 
                 except Exception as e:
                     print(f"Error processing message: {e}")
