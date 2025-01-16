@@ -110,6 +110,9 @@ try:
                         person_objs[index]["_id"] = face["_id"]
                         person_objs[index]["identity_confidence"] = face["identity_confidence"]
 
+                    # Deleting people without faces
+                    person_objs = [person for person in person_objs if "face" in person]
+
                     
 
                 except Exception as e:
