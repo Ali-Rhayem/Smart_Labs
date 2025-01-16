@@ -121,5 +121,14 @@ def find_best_match(face_embedding):
     return best_match_id, best_match_name, similarity_score
 
 def recognize_face(image, bounding_box):
-    pass
+
+    x1, y1, x2, y2 = bounding_box
+    padding = 20
+    x1 = int(max(0, x1 - padding))
+    y1 = int(max(0, y1 - padding))
+    x2 = int(min(640, x2 + padding))
+    y2 = int(min(640, y2 + padding))
+    
+    face_crop = image[y1:y2, x1:x2]
+    
   
