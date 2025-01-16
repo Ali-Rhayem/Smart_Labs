@@ -65,6 +65,16 @@ def resize_base64_image_to_image(base64_str, target_size=(640, 640)):
 def facenet_embed(img_rgb: np.ndarray):
     try:
         model = InceptionResnetV1(pretrained='vggface2').eval()
+
+        preprocess = transforms.Compose([
+            transforms.Resize((160, 160)),       
+            transforms.ToTensor(),              
+            transforms.Normalize(               
+                mean=[0.5, 0.5, 0.5],
+                std=[0.5, 0.5, 0.5]
+            )
+        ])
+
         
     except Exception as e:
         print(f"Error generating embeddings: {e}")
