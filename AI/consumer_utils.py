@@ -8,3 +8,6 @@ from torchvision import transforms
 import torch
 import matplotlib.pyplot as plt
 import random
+from dotenv import load_dotenv
+import os
+load_dotenv()
