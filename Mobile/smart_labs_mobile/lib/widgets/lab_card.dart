@@ -39,7 +39,7 @@ class LabCard extends StatelessWidget {
             topLeft: Radius.circular(12.0),
             bottomLeft: Radius.circular(12.0),
             topRight: Radius.circular(12.0),
-            bottomRight: Radius.circular(12.0),
+            bottomRight: Radius.circular(11.0),
           ),
         ),
         child: Column(
