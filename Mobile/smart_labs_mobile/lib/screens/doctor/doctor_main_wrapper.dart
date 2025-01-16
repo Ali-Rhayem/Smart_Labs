@@ -35,7 +35,7 @@ class _DoctorMainWrapperState extends State<DoctorMainWrapper> {
     const DoctorLabsScreen(),         // index 0
     const DoctorDashboardScreen(),    // index 1
     const DoctorLabsScreen(),         // index 2 (Messages placeholder)
-    ProfileScreen(user: _mockUser),   // index 3
+    const ProfileScreen(),   // index 3
   ];
 
   void _onItemTapped(int index) {
