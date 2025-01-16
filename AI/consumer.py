@@ -180,6 +180,21 @@ try:
 
                         people.append(person_data)
 
+                    session_exists = sessions.find_one({"_id": session_id})
+
+                    if not session_exists:
+                        sessions.insert_one({
+                            "_id": session_id,
+                            "lab_id": lab_id,
+                            "date": date,
+                            "outputs": []
+                        })
+
+                    session_entry = {
+                        "time": time_data,
+                        "people": people
+                    }
+
                     
 
                 except Exception as e:
