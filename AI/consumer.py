@@ -33,7 +33,16 @@ try:
                     raise KafkaException(msg.error())
             else:
                 try:
-                    pass
+                    data = json.loads(msg.value().decode('utf-8'))
+                    image_base64 = data['encoding']
+                    required_ppe = data['ppe_arr']
+                    sessions = db['Sessions']
+                    session_id = data["session_id"]
+                    lab_id = data["lab_id"]
+                    date = data["date"]
+                    time_data = data["time"]
+                    
+                    
 
                 except Exception as e:
                     print(f"Error processing message: {e}")
