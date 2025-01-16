@@ -31,4 +31,11 @@ def produce(message):
         'client.id': 'python-producer'
     }
     producer = Producer(conf)
+    try:
+        producer.produce('test', key='key', value = message, callback=delivery_report)
+        producer.flush() 
+    except Exception as e:
+        print(f"Error while producing message: {e}")
+        sys.exit(1)
 
+    print("Message sent successfully")
