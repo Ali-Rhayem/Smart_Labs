@@ -86,3 +86,6 @@ def facenet_embed(img_rgb: np.ndarray):
     except Exception as e:
         print(f"Error generating embeddings: {e}")
         return None
+    
+def best_similarity(face_embedding, known_embeddings):
+    pass
