@@ -32,7 +32,12 @@ try:
                 else:
                     raise KafkaException(msg.error())
             else:
-                pass
+                try:
+                    pass
+
+                except Exception as e:
+                    print(f"Error processing message: {e}")
+                    time.sleep(1)  # Wait a bit before retrying
         except KafkaException as ke:
             print(f"KafkaException: {ke}")
             time.sleep(5)  # Retry after waiting for network issues or Kafka-related issues
