@@ -12,10 +12,10 @@ load_dotenv()
 
 conf = {
     'bootstrap.servers': os.getenv("BOOTSTRAP_SERVERS"),
-    'group.id': 'python-consumer',
+    'group.id': os.getenv("GROUP_ID"),
     'auto.offset.reset': 'earliest'
 }
 
 consumer = Consumer(conf)
 
-consumer.subscribe(['test'])
+consumer.subscribe([os.getenv("TOPIC")])
