@@ -22,7 +22,14 @@ consumer.subscribe([os.getenv("TOPIC")])
 
 try:
     while True:
-        pass
+        try:
+            pass
+        except KafkaException as ke:
+            print(f"KafkaException: {ke}")
+            time.sleep(5)  # Retry after waiting for network issues or Kafka-related issues
+        except Exception as e:
+            print(f"Unexpected error: {e}")
+            time.sleep(5)  # Retry in case of any other errors
 except KeyboardInterrupt:
     print("Consuming interrupted by user")
 finally:
