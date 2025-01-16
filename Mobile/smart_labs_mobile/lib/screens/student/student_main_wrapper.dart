@@ -34,7 +34,7 @@ class _StudentMainWrapperState extends State<StudentMainWrapper> {
     const StudentLabsScreen(),         // index 0
     const StudentDashboardScreen(),    // index 1
     const StudentLabsScreen(),         // index 2 (Messages placeholder)
-    ProfileScreen(user: _mockUser),    // index 3
+    const ProfileScreen(),    // index 3
   ];
 
   void _onItemTapped(int index) {
