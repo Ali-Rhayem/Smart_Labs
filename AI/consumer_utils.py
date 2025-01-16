@@ -11,3 +11,7 @@ import random
 from dotenv import load_dotenv
 import os
 load_dotenv()
+
+from pymongo import MongoClient
+client = MongoClient(os.getenv("MONGO_URI"))
+db = client[os.getenv("MONGO_DB")]
