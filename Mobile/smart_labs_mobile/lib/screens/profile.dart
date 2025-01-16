@@ -1,15 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:smart_labs_mobile/models/user_model.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:smart_labs_mobile/providers/user_provider.dart';
 
 // Example accent color (the bright yellow)
 const Color kNeonYellow = Color(0xFFFFEB00);
 
-class ProfileScreen extends StatelessWidget {
-  final User user;
-  const ProfileScreen({super.key, required this.user});
+class ProfileScreen extends ConsumerWidget {
+  const ProfileScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final user = ref.watch(userProvider);
+    print(user);
+
+    if (user == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
     return Scaffold(
       // Remove or customize the AppBar if you want a different style
       appBar: AppBar(
@@ -35,7 +42,7 @@ class ProfileScreen extends StatelessWidget {
             Center(
               child: CircleAvatar(
                 radius: 50,
-                backgroundImage: NetworkImage(user.imageUrl ?? ''),
+                backgroundImage: NetworkImage('https://picsum.photos/200' ?? ''),
               ),
             ),
             const SizedBox(height: 16),
