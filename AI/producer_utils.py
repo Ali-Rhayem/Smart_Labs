@@ -4,4 +4,5 @@ import base64
 import os
 
 def images_to_base64(image_path):
-    pass
+    if not os.path.exists(image_path):
+        raise FileNotFoundError(f"The image {image_path} does not exist.")
