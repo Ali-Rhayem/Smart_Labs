@@ -137,7 +137,31 @@ try:
                                     person["lab coat"] = object_bbox
                                     break
 
-                        
+                        # Assigning gloves to people
+                        if obj["class_name"] == "gloves":
+                            object_bbox = obj["bounding_box"]
+                            possible_persons_indexes = []
+                            for index, person in enumerate(person_objs):
+                                person_bbox = person["person"]
+                                if overlap_percentage(object_bbox, person_bbox) > 90:
+                                    possible_persons_indexes.append(index)
+
+                            index = -1
+                            if len(possible_persons_indexes) == 1:
+                                index = possible_persons_indexes[0]
+                            else:
+                                min_distance = float("inf")
+                                for i in possible_persons_indexes:
+                                    person_bbox = person_objs[i]["person"]
+                                    distance = min(abs(obj - person) for obj, person in zip(object_bbox, person_bbox))
+                                    if distance < min_distance:
+                                        min_distance = distance
+                                        index = i
+                            if "gloves" not in person_objs[index]:
+                                person_objs[index]["gloves"] = []
+                            person_objs[index]["gloves"].append(object_bbox)
+
+                    
 
                 except Exception as e:
                     print(f"Error processing message: {e}")
