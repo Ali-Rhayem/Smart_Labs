@@ -85,6 +85,31 @@ try:
                             print(f"Error processing bounding box: {e}")
                             continue
 
+                    # Assigning faces to people
+                    for face in faces:
+                        fbbox = face["bounding_box"]
+                        possible_persons_indexes = []
+                        for index, person in enumerate(person_objs):
+                            pbbox = person["person"]
+                            if overlap_percentage(fbbox, pbbox) > 90:
+                                possible_persons_indexes.append(index)
+
+                        index = -1
+                        if len(possible_persons_indexes) == 1:
+                            index = possible_persons_indexes[0]
+                        elif len(possible_persons_indexes) > 1:
+                            max_area = 0
+                            for i in possible_persons_indexes:
+                                area = bbox_area(person_objs[index]["person"])
+                                if area > max_area:
+                                    max_area = area
+                                    index = i
+
+                        person_objs[index]["face"] = face["bounding_box"]
+                        person_objs[index]["identity"] = face["identity"]
+                        person_objs[index]["_id"] = face["_id"]
+                        person_objs[index]["identity_confidence"] = face["identity_confidence"]
+
                     
 
                 except Exception as e:
