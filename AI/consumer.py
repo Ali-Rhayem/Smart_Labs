@@ -128,6 +128,15 @@ try:
                                         person[class_name] = object_bbox
                                         break
 
+                        # Assigning lab coat to people
+                        if obj["class_name"] == "lab coat":
+                            object_bbox = obj["bounding_box"]
+                            for person in person_objs:
+                                person_bbox = person["person"]
+                                if overlap_percentage(object_bbox, person_bbox) > 90:
+                                    person["lab coat"] = object_bbox
+                                    break
+
                         
 
                 except Exception as e:
