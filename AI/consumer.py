@@ -23,7 +23,16 @@ consumer.subscribe([os.getenv("TOPIC")])
 try:
     while True:
         try:
-            pass
+            msg = consumer.poll(1.0)
+            if msg is None:
+                continue
+            if msg.error():
+                if msg.error().code() == KafkaError._PARTITION_EOF:
+                    print(f"End of partition reached: {msg.topic()} [{msg.partition()}] @ {msg.offset()}")
+                else:
+                    raise KafkaException(msg.error())
+            else:
+                pass
         except KafkaException as ke:
             print(f"KafkaException: {ke}")
             time.sleep(5)  # Retry after waiting for network issues or Kafka-related issues
