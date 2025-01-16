@@ -19,3 +19,15 @@ conf = {
 consumer = Consumer(conf)
 
 consumer.subscribe([os.getenv("TOPIC")])
+
+try:
+    while True:
+        pass
+except KeyboardInterrupt:
+    print("Consuming interrupted by user")
+finally:
+    try:
+        consumer.close()
+    except Exception as e:
+        print(f"Error closing the consumer: {e}")
+     
