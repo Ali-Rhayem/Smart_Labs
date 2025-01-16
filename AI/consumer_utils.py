@@ -157,4 +157,27 @@ def recognize_face(image, bounding_box):
         best_id = anonymous_id
         
     return best_id, best_name, score[0]
-  
+
+def overlap_percentage(bbox1, bbox2):
+    x1_1, y1_1, x2_1, y2_1 = bbox1
+    x1_2, y1_2, x2_2, y2_2 = bbox2
+
+    inter_x1 = max(x1_1, x1_2)
+    inter_y1 = max(y1_1, y1_2)
+    inter_x2 = min(x2_1, x2_2)
+    inter_y2 = min(y2_1, y2_2)
+
+    inter_width = max(0, inter_x2 - inter_x1)
+    inter_height = max(0, inter_y2 - inter_y1)
+    inter_area = inter_width * inter_height
+
+    area1 = (x2_1 - x1_1) * (y2_1 - y1_1)
+    area2 = (x2_2 - x1_2) * (y2_2 - y1_2)
+
+    smaller_area = min(area1, area2)
+
+    if smaller_area == 0:
+        return 0.0 
+    percentage_inside = (inter_area / smaller_area) * 100
+
+    return percentage_inside
