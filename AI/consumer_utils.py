@@ -31,4 +31,15 @@ def display_image(img_rgb):
     plt.show()
     
 def analyze_image(image):
-    pass
+    global model
+    if model is None:
+        model = YOLO(model_path)
+    
+    if image is None:
+        raise ValueError("Failed to resize the input image.")
+
+    image_array = np.array(image)
+
+    results = model.predict(source=image_array)
+    
+    return results
