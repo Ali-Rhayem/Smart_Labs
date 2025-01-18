@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 
-class DoctorDashboardScreen extends StatelessWidget {
-  const DoctorDashboardScreen({super.key});
+class InstructorDashboardScreen extends StatelessWidget {
+  const InstructorDashboardScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
