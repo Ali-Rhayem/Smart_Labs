@@ -253,7 +253,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         );
 
         ref.read(userProvider.notifier).setUser(user);
-        if (userData['role'] == 'doctor' || userData['role'] == 'admin') {
+        if (userData['role'] == 'instructor' || userData['role'] == 'admin') {
           Navigator.pushReplacementNamed(context, '/doctorMain');
         } else {
           Navigator.pushReplacementNamed(context, '/studentMain');
