@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:smart_labs_mobile/models/user_model.dart';
-import 'package:smart_labs_mobile/screens/doctor/create_lab_screen.dart';
-import 'package:smart_labs_mobile/screens/doctor/doctor_dashboard.dart';
-import 'package:smart_labs_mobile/screens/doctor/doctor_labs.dart';
+import 'package:smart_labs_mobile/screens/instructor/create_lab_screen.dart';
+import 'package:smart_labs_mobile/screens/instructor/instructor_dashboard.dart';
+import 'package:smart_labs_mobile/screens/instructor/instructor_labs.dart';
 import 'package:smart_labs_mobile/screens/profile.dart';
 
-class DoctorMainWrapper extends StatefulWidget {
-  const DoctorMainWrapper({super.key});
+class InstructorMainWrapper extends StatefulWidget {
+  const InstructorMainWrapper({super.key});
 
   @override
-  State<DoctorMainWrapper> createState() => _DoctorMainWrapperState();
+  State<InstructorMainWrapper> createState() => _InstructorMainWrapperState();
 }
 
-class _DoctorMainWrapperState extends State<DoctorMainWrapper> {
+class _InstructorMainWrapperState extends State<InstructorMainWrapper> {
   int _currentIndex = 0;
 
   // For demonstration, we create a mock user.
@@ -33,7 +33,7 @@ class _DoctorMainWrapperState extends State<DoctorMainWrapper> {
   // We now have 4 items: Labs, Analytics, Messages, Profile.
   late final List<Widget> _pages = [
     const DoctorLabsScreen(),         // index 0
-    const DoctorDashboardScreen(),    // index 1
+    const InstructorDashboardScreen(),    // index 1
     const DoctorLabsScreen(),         // index 2 (Messages placeholder)
     const ProfileScreen(),   // index 3
   ];
