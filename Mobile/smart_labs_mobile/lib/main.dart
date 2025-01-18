@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:smart_labs_mobile/screens/doctor/doctor_dashboard.dart';
-import 'package:smart_labs_mobile/screens/doctor/doctor_main_wrapper.dart';
+import 'package:smart_labs_mobile/screens/instructor/instructor_dashboard.dart';
+import 'package:smart_labs_mobile/screens/instructor/instructor_main_wrapper.dart';
 import 'package:smart_labs_mobile/screens/login.dart';
 import 'package:smart_labs_mobile/screens/student/student_main_wrapper.dart';
 import 'package:smart_labs_mobile/screens/student/student_dashboard.dart';
@@ -80,9 +80,9 @@ class MyApp extends ConsumerWidget {
       routes: {
         '/login': (context) => const LoginPage(),
         '/studentMain': (context) => const StudentMainWrapper(),
-        '/doctorMain': (context) => const DoctorMainWrapper(),
+        '/instructorMain': (context) => const InstructorMainWrapper(),
         '/studentDashboard': (context) => const StudentDashboardScreen(),
-        '/doctorDashboard': (context) => const DoctorDashboardScreen(),
+        '/instructorDashboard': (context) => const InstructorDashboardScreen(),
         '/studentLabsPage': (context) => const StudentLabsScreen(),
       },
     );
