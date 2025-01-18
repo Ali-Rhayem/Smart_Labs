@@ -8,6 +8,15 @@ class AuthMiddleware {
   }
 
   static Future<String> getInitialRoute() async {
-    return await isAuthenticated() ? '/studentMain' : '/login';
+    final storage = SecureStorage();
+    if (!await isAuthenticated()) {
+      return '/login';
+    }
+
+    final role = await storage.readRole();
+    if (role == 'instructor') {
+      return '/doctorMain';
+    }
+    return '/studentMain';
   }
-} 
+}
