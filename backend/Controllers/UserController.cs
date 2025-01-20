@@ -41,6 +41,7 @@ namespace backend.Controllers
             if (user == null)
                 return NotFound();
 
+            user.Role = "";
             return Ok(user);
         }
 

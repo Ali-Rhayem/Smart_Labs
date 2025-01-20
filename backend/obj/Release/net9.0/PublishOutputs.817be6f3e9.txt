@@ -1,6 +1,7 @@
 /Users/jawadalsayed/Desktop/fyp/publish/backend
 /Users/jawadalsayed/Desktop/fyp/publish/appsettings.Development.json
 /Users/jawadalsayed/Desktop/fyp/publish/appsettings.json
+/Users/jawadalsayed/Desktop/fyp/publish/appsettings_example.json
 /Users/jawadalsayed/Desktop/fyp/publish/gmail_api/token.json
 /Users/jawadalsayed/Desktop/fyp/publish/backend.dll
 /Users/jawadalsayed/Desktop/fyp/publish/backend.deps.json

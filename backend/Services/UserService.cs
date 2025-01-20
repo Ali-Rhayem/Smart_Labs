@@ -34,7 +34,6 @@ public class UserService
     {
         var projection = Builders<User>.Projection
             .Exclude(u => u.Password)
-            .Exclude(u => u.Role)
             .Exclude(u => u.FaceIdentityVector);
 
         return await _users

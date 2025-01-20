@@ -1,6 +1,7 @@
 /Users/jawadalsayed/Desktop/fyp/Smart_Labs/publish/backend
 /Users/jawadalsayed/Desktop/fyp/Smart_Labs/publish/appsettings.Development.json
 /Users/jawadalsayed/Desktop/fyp/Smart_Labs/publish/appsettings.json
+/Users/jawadalsayed/Desktop/fyp/Smart_Labs/publish/appsettings_example.json
 /Users/jawadalsayed/Desktop/fyp/Smart_Labs/publish/gmail_api/token.json
 /Users/jawadalsayed/Desktop/fyp/Smart_Labs/publish/backend.dll
 /Users/jawadalsayed/Desktop/fyp/Smart_Labs/publish/backend.deps.json
