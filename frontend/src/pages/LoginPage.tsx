@@ -10,6 +10,79 @@ const LoginPage: React.FC = () => {
 	const [password, setPassword] = useState("");
 	const { themeMode } = useTheme();
 
+	const [errors, setErrors] = useState<{
+		email?: string;
+		password?: string[];
+	}>({
+		password: [],
+	});
+
+	// Handle form submission
+	const handleSubmit = (e: React.FormEvent) => {
+		e.preventDefault();
+
+		// Reset errors
+		setErrors({ email: undefined, password: [] });
+
+		// Validation
+		let valid = true;
+		const newErrors: { email?: string; password?: string[] } = {
+			password: [],
+		};
+
+		// Email validation
+		if (!email) {
+			newErrors.email = "Email is required";
+			valid = false;
+		} else if (!/\S+@\S+\.\S+/.test(email)) {
+			newErrors.email = "Please enter a valid email address";
+			valid = false;
+		}
+
+		// Password validation
+		if (!password) {
+			newErrors.password?.push("Password is required");
+			valid = false;
+		} else {
+			// Check password strength requirements
+			if (password.length < 8) {
+				newErrors.password?.push(
+					"Password must be at least 8 characters long"
+				);
+			}
+			if (!/[A-Z]/.test(password)) {
+				newErrors.password?.push(
+					"Password must contain at least one uppercase letter"
+				);
+			}
+			if (!/[a-z]/.test(password)) {
+				newErrors.password?.push(
+					"Password must contain at least one lowercase letter"
+				);
+			}
+			if (!/\d/.test(password)) {
+				newErrors.password?.push(
+					"Password must contain at least one number"
+				);
+			}
+			if (!/[!@#$%^&*()_+={}|:;'<>,.?/-]/.test(password)) {
+				newErrors.password?.push(
+					"Password must contain at least one special character"
+				);
+			}
+		}
+
+		if (newErrors.password?.length || newErrors.email) {
+			setErrors(newErrors);
+			valid = false;
+		}
+
+		if (valid) {
+			// If valid, proceed with the form submission (e.g., API call)
+			console.log("Form submitted with:", { email, password });
+		}
+	};
+
 	return (
 		<div
 			className={`min-h-screen flex items-center justify-center ${
@@ -41,7 +114,7 @@ const LoginPage: React.FC = () => {
 				</Typography>
 
 				{/* Form */}
-				<form className="space-y-6">
+				<form onSubmit={handleSubmit} className="space-y-6">
 					<InputField
 						id="email"
 						label="Email Address"
@@ -50,6 +123,11 @@ const LoginPage: React.FC = () => {
 						value={email}
 						onChange={(e) => setEmail(e.target.value)}
 					/>
+					{errors.email && (
+						<p className="text-red-500 text-xs mt-1">
+							{errors.email}
+						</p>
+					)}
 					<InputField
 						id="password"
 						label="Password"
@@ -58,6 +136,13 @@ const LoginPage: React.FC = () => {
 						value={password}
 						onChange={(e) => setPassword(e.target.value)}
 					/>
+					{errors.password && errors.password.length > 0 && (
+						<ul className="text-red-500 text-xs mt-1">
+							{errors.password.map((error, index) => (
+								<li key={index}>{error}</li>
+							))}
+						</ul>
+					)}
 
 					{/* Forgot Password Link */}
 					<div className="flex justify-between items-center">
