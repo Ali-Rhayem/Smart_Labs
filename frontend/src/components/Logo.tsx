@@ -6,6 +6,7 @@ const Logo: React.FC = () => {
 			src={logo}
 			alt="Smart Labs Logo"
 			className="w-20 h-20 rounded-full shadow-md"
+			style={{ backgroundColor: "var(--color-background)" }}
 		/>
 	);
 };
