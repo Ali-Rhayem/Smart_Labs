@@ -78,10 +78,10 @@ namespace backend.Controllers
             }
             var result = await _userService.UpdateUser(id, updatedFields);
 
-            if (!result)
+            if (result == null)
                 return BadRequest(new { errors = "Update failed." });
 
-            return NoContent(); // 204 No Content
+            return Ok(result);
         }
 
         // DELETE: api/user/{id}

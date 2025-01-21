@@ -48,7 +48,7 @@ public class UserService
             .Find(user => user.Id == id).Project<User>(projection).FirstOrDefaultAsync();
     }
 
-    public async Task<bool> UpdateUser(int id, UpdateUser updatedFields)
+    public async Task<User?> UpdateUser(int id, UpdateUser updatedFields)
     {
         var updateDefinition = new List<UpdateDefinition<UpdateUser>>();
         var builder = Builders<UpdateUser>.Update;
@@ -65,14 +65,14 @@ public class UserService
                     var image = value as string;
                     var imageType = image!.Split(';')[0].Split('/')[1];
                     var imageBytes = Convert.FromBase64String(image.Split(',')[1]);
-                    var imagePath = $"/var/www/pfps/{id}.{imageType}";
+                    var imagePath = $"/medi/{id}.{imageType}";
                     await File.WriteAllBytesAsync(imagePath, imageBytes);
                     value = imagePath;
                 }
                 else if (fieldName == "email")
                 {
-                    var user = await GetUserByEmailAsync(value.ToString()!);
-                    if (user != null && user.Id != id)
+                    var user_by_email = await GetUserByEmailAsync(value.ToString()!);
+                    if (user_by_email != null && user_by_email.Id != id)
                         continue;
                 }
 
@@ -82,12 +82,14 @@ public class UserService
         }
 
         if (!updateDefinition.Any())
-            return false;
+            return null;
 
         var update = Builders<UpdateUser>.Update.Combine(updateDefinition);
         var result = await _UpdateUser.UpdateOneAsync(user => user.Id == id, update);
 
-        return result.IsAcknowledged && result.ModifiedCount > 0;
+        var user = await GetUserById(id);
+        return result.IsAcknowledged ? user : null;
+
     }
 
     public async Task<bool> DeleteUser(int id)
