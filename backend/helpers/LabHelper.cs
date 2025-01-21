@@ -1,5 +1,4 @@
 using System;
-using System.ComponentModel.DataAnnotations;
 using System.Net;
 using MongoDB.Driver;
 using System.Net.Mail;
@@ -29,10 +28,10 @@ public class LabHelper
     }
 
 
-    public Boolean CreateStudentIfNotExists(int studentId)
+    public Boolean CreateStudentIfNotExists(string student_email)
     {
         // Check if student exists in the database
-        var student = _users.Find(user => user.Id == studentId).FirstOrDefault();
+        var student = _users.Find(user => user.Email == student_email).FirstOrDefault();
 
         // if student exists, return true
         if (student != null)
@@ -42,10 +41,13 @@ public class LabHelper
 
         var password = GenerateTempPassword();
         // If student does not exist, create a new student
+        // find the last id
+        var lastStudent = _users.Find(_ => true).SortByDescending(user => user.Id).FirstOrDefault();
+        var studentId = lastStudent == null ? 1 : lastStudent.Id + 1;
         var newStudent = new User
         {
             Id = studentId,
-            Email = studentId + "@mu.edu.lb",
+            Email = student_email,
             Name = "Student_" + studentId,
             Role = "student",
             Password = BCrypt.Net.BCrypt.HashPassword(password),
@@ -55,7 +57,7 @@ public class LabHelper
         _users.InsertOne(newStudent);
 
         // send email to student with temp password
-        SendEmail(newStudent.Email, password);
+        SendEmail(student_email, password);
 
         return true;
 
@@ -75,41 +77,6 @@ public class LabHelper
         return new String(stringChars);
     }
 
-    // private void SendEmail(string email, string password)
-    // {
-
-    //     try
-    //     {
-    //         var EmailSettings = _configuration.GetSection("EmailSettings");
-
-    //         var smtpClient = new SmtpClient(EmailSettings["Host"])
-    //         {
-    //             Port = EmailSettings.GetValue<int>("Port"),
-    //             // Credentials = new NetworkCredential(EmailSettings["Email"], EmailSettings["Password"]),
-    //             Credentials = new NetworkCredential(EmailSettings["Email"], EmailSettings["Password"]),
-    //             EnableSsl = true,
-    //         };
-
-    //         var mailMessage = new MailMessage
-    //         {
-    //             From = new MailAddress(EmailSettings["Email"]),
-    //             Subject = "Your Temporary Password",
-    //             Body = $"Dear Student,\n\nYour temporary password is: {password}\n\nPlease log in and change your password immediately.\n\nBest regards,\nUniversity Team",
-    //             IsBodyHtml = false,
-    //         };
-
-    //         mailMessage.To.Add(email);
-
-    //         smtpClient.Send(mailMessage);
-
-    //         Console.WriteLine("Email sent successfully to " + email);
-    //     }
-    //     catch (Exception ex)
-    //     {
-    //         Console.WriteLine("Failed to send email: " + ex.Message);
-    //     }
-
-    // }
 
     private void SendEmail(string student_email, string password)
     {
