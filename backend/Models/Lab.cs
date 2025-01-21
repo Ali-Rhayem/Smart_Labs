@@ -23,7 +23,7 @@ public class Lab
     public required List<int> Instructors { get; set; }
 
     [BsonElement("Students")]
-    public List<int>? Students { get; set; }
+    public List<int> Students { get; set; } = [];
 
     [BsonElement("Day")]
     public required string Day { get; set; }

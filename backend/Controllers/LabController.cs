@@ -178,8 +178,12 @@ namespace backend.Controllers
         // POST: api/lab/{labId}/students
         [HttpPost("{labId}/students")]
         [Authorize(Roles = "admin,instructor")]
-        public async Task<ActionResult> AddStudentToLab(int labId, List<int> studentsId)
+        public async Task<ActionResult> AddStudentToLab(int labId, List<String> emails)
         {
+            foreach (var email in emails)
+                if (!new EmailAddressAttribute().IsValid(email))
+                    emails.Remove(email);
+
             var userRoleClaim = HttpContext.User.FindFirst(ClaimTypes.Role);
             var userIdClaim = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier);
             var lab = await _labService.GetLabByIdAsync(labId);
@@ -195,20 +199,20 @@ namespace backend.Controllers
                 }
             }
 
-            // check if student in lab
-            foreach (var studentId in studentsId)
+            foreach (var student_email in emails)
             {
-                if (lab.Students == null)
-                    break;
-                if (lab.Students.Contains(studentId))
-                    studentsId.Remove(studentId);
+                var student = await _userService.GetUserByEmailAsync(student_email);
+                if (student == null)
+                    continue;
+                if (lab.Students.Contains(student.Id) || student.Role != "student")
+                    emails.Remove(student_email);
             }
-            if (studentsId.Count == 0)
+            if (emails.Count == 0)
             {
                 return BadRequest();
             }
 
-            var result = await _labService.AddStudentToLabAsync(labId, studentsId);
+            var result = await _labService.AddStudentToLabAsync(labId, emails);
 
             if (!result)
                 return NotFound();
