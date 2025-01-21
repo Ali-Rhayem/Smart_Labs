@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using backend.Models;
 using backend.Services;
 
@@ -54,23 +55,31 @@ namespace backend.Controllers
             // Validate input
             if (string.IsNullOrEmpty(user.Password))
             {
-                return BadRequest("Password is required.");
+                return BadRequest(new { errors = "Password is required." });
             }
             user.Password = BCrypt.Net.BCrypt.HashPassword(user.Password);
 
             var createdUser = await _userService.CreateUser(user);
+            if (createdUser == null)
+                return BadRequest(new { errors = "User already exists." });
             return CreatedAtAction(nameof(GetUserById), new { id = createdUser.Id }, createdUser);
         }
 
         // PUT: api/user/{id}
         [HttpPut("{id}")]
         [Authorize(Roles = "admin,student")]
-        public async Task<ActionResult> UpdateUser(int id, User updatedFields)
+        public async Task<ActionResult> UpdateUser(int id, UpdateUser updatedFields)
         {
+            // check if change is to the current user
+            var userIdClaim = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null || id != int.Parse(userIdClaim.Value))
+            {
+                return Unauthorized();
+            }
             var result = await _userService.UpdateUser(id, updatedFields);
 
             if (!result)
-                return BadRequest("Update failed.");
+                return BadRequest(new { errors = "Update failed." });
 
             return NoContent(); // 204 No Content
         }
@@ -95,7 +104,7 @@ namespace backend.Controllers
             // Validate the request
             if (loginRequest == null || string.IsNullOrEmpty(loginRequest.Email) || string.IsNullOrEmpty(loginRequest.Password))
             {
-                return BadRequest("Email and password are required.");
+                return BadRequest(new { errors = "Email and password are required." });
             }
 
             // Check the user in the database
