@@ -6,7 +6,13 @@ interface CardProps {
 
 const Card: React.FC<CardProps> = ({ children }) => {
 	return (
-		<div className="w-full max-w-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-2xl shadow-2xl p-8">
+		<div
+			className="w-full max-w-md rounded-2xl shadow-lg p-8"
+			style={{
+				backgroundColor: "var(--color-card)",
+				color: "var(--color-text)",
+			}}
+		>
 			{children}
 		</div>
 	);
