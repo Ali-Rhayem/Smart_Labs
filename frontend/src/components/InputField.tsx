@@ -29,10 +29,19 @@ const InputField: React.FC<InputFieldProps> = ({
 			fullWidth
 			variant="outlined"
 			margin="normal"
+			InputLabelProps={{
+				style: { color: "var(--color-text)" },
+			}}
 			InputProps={{
 				style: {
 					borderRadius: "10px",
+					backgroundColor: "var(--color-background)",
+					color: "var(--color-text)",
+					borderColor: "var(--color-primary-light)",
 				},
+			}}
+			FormHelperTextProps={{
+				style: { color: "red" },
 			}}
 		/>
 	);
