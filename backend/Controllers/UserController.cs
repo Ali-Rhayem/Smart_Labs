@@ -67,7 +67,7 @@ namespace backend.Controllers
 
         // PUT: api/user/{id}
         [HttpPut("{id}")]
-        [Authorize(Roles = "admin,student")]
+        [Authorize]
         public async Task<ActionResult> UpdateUser(int id, UpdateUser updatedFields)
         {
             // check if change is to the current user
