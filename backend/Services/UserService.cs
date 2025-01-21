@@ -15,6 +15,9 @@ public class UserService
     // for testing purposes
     public async Task<User> CreateUser(User user)
     {
+        var lastUser = _users.Find(_ => true).SortByDescending(user => user.Id).FirstOrDefault();
+        var UserId = lastUser == null ? 1 : lastUser.Id + 1;
+        user.Id = UserId;
         await _users.InsertOneAsync(user);
         return user;
     }
