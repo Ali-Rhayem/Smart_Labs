@@ -4,11 +4,13 @@ import Logo from "../components/Logo";
 import InputField from "../components/InputField";
 import Card from "../components/Card";
 import { useTheme } from "../themes/ThemeContext";
+import { useNavigate } from "react-router-dom";
 
 const LoginPage: React.FC = () => {
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const { themeMode } = useTheme();
+	const navigate = useNavigate();
 
 	const [errors, setErrors] = useState<{
 		email?: string;
@@ -78,8 +80,7 @@ const LoginPage: React.FC = () => {
 		}
 
 		if (valid) {
-			// If valid, proceed with the form submission (e.g., API call)
-			console.log("Form submitted with:", { email, password });
+			navigate("/labs");
 		}
 	};
 
