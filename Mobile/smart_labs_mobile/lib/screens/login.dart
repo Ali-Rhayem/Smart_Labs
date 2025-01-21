@@ -1,5 +1,4 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 import 'package:smart_labs_mobile/models/user_model.dart';
 import 'package:smart_labs_mobile/providers/user_provider.dart';
@@ -254,15 +253,16 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
         ref.read(userProvider.notifier).setUser(user);
         if (userData['role'] == 'instructor' || userData['role'] == 'admin') {
-          Navigator.pushReplacementNamed(context, '/doctorMain');
+          Navigator.pushReplacementNamed(context, '/instructorMain');
         } else {
           Navigator.pushReplacementNamed(context, '/studentMain');
         }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text(
-                  userResult['message'] ?? 'Failed to fetch user details')),
+            content:
+                Text(userResult['message'] ?? 'Failed to fetch user details'),
+          ),
         );
       }
     } else {
