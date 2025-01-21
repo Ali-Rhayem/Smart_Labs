@@ -3,13 +3,11 @@ import { Button, Typography, Link } from "@mui/material";
 import Logo from "../components/Logo";
 import InputField from "../components/InputField";
 import Card from "../components/Card";
-import { useTheme } from "../themes/ThemeContext";
 import { useNavigate } from "react-router-dom";
 
 const LoginPage: React.FC = () => {
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
-	const { themeMode } = useTheme();
 	const navigate = useNavigate();
 
 	const [errors, setErrors] = useState<{
@@ -86,30 +84,30 @@ const LoginPage: React.FC = () => {
 
 	return (
 		<div
-			className={`min-h-screen flex items-center justify-center ${
-				themeMode === "dark" ? "bg-gray-900" : "bg-gray-100"
-			}`}
+			className={`min-h-screen flex items-center justify-center px-4`}
+			style={{
+				backgroundColor: "var(--color-background)",
+				color: "var(--color-text)",
+			}}
 		>
 			<Card>
-				{/* Logo */}
 				<div className="flex justify-center mb-8">
 					<Logo />
 				</div>
 
-				{/* Welcome Message */}
 				<Typography
 					variant="h4"
 					align="center"
 					className="font-bold mb-4"
+					style={{ color: "var(--color-text)" }}
 				>
 					Welcome Back!
 				</Typography>
 				<Typography
 					variant="body2"
 					align="center"
-					className={`mb-8 ${
-						themeMode === "dark" ? "text-gray-400" : "text-gray-600"
-					}`}
+					className="mb-8"
+					style={{ color: "var(--color-text)" }}
 				>
 					Please sign in to your account
 				</Typography>
@@ -145,27 +143,21 @@ const LoginPage: React.FC = () => {
 						</ul>
 					)}
 
-					{/* Forgot Password Link */}
 					<div className="flex justify-between items-center">
-						<Link
-							href="#"
-							className={`text-sm ${
-								themeMode === "dark"
-									? "text-blue-400"
-									: "text-blue-600"
-							}`}
-						>
+						<Link href="#" className="text-sm text-primary">
 							Forgot Password?
 						</Link>
 					</div>
 
-					{/* Sign In Button */}
 					<Button
 						type="submit"
 						variant="contained"
-						color="primary"
 						fullWidth
 						className="mt-4 py-3 rounded-lg text-lg font-medium shadow-lg transition-transform hover:scale-105"
+						style={{
+							backgroundColor: "var(--color-primary)",
+							color: "var(--color-secondary)",
+						}}
 					>
 						Sign In
 					</Button>
