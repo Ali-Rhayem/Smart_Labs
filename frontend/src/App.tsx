@@ -4,6 +4,7 @@ import LoginPage from "./pages/LoginPage";
 import LabsPage from "./pages/LabsPage";
 
 const App: React.FC = () => {
+	document.documentElement.setAttribute("data-theme","dark")
 	return (
 		<Router>
 			<Routes>

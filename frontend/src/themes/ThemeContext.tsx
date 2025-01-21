@@ -3,7 +3,7 @@ import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { CssBaseline } from "@mui/material";
 
 interface ThemeContextType {
-	toggleTheme: () => void;
+	// toggleTheme: () => void;
 	themeMode: string;
 }
 
@@ -20,11 +20,11 @@ export const useTheme = () => {
 const ThemeProviderComponent: React.FC<{ children: ReactNode }> = ({
 	children,
 }) => {
-	const [themeMode, setThemeMode] = useState<"light" | "dark">("dark");
+	const [themeMode] = useState<"dark">("dark");
 
-	const toggleTheme = () => {
-		setThemeMode((prev) => (prev === "light" ? "dark" : "light"));
-	};
+	// const toggleTheme = () => {
+	// 	setThemeMode((prev) => (prev === "light" ? "dark" : "light"));
+	// };
 
 	const theme = createTheme({
 		palette: {
@@ -33,7 +33,7 @@ const ThemeProviderComponent: React.FC<{ children: ReactNode }> = ({
 	});
 
 	return (
-		<ThemeContext.Provider value={{ toggleTheme, themeMode }}>
+		<ThemeContext.Provider value={{ themeMode }}>
 			<ThemeProvider theme={theme}>
 				<CssBaseline />
 				{children}
