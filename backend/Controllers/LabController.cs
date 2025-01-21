@@ -44,9 +44,9 @@ namespace backend.Controllers
                 return Unauthorized();
             }
             var user = await _userService.GetUserById(instructorId);
-            if (user.Role != "instructor")
+            if (user == null || user.Role != "instructor")
             {
-                return BadRequest();
+                return BadRequest(new { errors = "User is not an instructor." });
             }
             var labs = await _labService.GetInstructorLabsAsync(instructorId);
             return Ok(labs);
@@ -65,9 +65,9 @@ namespace backend.Controllers
                 return Unauthorized();
             }
             var user = await _userService.GetUserById(studentId);
-            if (user.Role != "student")
+            if (user == null || user.Role != "student")
             {
-                return BadRequest();
+                return BadRequest(new { errors = "User is not a student." });
             }
             var labs = await _labService.GetStudentLabsAsync(studentId);
             return Ok(labs);
@@ -209,7 +209,7 @@ namespace backend.Controllers
             }
             if (emails.Count == 0)
             {
-                return BadRequest();
+                return BadRequest(new { errors = "No valid students to add." });
             }
 
             var result = await _labService.AddStudentToLabAsync(labId, emails);
@@ -266,11 +266,15 @@ namespace backend.Controllers
                     return Unauthorized();
                 }
             }
+            // check if instructorid is realy an instructor
+            var instructor = await _userService.GetUserById(instructorId);
+            if (instructor == null || instructor.Role != "instructor")
+                return BadRequest(new { errors = "User is not an instructor." });
 
             // check if instructor in lab
             if (lab.Instructors.Contains(instructorId))
             {
-                return BadRequest();
+                return BadRequest(new { errors = "Instructor already in lab." });
             }
             var result = await _labService.AddInstructorToLabAsync(labId, instructorId);
 
@@ -319,6 +323,7 @@ namespace backend.Controllers
 
             if (lab == null)
                 return NotFound();
+
 
             if (userRoleClaim!.Value == "instructor")
             {
