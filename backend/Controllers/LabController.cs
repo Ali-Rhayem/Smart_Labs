@@ -115,8 +115,10 @@ namespace backend.Controllers
         // POST: api/lab
         [HttpPost]
         [Authorize(Roles = "admin,instructor")]
-        public async Task<ActionResult<Lab>> CreateLab(Lab lab, List<String> emails)
+        public async Task<ActionResult<Lab>> CreateLab(CreateLab createLab)
         {
+            var lab = createLab.Lab;
+            var emails = createLab.Emails;
             foreach (var email in emails)
                 if (!new EmailAddressAttribute().IsValid(email))
                     emails.Remove(email);
