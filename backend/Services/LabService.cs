@@ -74,17 +74,24 @@ public class LabService
         return await _labs.Find(lab => lab.Id == id).FirstOrDefaultAsync();
     }
 
-    public async Task<Lab> CreateLabAsync(Lab lab)
+    public async Task<Lab> CreateLabAsync(Lab lab, List<String> emails)
     {
         // check if students exist in the database
-        foreach (var studentId in lab.Students)
+        foreach (var studentEmail in emails)
         {
-            var student = await _users.Find(user => user.Id == studentId).FirstOrDefaultAsync();
+            var student = await _users.Find(user => user.Email == studentEmail).FirstOrDefaultAsync();
             if (student == null)
             {
-                _labHelper.CreateStudentIfNotExists(studentId);
+                _labHelper.CreateStudentIfNotExists(studentEmail);
             }
         }
+        List<int> student_ids = [];
+        foreach (var studentEmail in emails)
+        {
+            var student = await _users.Find(user => user.Email == studentEmail).FirstOrDefaultAsync();
+            student_ids.Add(student.Id);
+        }
+        lab.Students = student_ids;
         await _labs.InsertOneAsync(lab);
         return lab;
     }
@@ -115,15 +122,21 @@ public class LabService
 
     }
 
-    public async Task<Boolean> AddStudentToLabAsync(int labId, List<int> studentsId)
+    public async Task<Boolean> AddStudentToLabAsync(int labId, List<String> emails)
     {
-        foreach (var id in studentsId)
+        foreach (var email in emails)
         {
-            var student = await _users.Find(user => user.Id == id).FirstOrDefaultAsync();
+            var student = await _users.Find(user => user.Email == email).FirstOrDefaultAsync();
             if (student == null)
             {
-                _labHelper.CreateStudentIfNotExists(id);
+                _labHelper.CreateStudentIfNotExists(email);
             }
+        }
+        List<int> studentsId = [];
+        foreach (var email in emails)
+        {
+            var student = await _users.Find(user => user.Email == email).FirstOrDefaultAsync();
+            studentsId.Add(student.Id);
         }
         var updateDefinition = Builders<Lab>.Update.PushEach(lab => lab.Students, studentsId);
         var result = await _labs.UpdateOneAsync(lab => lab.Id == labId, updateDefinition);
