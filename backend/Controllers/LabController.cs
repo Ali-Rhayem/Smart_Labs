@@ -4,6 +4,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using backend.Models;
 using backend.Services;
+using System.ComponentModel.DataAnnotations;
 
 namespace backend.Controllers
 {
@@ -114,9 +115,13 @@ namespace backend.Controllers
         // POST: api/lab
         [HttpPost]
         [Authorize(Roles = "admin,instructor")]
-        public async Task<ActionResult<Lab>> CreateLab(Lab lab)
+        public async Task<ActionResult<Lab>> CreateLab(Lab lab, List<String> emails)
         {
-            var createdLab = await _labService.CreateLabAsync(lab);
+            foreach (var email in emails)
+                if (!new EmailAddressAttribute().IsValid(email))
+                    emails.Remove(email);
+
+            var createdLab = await _labService.CreateLabAsync(lab, emails);
             return CreatedAtAction(nameof(GetLabById), new { id = createdLab.Id }, createdLab);
         }
 
@@ -193,10 +198,10 @@ namespace backend.Controllers
             // check if student in lab
             foreach (var studentId in studentsId)
             {
+                if (lab.Students == null)
+                    break;
                 if (lab.Students.Contains(studentId))
-                {
                     studentsId.Remove(studentId);
-                }
             }
             if (studentsId.Count == 0)
             {
