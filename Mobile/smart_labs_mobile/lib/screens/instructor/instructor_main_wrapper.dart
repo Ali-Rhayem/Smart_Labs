@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:smart_labs_mobile/models/user_model.dart';
 import 'package:smart_labs_mobile/screens/instructor/create_lab_screen.dart';
 import 'package:smart_labs_mobile/screens/instructor/instructor_dashboard.dart';
 import 'package:smart_labs_mobile/screens/instructor/instructor_labs.dart';
@@ -14,20 +13,6 @@ class InstructorMainWrapper extends StatefulWidget {
 
 class _InstructorMainWrapperState extends State<InstructorMainWrapper> {
   int _currentIndex = 0;
-
-  // For demonstration, we create a mock user.
-  // In a real app, you might fetch this from your auth provider, or pass it in as a parameter.
-  final User _mockUser = User(
-    id: 1,
-    name: 'John Doe',
-    email: 'john.doe@example.com',
-    password: 'password123',
-    major: 'Computer Science',
-    faculty: 'Engineering',
-    imageUrl: 'https://picsum.photos/200', // or a real image URL
-    role: 'student',
-    faceIdentityVector: [1, 2, 3],
-  );
 
   // A list of pages in the same order as the BottomNavigationBar items.
   // We now have 4 items: Labs, Analytics, Messages, Profile.
