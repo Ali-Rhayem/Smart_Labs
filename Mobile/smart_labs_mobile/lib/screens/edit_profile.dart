@@ -4,6 +4,9 @@ import 'package:smart_labs_mobile/utils/secure_storage.dart';
 import '../models/user_model.dart';
 import '../providers/user_provider.dart';
 import '../services/api_service.dart';
+import 'dart:convert';
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
 
 class EditProfileScreen extends ConsumerStatefulWidget {
   final User user;
@@ -21,6 +24,9 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   late TextEditingController _nameController;
   late TextEditingController _emailController;
   bool _isLoading = false;
+  File? _imageFile;
+  final ImagePicker _picker = ImagePicker();
+  String? _base64Image;
 
   @override
   void initState() {
@@ -40,20 +46,24 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     if (!_formKey.currentState!.validate()) return;
 
     final id = await _secureStorage.readId();
-
+    final role = await _secureStorage.readRole();
     setState(() => _isLoading = true);
 
-    final response = await _apiService.put(
-      '/User/$id',
-      {
-        'email': _emailController.text,
-        'name': _nameController.text,
-        if (widget.user.imageUrl != null) 'image': widget.user.imageUrl,
-      },
-    );
+    final Map<String, dynamic> updateData = {
+      'email': _emailController.text,
+      'name': _nameController.text,
+      'role': role,
+      'password': '12343',
+    };
 
-    print('/user/$id');
-    print(response);
+    // Add image if it was updated
+    if (_base64Image != null) {
+      updateData['image'] = _base64Image;
+    } else if (widget.user.imageUrl != null) {
+      updateData['image'] = widget.user.imageUrl;
+    }
+
+    final response = await _apiService.put('/User/$id', updateData);
 
     if (!mounted) return;
 
@@ -63,7 +73,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
         id: widget.user.id,
         name: _nameController.text,
         email: _emailController.text,
-        imageUrl: widget.user.imageUrl,
+        imageUrl: response['data']['imageUrl'] ?? widget.user.imageUrl,
         role: widget.user.role,
         major: widget.user.major,
         faculty: widget.user.faculty,
@@ -86,6 +96,22 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     setState(() => _isLoading = false);
   }
 
+  Future<void> _pickImage() async {
+    final XFile? pickedFile =
+        await _picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      setState(() {
+        _imageFile = File(pickedFile.path);
+      });
+
+      // Convert image to base64
+      final bytes = await _imageFile!.readAsBytes();
+      _base64Image = base64Encode(bytes);
+      print('base64Image: $_base64Image');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -101,6 +127,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
           child: Column(
             children: [
               const SizedBox(height: 20),
+              _buildProfileImage(),
               TextFormField(
                 controller: _nameController,
                 style: const TextStyle(color: Colors.white),
@@ -157,6 +184,41 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildProfileImage() {
+    return Column(
+      children: [
+        Stack(
+          children: [
+            CircleAvatar(
+              radius: 50,
+              backgroundImage: _imageFile != null
+                  ? FileImage(_imageFile!)
+                  : (widget.user.imageUrl != null
+                          ? NetworkImage(widget.user.imageUrl!)
+                          : const NetworkImage('https://picsum.photos/200'))
+                      as ImageProvider<Object>,
+            ),
+            Positioned(
+              bottom: 0,
+              right: 0,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFEB00),
+                  shape: BoxShape.circle,
+                ),
+                child: IconButton(
+                  icon: const Icon(Icons.camera_alt, color: Colors.black),
+                  onPressed: _pickImage,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 24),
+      ],
     );
   }
 }
