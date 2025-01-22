@@ -92,13 +92,30 @@ class ApiService {
   }
 
   Map<String, dynamic> _handleResponse(http.Response response) {
-    final body = json.decode(response.body);
-    if (response.statusCode >= 200 && response.statusCode < 300) {
-      return {'success': true, 'data': body};
-    } else {
+    try {
+      if (response.body.isEmpty && response.statusCode != 204) {
+        return {
+          'success': false,
+          'message': 'Empty response body',
+          'statusCode': response.statusCode,
+        };
+      }
+
+      final body = json.decode(response.body);
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        return {'success': true, 'data': body};
+      } else {
+        return {
+          'success': false,
+          'message': body['message'] ?? 'Request failed',
+          'statusCode': response.statusCode,
+        };
+      }
+    } catch (e) {
       return {
         'success': false,
-        'message': body['message'] ?? 'Request failed',
+        'message': 'Failed to process response: $e',
         'statusCode': response.statusCode,
       };
     }
