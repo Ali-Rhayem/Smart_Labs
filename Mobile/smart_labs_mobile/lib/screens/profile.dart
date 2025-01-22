@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:smart_labs_mobile/providers/user_provider.dart';
+import 'package:smart_labs_mobile/screens/edit_profile.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 // Example accent color (the bright yellow)
 const Color kNeonYellow = Color(0xFFFFEB00);
@@ -42,7 +44,10 @@ class ProfileScreen extends ConsumerWidget {
             Center(
               child: CircleAvatar(
                 radius: 50,
-                backgroundImage: NetworkImage('https://picsum.photos/200' ?? ''),
+                backgroundImage: user.imageUrl != null
+                    ? NetworkImage(
+                        '${dotenv.env['IMAGE_BASE_URL']}${user.imageUrl}',)
+                    : const NetworkImage('https://picsum.photos/200'),
               ),
             ),
             const SizedBox(height: 16),
@@ -63,7 +68,7 @@ class ProfileScreen extends ConsumerWidget {
               user.email,
               style: TextStyle(
                 fontSize: 14,
-                color: Colors.white.withOpacity(0.7),
+                color: Colors.white.withValues(alpha: 0.7),
               ),
             ),
             const SizedBox(height: 24),
@@ -76,7 +81,12 @@ class ProfileScreen extends ConsumerWidget {
                 style: TextStyle(color: Colors.black),
               ),
               onPressed: () {
-                // TODO: handle edit profile
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => EditProfileScreen(user: user),
+                  ),
+                );
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: kNeonYellow,
