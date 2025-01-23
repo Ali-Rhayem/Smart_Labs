@@ -273,7 +273,7 @@ namespace backend.Controllers
             var lab = await _labService.GetLabByIdAsync(labId);
 
             if (lab == null)
-                return NotFound();
+                return NotFound(new { errors = "Lab not found." });
 
             if (userRoleClaim!.Value == "instructor")
             {
@@ -323,7 +323,7 @@ namespace backend.Controllers
             var result = await _labService.RemoveInstructorFromLabAsync(labId, instructorId);
 
             if (!result)
-                return NotFound();
+                return NotFound(new { errors = "Instructor not found in lab." });
 
             return NoContent();
         }
@@ -338,7 +338,7 @@ namespace backend.Controllers
             var lab = await _labService.GetLabByIdAsync(labId);
 
             if (lab == null)
-                return NotFound();
+                return NotFound(new { errors = "Lab not found." });
 
 
             if (userRoleClaim!.Value == "instructor")
