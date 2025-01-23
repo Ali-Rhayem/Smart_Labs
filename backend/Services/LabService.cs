@@ -9,13 +9,15 @@ public class LabService
     private readonly IMongoCollection<User> _users;
     private readonly LabHelper _labHelper;
     private readonly UserService _userService;
+    private readonly SemesterService _semesterService;
 
-    public LabService(IMongoDatabase database, LabHelper labHelper, UserService userService)
+    public LabService(IMongoDatabase database, LabHelper labHelper, UserService userService, SemesterService semesterService)
     {
         _labs = database.GetCollection<Lab>("Labs");
         _users = database.GetCollection<User>("Users");
         _labHelper = labHelper;
         _userService = userService;
+        _semesterService = semesterService;
     }
 
     public async Task<List<Lab>> GetAllLabsAsync()
@@ -106,6 +108,12 @@ public class LabService
             return null;
         }
 
+        // check if semester exists in the database
+        if (await _semesterService.GetSemesterByIdAsync(lab.SemesterID) == null && lab.SemesterID != 0)
+        {
+            return null;
+        }
+
         var lastLab = _labs.Find(_ => true).SortByDescending(lab => lab.Id).FirstOrDefault();
         var labId = lastLab == null ? 1 : lastLab.Id + 1;
         lab.Id = labId;
@@ -129,6 +137,9 @@ public class LabService
             if (value != null && !restrictedFields.Contains(prop.Name))
             {
                 var fieldName = prop.Name;
+                // check if semester exists in the database
+                if (fieldName == "SemesterID" && await _semesterService.GetSemesterByIdAsync((int)value) == null && (int)value != 0)
+                    continue;
                 var fieldUpdate = builder.Set(fieldName, value);
                 updateDefinition.Add(fieldUpdate);
             }
