@@ -17,7 +17,7 @@ public class Lab
     public string? Description { get; set; }
 
     [BsonElement("PPE")]
-    public required List<int> PPE { get; set; }
+    public List<int> PPE { get; set; } = [];
 
     [BsonElement("Instructors")]
     public List<int> Instructors { get; set; } = [];
@@ -26,13 +26,7 @@ public class Lab
     public List<int> Students { get; set; } = [];
 
     [BsonElement("Day")]
-    public required string Day { get; set; }
-
-    [BsonElement("StartTime")]
-    public required string StartTime { get; set; }
-
-    [BsonElement("EndTime")]
-    public required string EndTime { get; set; }
+    public required List<Schedule> Schedule { get; set; }
 
     [BsonElement("Report")]
     public string? Report { get; set; }
@@ -40,5 +34,6 @@ public class Lab
     [BsonElement("SemesterID")]
     public int SemesterID { get; set; } = 0;
 
+    [BsonElement("EndLab")]
     public bool EndLab { get; set; } = false;
 }
