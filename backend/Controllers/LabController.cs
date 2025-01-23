@@ -134,6 +134,10 @@ namespace backend.Controllers
                     emails.Remove(email);
 
             var createdLab = await _labService.CreateLabAsync(lab, emails);
+            if (createdLab == null)
+            {
+                return BadRequest(new { errors = "Lab creation failed." });
+            }
             return CreatedAtAction(nameof(GetLabById), new { id = createdLab.Id }, createdLab);
         }
 

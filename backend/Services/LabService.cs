@@ -74,7 +74,7 @@ public class LabService
         return await _labs.Find(lab => lab.Id == id).FirstOrDefaultAsync();
     }
 
-    public async Task<Lab> CreateLabAsync(Lab lab, List<String> emails)
+    public async Task<Lab?> CreateLabAsync(Lab lab, List<String> emails)
     {
         // check if students exist in the database
         foreach (var studentEmail in emails)
@@ -89,9 +89,27 @@ public class LabService
         foreach (var studentEmail in emails)
         {
             var student = await _users.Find(user => user.Email == studentEmail).FirstOrDefaultAsync();
-            student_ids.Add(student.Id);
+            if (student.Role == "student")
+                student_ids.Add(student.Id);
         }
         lab.Students = student_ids;
+
+        // check if instructors exist in the database
+        foreach (var instructorId in lab.Instructors)
+        {
+            var instructor = await _users.Find(user => user.Id == instructorId).FirstOrDefaultAsync();
+            if (instructor == null)
+                lab.Instructors.Remove(instructorId);
+        }
+        if (lab.Instructors.Count == 0)
+        {
+            return null;
+        }
+
+        var lastLab = _labs.Find(_ => true).SortByDescending(lab => lab.Id).FirstOrDefault();
+        var labId = lastLab == null ? 1 : lastLab.Id + 1;
+        lab.Id = labId;
+
         await _labs.InsertOneAsync(lab);
         return lab;
     }
