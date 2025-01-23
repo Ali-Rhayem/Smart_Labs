@@ -65,9 +65,16 @@ public class UserService
                     var image = value as string;
                     var imageType = image!.Split(';')[0].Split('/')[1];
                     var imageBytes = Convert.FromBase64String(image.Split(',')[1]);
-                    var imagePath = $"/medi/{id}.{imageType}";
-                    await File.WriteAllBytesAsync(imagePath, imageBytes);
-                    value = imagePath;
+                    var currentDirectory = AppContext.BaseDirectory;
+                    var directoryPath = Path.Combine(currentDirectory, "wwwroot", "medi");
+                    if (!Directory.Exists(directoryPath))
+                    {
+                        Directory.CreateDirectory(directoryPath);
+                    }
+                    var image_path = $"medi/{id}.{imageType}";
+                    var SaveimagePath = Path.Combine(directoryPath, $"{id}.{imageType}");
+                    await File.WriteAllBytesAsync(SaveimagePath, imageBytes);
+                    value = image_path;
                 }
                 else if (fieldName == "email")
                 {

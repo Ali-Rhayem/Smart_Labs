@@ -62,3 +62,4 @@
 /Users/jawadalsayed/Desktop/fyp/Smart_Labs/backend/obj/Release/net9.0/backend.genruntimeconfig.cache
 /Users/jawadalsayed/Desktop/fyp/Smart_Labs/backend/obj/Release/net9.0/ref/backend.dll
 /Users/jawadalsayed/Desktop/fyp/Smart_Labs/backend/bin/Release/net9.0/appsettings_example.json
+/Users/jawadalsayed/Desktop/fyp/Smart_Labs/backend/bin/Release/net9.0/backend.staticwebassets.runtime.json
