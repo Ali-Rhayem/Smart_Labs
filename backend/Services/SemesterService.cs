@@ -27,9 +27,9 @@ public class SemesterService
         return await _semesters.Find(semester => semester.CurrentSemester == true).FirstOrDefaultAsync();
     }
 
-    public async Task<Semester> GetListOfSemestersAsync(List<int> ids)
+    public async Task<List<Semester>> GetListOfSemestersAsync(List<int> ids)
     {
-        return await _semesters.Find(semester => ids.Contains(semester.Id)).FirstOrDefaultAsync();
+        return await _semesters.Find(semester => ids.Contains(semester.Id)).ToListAsync();
     }
 
     public async Task<Semester> CreateSemesterAsync(Semester semester)
@@ -40,11 +40,11 @@ public class SemesterService
         return semester;
     }
 
-    public async Task<bool> UpdateSemesterAsync(int id, Semester semesterIn)
+    public async Task<Semester?> UpdateSemesterAsync(int id, Semester semesterIn)
     {
         semesterIn.Id = id;
         var result = await _semesters.ReplaceOneAsync(semester => semester.Id == id, semesterIn);
-        return result.ModifiedCount > 0;
+        return result.IsAcknowledged ? semesterIn : null;
     }
 
     public async Task<bool> DeleteSemesterAsync(int id)
@@ -65,7 +65,8 @@ public class SemesterService
         }
         var semester = await GetSemesterByIdAsync(id);
         semester.CurrentSemester = true;
-        return await UpdateSemesterAsync(id, semester);
+        var result = await UpdateSemesterAsync(id, semester);
+        return result != null;
     }
 
 
