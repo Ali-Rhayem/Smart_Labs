@@ -1,15 +1,15 @@
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
-public class Semaster
+public class Semester
 {
     [BsonId]
-    public int Id { get; set; }
+    public int Id { get; set; } = 0;
 
     [BsonElement("Name")]
     public required string Name { get; set; }
 
-    [BsonElement("CurrentSemaster")]
-    public bool CurrentSemaster { get; set; } = false;
+    [BsonElement("CurrentSemester")]
+    public bool CurrentSemester { get; set; } = false;
 
 }
