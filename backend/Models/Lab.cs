@@ -20,7 +20,7 @@ public class Lab
     public required List<int> PPE { get; set; }
 
     [BsonElement("Instructors")]
-    public required List<int> Instructors { get; set; }
+    public List<int> Instructors { get; set; } = [];
 
     [BsonElement("Students")]
     public List<int> Students { get; set; } = [];
@@ -38,5 +38,7 @@ public class Lab
     public string? Report { get; set; }
 
     [BsonElement("SemesterID")]
-    public int SemesterID { get; set; }
+    public int SemesterID { get; set; } = 0;
+
+    public bool EndLab { get; set; } = false;
 }
