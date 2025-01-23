@@ -53,6 +53,10 @@ namespace backend.Controllers
         public async Task<ActionResult<User>> CreateUser(User user)
         {
             // Validate input
+            if (user.Role != "admin" && user.Role != "instructor" && user.Role != "student")
+            {
+                return BadRequest(new { errors = "Role must be admin, instructor, or student." });
+            }
             if (string.IsNullOrEmpty(user.Password))
             {
                 return BadRequest(new { errors = "Password is required." });
