@@ -117,6 +117,16 @@ namespace backend.Controllers
         [Authorize(Roles = "admin,instructor")]
         public async Task<ActionResult<Lab>> CreateLab(CreateLab createLab)
         {
+            var user_id = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier);
+            var user_role = HttpContext.User.FindFirst(ClaimTypes.Role);
+            if (user_role!.Value == "instructor")
+            {
+                createLab.Lab.Instructors.Add(int.Parse(user_id!.Value));
+            }
+            else if (createLab.Lab.Instructors.Count == 0)
+            {
+                return BadRequest(new { errors = "Lab must have at least one instructor." });
+            }
             var lab = createLab.Lab;
             var emails = createLab.Emails;
             foreach (var email in emails)
