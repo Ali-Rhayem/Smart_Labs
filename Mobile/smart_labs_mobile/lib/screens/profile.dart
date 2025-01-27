@@ -46,7 +46,7 @@ class ProfileScreen extends ConsumerWidget {
                 radius: 50,
                 backgroundImage: user.imageUrl != null
                     ? NetworkImage(
-                        '${dotenv.env['IMAGE_BASE_URL']}${user.imageUrl}',)
+                        '${dotenv.env['IMAGE_BASE_URL']}/${user.imageUrl}',)
                     : const NetworkImage('https://picsum.photos/200'),
               ),
             ),
