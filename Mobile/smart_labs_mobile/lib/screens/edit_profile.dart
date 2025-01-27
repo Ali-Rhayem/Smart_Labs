@@ -7,6 +7,7 @@ import '../services/api_service.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class EditProfileScreen extends ConsumerStatefulWidget {
   final User user;
@@ -50,15 +51,18 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     setState(() => _isLoading = true);
 
     final Map<String, dynamic> updateData = {
+      'id': int.parse(id!),
       'email': _emailController.text,
       'name': _nameController.text,
       'role': role,
       'password': '12343',
+      'major':'Computer Science',
+      'faculty':'Engineering',
     };
 
     // Add image if it was updated
     if (_base64Image != null) {
-      updateData['image'] = _base64Image;
+      updateData['image'] = 'data:image/jpeg;base64,$_base64Image';
     } else if (widget.user.imageUrl != null) {
       updateData['image'] = widget.user.imageUrl;
     }
@@ -73,7 +77,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
         id: widget.user.id,
         name: _nameController.text,
         email: _emailController.text,
-        imageUrl: response['data']['imageUrl'] ?? widget.user.imageUrl,
+        imageUrl: response['data']['image'] ?? widget.user.imageUrl,
         role: widget.user.role,
         major: widget.user.major,
         faculty: widget.user.faculty,
@@ -197,7 +201,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
               backgroundImage: _imageFile != null
                   ? FileImage(_imageFile!)
                   : (widget.user.imageUrl != null
-                          ? NetworkImage(widget.user.imageUrl!)
+                          ? NetworkImage('${dotenv.env['IMAGE_BASE_URL']}/${widget.user.imageUrl}')
                           : const NetworkImage('https://picsum.photos/200'))
                       as ImageProvider<Object>,
             ),
