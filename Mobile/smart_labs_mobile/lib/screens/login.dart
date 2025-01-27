@@ -223,8 +223,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     setState(() => _isLoading = true);
 
     final result = await _authService.login(_email, _password);
-
-    // Check if widget is still mounted before proceeding
+    
+        // Check if widget is still mounted before proceeding
     if (!mounted) return;
 
     if (result['success']) {
@@ -246,7 +246,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
           password: '',
           major: userDetails['major'],
           faculty: userDetails['faculty'],
-          imageUrl: userDetails['imageUrl'],
+          imageUrl: userDetails['image'],
           role: role!,
           faceIdentityVector: userDetails['faceIdentityVector'],
         );
