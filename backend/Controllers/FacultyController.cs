@@ -58,5 +58,17 @@ namespace backend.Controllers
             return Ok(updatedFaculty);
         }
 
+        [HttpDelete("{id}/major")]
+        [Authorize(Roles = "admin")]
+        public async Task<ActionResult<Faculty>> RemoveMajor(int id, string major)
+        {
+            var updatedFaculty = await _facultyService.RemoveMajorAsync(id, major);
+            if (updatedFaculty == null)
+            {
+                return NotFound();
+            }
+            return Ok(updatedFaculty);
+        }
+
     }
 }

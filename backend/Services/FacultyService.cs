@@ -57,6 +57,23 @@ public class FacultyService
         return main_faculty;
     }
 
+    public async Task<Faculty?> RemoveMajorAsync(int id, string major)
+    {
+        var main_faculty = await _faculties.Find(faculty => faculty.Id == id).FirstOrDefaultAsync();
+        if (main_faculty == null)
+        {
+            return null;
+        }
+
+        // check if major exists
+        if (!main_faculty.Major.Contains(major))
+        {
+            return null;
+        }
+        main_faculty.Major.Remove(major);
+        await _faculties.ReplaceOneAsync(faculty => faculty.Id == id, main_faculty);
+        return main_faculty;
+    }
 
 
 }
