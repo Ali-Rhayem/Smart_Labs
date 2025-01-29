@@ -6,9 +6,9 @@ public class PPE
 {
 
     [BsonId]
-    public int Id { get; set; };
+    public int Id { get; set; }
 
     [BsonElement("Name")]
-    public string Name { get; set; };
+    public string Name { get; set; }
 
 }

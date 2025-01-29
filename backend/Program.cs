@@ -27,6 +27,8 @@ builder.Services.AddScoped(sp =>
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<LabService>();
 builder.Services.AddScoped<SemesterService>();
+builder.Services.AddScoped<PPEService>();
+builder.Services.AddScoped<FacultyService>();
 builder.Services.AddScoped<LabHelper>();
 
 builder.Services.AddSingleton<JwtTokenHelper>();
