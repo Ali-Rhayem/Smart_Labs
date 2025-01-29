@@ -56,8 +56,8 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       'name': _nameController.text,
       'role': role,
       'password': '12343',
-      'major':'Computer Science',
-      'faculty':'Engineering',
+      'major': 'Computer Science',
+      'faculty': 'Engineering',
     };
 
     // Add image if it was updated
@@ -68,8 +68,6 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     }
 
     final response = await _apiService.put('/User/$id', updateData);
-
-    if (!mounted) return;
 
     if (response['success']) {
       // Update the user in the provider
@@ -84,7 +82,14 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
         faceIdentityVector: widget.user.faceIdentityVector,
       );
 
+      if (_imageFile != null) {
+        imageCache.clear();
+        imageCache.clearLiveImages();
+      }
+
       ref.read(userProvider.notifier).setUser(updatedUser);
+
+      if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Profile updated successfully')),
@@ -201,15 +206,17 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
               backgroundImage: _imageFile != null
                   ? FileImage(_imageFile!)
                   : (widget.user.imageUrl != null
-                          ? NetworkImage('${dotenv.env['IMAGE_BASE_URL']}/${widget.user.imageUrl}')
-                          : const NetworkImage('https://picsum.photos/200'))
-                      as ImageProvider<Object>,
+                      ? NetworkImage(
+                          '${dotenv.env['IMAGE_BASE_URL']}/${widget.user.imageUrl}')
+                      : const NetworkImage(
+                          'https://picsum.photos/200')) as ImageProvider<
+                      Object>,
             ),
             Positioned(
               bottom: 0,
               right: 0,
               child: Container(
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   color: const Color(0xFFFFEB00),
                   shape: BoxShape.circle,
                 ),
