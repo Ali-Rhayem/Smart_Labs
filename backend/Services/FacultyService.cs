@@ -75,5 +75,11 @@ public class FacultyService
         return main_faculty;
     }
 
+    public async Task<bool> DeleteFacultyAsync(int id)
+    {
+        var result = await _faculties.DeleteOneAsync(faculty => faculty.Id == id);
+        return result.DeletedCount > 0;
+    }
+
 
 }

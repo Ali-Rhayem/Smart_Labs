@@ -70,5 +70,17 @@ namespace backend.Controllers
             return Ok(updatedFaculty);
         }
 
+        [HttpDelete("{id}")]
+        [Authorize(Roles = "admin")]
+        public async Task<ActionResult> DeleteFaculty(int id)
+        {
+            var faculty = await _facultyService.DeleteFacultyAsync(id);
+            if (!faculty)
+            {
+                return NotFound();
+            }
+            return NoContent();
+        }
+
     }
 }
