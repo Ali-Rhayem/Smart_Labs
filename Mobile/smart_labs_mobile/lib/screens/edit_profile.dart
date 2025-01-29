@@ -117,7 +117,6 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       // Convert image to base64
       final bytes = await _imageFile!.readAsBytes();
       _base64Image = base64Encode(bytes);
-      print('base64Image: $_base64Image');
     }
   }
 
@@ -217,7 +216,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
               right: 0,
               child: Container(
                 decoration: const BoxDecoration(
-                  color: const Color(0xFFFFEB00),
+                  color: Color(0xFFFFEB00),
                   shape: BoxShape.circle,
                 ),
                 child: IconButton(

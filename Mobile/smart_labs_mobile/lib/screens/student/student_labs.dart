@@ -15,6 +15,26 @@ class _StudentLabsScreenState extends ConsumerState<StudentLabsScreen> {
   static const Color kNeonAccent = Color(0xFFFFFF00);
   String _searchQuery = '';
 
+    @override
+  void initState() {
+    super.initState();
+    // Detect app lifecycle changes
+    AppLifecycleListener(
+      onResume: () {
+        print("App Resumed"); // App comes to the foreground
+      },
+      onInactive: () {
+        print("App Inactive"); // Happens when switching apps
+      },
+      onPause: () {
+        print("App Paused"); // App goes to the background
+      },
+      onDetach: () {
+        print("App Detached (Closed)"); // App is killed
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final labsAsync = ref.watch(labsProvider);
