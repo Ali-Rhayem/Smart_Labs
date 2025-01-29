@@ -22,7 +22,8 @@ namespace backend.Controllers
         [Authorize(Roles = "admin,instructor")]
         public async Task<ActionResult<List<PPE>>> GetAllPPE()
         {
-            return await _ppeService.GetAllPPEAsync();
+            var ppe = await _ppeService.GetAllPPEAsync();
+            return Ok(ppe);
         }
 
         // GET: api/PPE/list
@@ -30,7 +31,39 @@ namespace backend.Controllers
         [Authorize]
         public async Task<ActionResult<List<PPE>>> GetListOfPPEs([FromQuery] List<int> ids)
         {
-            return await _ppeService.GetListOfPPEsAsync(ids);
+            var ppe = await _ppeService.GetListOfPPEsAsync(ids);
+            return Ok(ppe);
+        }
+
+        // POST: api/PPE
+        [HttpPost]
+        [Authorize(Roles = "admin")]
+        public async Task<ActionResult<PPE>> CreatePPE(PPE ppe)
+        {
+            var createdPPE = await _ppeService.CreatePPEAsync(ppe);
+            return CreatedAtAction(nameof(GetAllPPE), new { id = createdPPE.Id }, createdPPE);
+        }
+
+        // PUT: api/PPE/5
+        [HttpPut("{id}")]
+        [Authorize(Roles = "admin")]
+        public async Task<ActionResult<PPE>> UpdatePPE(int id, PPE ppe)
+        {
+            var updatedPPE = await _ppeService.UpdatePPEAsync(id, ppe);
+            return Ok(updatedPPE);
+        }
+
+        // DELETE: api/PPE/5
+        [HttpDelete("{id}")]
+        [Authorize(Roles = "admin")]
+        public async Task<ActionResult> DeletePPE(int id)
+        {
+            var result = await _ppeService.DeletePPEAsync(id);
+            if (result)
+            {
+                return NoContent();
+            }
+            return NotFound();
         }
 
 
