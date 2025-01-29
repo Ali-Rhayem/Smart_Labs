@@ -60,7 +60,7 @@ namespace backend.Controllers
 
         // POST: api/Semester
         [HttpPost]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "admin")]
         public async Task<ActionResult<Semester>> CreateSemester(Semester semester)
         {
             var createdSemester = await _semesterService.CreateSemesterAsync(semester);
@@ -69,7 +69,7 @@ namespace backend.Controllers
 
         // PUT: api/Semester/5
         [HttpPut("{id}")]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "admin")]
         public async Task<ActionResult<Semester>> UpdateSemester(int id, Semester semester)
         {
             var updated = await _semesterService.UpdateSemesterAsync(id, semester);
@@ -84,7 +84,7 @@ namespace backend.Controllers
 
         // DELETE: api/Semester/5
         [HttpDelete("{id}")]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "admin")]
         public async Task<ActionResult> DeleteSemester(int id)
         {
             var deleted = await _semesterService.DeleteSemesterAsync(id);
@@ -99,7 +99,7 @@ namespace backend.Controllers
 
         // PUT: api/Semester/5/current
         [HttpPut("{id}/current")]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "admin")]
         public async Task<ActionResult> SetCurrentSemester(int id)
         {
             var result = await _semesterService.SetCurrentSemesterAsync(id);
