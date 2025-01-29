@@ -25,7 +25,7 @@ public class Lab
     [BsonElement("Students")]
     public List<int> Students { get; set; } = [];
 
-    [BsonElement("Day")]
+    [BsonElement("Schedule")]
     public required List<Schedule> Schedule { get; set; }
 
     [BsonElement("Report")]
