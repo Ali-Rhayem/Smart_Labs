@@ -39,6 +39,24 @@ public class FacultyService
         return faculty;
     }
 
+    public async Task<Faculty?> AddMajorAsync(int id, string major)
+    {
+        var main_faculty = await _faculties.Find(faculty => faculty.Id == id).FirstOrDefaultAsync();
+        if (main_faculty == null)
+        {
+            return null;
+        }
+
+        // check if major already exists
+        if (main_faculty.Major.Contains(major))
+        {
+            return main_faculty;
+        }
+        main_faculty.Major.Add(major);
+        await _faculties.ReplaceOneAsync(faculty => faculty.Id == id, main_faculty);
+        return main_faculty;
+    }
+
 
 
 }

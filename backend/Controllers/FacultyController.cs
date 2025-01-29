@@ -46,5 +46,17 @@ namespace backend.Controllers
             return Ok(updatedFaculty);
         }
 
+        [HttpPost("{id}/major")]
+        [Authorize(Roles = "admin")]
+        public async Task<ActionResult<Faculty>> AddMajor(int id, string major)
+        {
+            var updatedFaculty = await _facultyService.AddMajorAsync(id, major);
+            if (updatedFaculty == null)
+            {
+                return NotFound();
+            }
+            return Ok(updatedFaculty);
+        }
+
     }
 }
