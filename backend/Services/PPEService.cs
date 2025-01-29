@@ -24,12 +24,15 @@ public class PPEService
 
     public async Task<PPE> CreatePPEAsync(PPE ppe)
     {
+        var last_PPE = await _PPEs.Find(_ => true).SortByDescending(p => p.Id).FirstOrDefaultAsync();
+        ppe.Id = last_PPE == null ? 1 : last_PPE.Id + 1;
         await _PPEs.InsertOneAsync(ppe);
         return ppe;
     }
 
     public async Task<PPE> UpdatePPEAsync(int id, PPE ppe)
     {
+        ppe.Id = id;
         await _PPEs.ReplaceOneAsync(p => p.Id == id, ppe);
         return ppe;
     }
