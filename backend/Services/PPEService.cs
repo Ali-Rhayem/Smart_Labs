@@ -17,6 +17,11 @@ public class PPEService
         return await _PPEs.Find(_ => true).ToListAsync();
     }
     
+    public async Task<List<PPE>> GetListOfPPEsAsync(List<int> ids)
+    {
+        return await _PPEs.Find(ppe => ids.Contains(ppe.Id)).ToListAsync();
+    }
+
 
 
 }

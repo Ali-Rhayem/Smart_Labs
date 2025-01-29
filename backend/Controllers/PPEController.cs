@@ -25,6 +25,14 @@ namespace backend.Controllers
             return await _ppeService.GetAllPPEAsync();
         }
 
+        // GET: api/PPE/list
+        [HttpGet("list")]
+        [Authorize]
+        public async Task<ActionResult<List<PPE>>> GetListOfPPEs([FromQuery] List<int> ids)
+        {
+            return await _ppeService.GetListOfPPEsAsync(ids);
+        }
+
 
     }
 }
