@@ -1,5 +1,7 @@
 using MongoDB.Driver;
 using backend.Models;
+using OneOf;
+using System.ComponentModel.DataAnnotations;
 
 namespace backend.Services;
 
@@ -7,11 +9,13 @@ public class UserService
 {
     private readonly IMongoCollection<User> _users;
     private readonly IMongoCollection<UpdateUser> _UpdateUser;
+    private readonly FacultyService _facultyService;
 
-    public UserService(IMongoDatabase database)
+    public UserService(IMongoDatabase database, FacultyService facultyService)
     {
         _users = database.GetCollection<User>("Users");
         _UpdateUser = database.GetCollection<UpdateUser>("Users");
+        _facultyService = facultyService;
     }
 
     // for testing purposes
@@ -48,7 +52,7 @@ public class UserService
             .Find(user => user.Id == id).Project<User>(projection).FirstOrDefaultAsync();
     }
 
-    public async Task<User?> UpdateUser(int id, UpdateUser updatedFields)
+    public async Task<OneOf<User, ErrorMessage>> UpdateUser(int id, UpdateUser updatedFields)
     {
         var updateDefinition = new List<UpdateDefinition<UpdateUser>>();
         var builder = Builders<UpdateUser>.Update;
@@ -78,10 +82,26 @@ public class UserService
                 }
                 else if (fieldName == "email")
                 {
+                    var email = value.ToString()!;
+                    if (!new EmailAddressAttribute().IsValid(email))
+                        return new ErrorMessage { StatusCode = 400, Message = "Invalid email address." };
                     var user_by_email = await GetUserByEmailAsync(value.ToString()!);
                     if (user_by_email != null && user_by_email.Id != id)
                         continue;
                 }
+                else if (fieldName == "faculty")
+                {
+                    var faculty = value as string;
+                    if (faculty == null || !await _facultyService.FacultyExists(faculty))
+                        return new ErrorMessage { StatusCode = 400, Message = "Invalid faculty." };
+                }
+                else if (fieldName == "major")
+                {
+                    var major = value as string;
+                    if (major == null || !await _facultyService.MajorExistsInFaculty(updatedFields.Faculty, major))
+                        return new ErrorMessage { StatusCode = 400, Message = "Invalid major or faculty." };
+                }
+
 
                 var fieldUpdate = builder.Set(fieldName, value);
                 updateDefinition.Add(fieldUpdate);
@@ -89,13 +109,13 @@ public class UserService
         }
 
         if (!updateDefinition.Any())
-            return null;
+            return new ErrorMessage { StatusCode = 400, Message = "No fields to update." };
 
         var update = Builders<UpdateUser>.Update.Combine(updateDefinition);
         var result = await _UpdateUser.UpdateOneAsync(user => user.Id == id, update);
 
         var user = await GetUserById(id);
-        return result.IsAcknowledged ? user : null;
+        return result.IsAcknowledged ? user : new ErrorMessage { StatusCode = 500, Message = "Update failed." };
 
     }
 
