@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:smart_labs_mobile/models/faculty_model.dart';
 import 'package:smart_labs_mobile/providers/faculty_provider.dart';
 import 'package:smart_labs_mobile/utils/secure_storage.dart';
 import '../models/user_model.dart';
