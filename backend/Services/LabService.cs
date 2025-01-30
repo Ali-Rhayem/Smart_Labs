@@ -127,7 +127,7 @@ public class LabService
                 return new ErrorMessage { StatusCode = 400, Message = "invalid day" };
             }
 
-            if (labTime.StartTime.TimeOfDay >= labTime.EndTime.TimeOfDay)
+            if (labTime.StartTime >= labTime.EndTime)
                 return new ErrorMessage { StatusCode = 400, Message = "Start time must be before end time" };
 
             // check if conflict with room
@@ -137,8 +137,8 @@ public class LabService
                 {
                     if (labTime.DayOfWeek == roomLabTime.DayOfWeek)
                     {
-                        if ((labTime.StartTime.TimeOfDay < roomLabTime.EndTime.TimeOfDay && labTime.StartTime.TimeOfDay > roomLabTime.StartTime.TimeOfDay) ||
-                            (labTime.EndTime.TimeOfDay < roomLabTime.EndTime.TimeOfDay && labTime.EndTime.TimeOfDay > roomLabTime.StartTime.TimeOfDay))
+                        if ((labTime.StartTime < roomLabTime.EndTime && labTime.StartTime >= roomLabTime.StartTime) ||
+                            (labTime.EndTime <= roomLabTime.EndTime && labTime.EndTime > roomLabTime.StartTime))
                         {
                             return new ErrorMessage { StatusCode = 409, Message = "room time conflict" };
                         }
@@ -156,8 +156,8 @@ public class LabService
                     {
                         if (labTime.DayOfWeek == instructorLabTime.DayOfWeek)
                         {
-                            if ((labTime.StartTime.TimeOfDay < instructorLabTime.EndTime.TimeOfDay && labTime.StartTime.TimeOfDay > instructorLabTime.StartTime.TimeOfDay) ||
-                                (labTime.EndTime.TimeOfDay < instructorLabTime.EndTime.TimeOfDay && labTime.EndTime.TimeOfDay > instructorLabTime.StartTime.TimeOfDay))
+                            if ((labTime.StartTime < instructorLabTime.EndTime && labTime.StartTime >= instructorLabTime.StartTime) ||
+                                (labTime.EndTime <= instructorLabTime.EndTime && labTime.EndTime > instructorLabTime.StartTime))
                             {
                                 return new ErrorMessage { StatusCode = 409, Message = "instructor time conflict" };
                             }
