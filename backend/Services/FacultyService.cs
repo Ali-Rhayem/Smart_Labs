@@ -81,5 +81,9 @@ public class FacultyService
         return result.DeletedCount > 0;
     }
 
+    public async Task<bool> FacultyExists(string faculty)
+    {
+        return await _faculties.Find(f => f.faculty == faculty).AnyAsync();
+    }
 
 }
