@@ -123,7 +123,7 @@ namespace backend.Controllers
             {
                 createLab.Lab.Instructors.Add(int.Parse(user_id!.Value));
             }
-            else if (createLab.Lab.Instructors.Count == 0)
+            else if (createLab.Lab.Instructors.Count == 0 && createLab.Instructor_Emails.Count == 0)
             {
                 return BadRequest(new { errors = "Lab must have at least one instructor." });
             }
@@ -133,7 +133,7 @@ namespace backend.Controllers
                 if (!new EmailAddressAttribute().IsValid(email))
                     students_emails.Remove(email);
 
-            var instructers_emails = createLab.Student_Emails;
+            var instructers_emails = createLab.Instructor_Emails;
             foreach (var email in instructers_emails)
                 if (!new EmailAddressAttribute().IsValid(email))
                     instructers_emails.Remove(email);
