@@ -36,4 +36,7 @@ public class Lab
 
     [BsonElement("EndLab")]
     public bool EndLab { get; set; } = false;
+
+    [BsonElement("Room")]
+    public required string Room { get; set; }
 }
