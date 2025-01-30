@@ -2,19 +2,23 @@ using backend.helpers;
 using backend.Models;
 using MongoDB.Driver;
 using backend.Services;
+using OneOf;
+using System.Globalization;
 
 public class LabService
 {
     private readonly IMongoCollection<Lab> _labs;
     private readonly IMongoCollection<User> _users;
+    private readonly IMongoCollection<PPE> _ppes;
     private readonly LabHelper _labHelper;
     private readonly UserService _userService;
     private readonly SemesterService _semesterService;
 
-    public LabService(IMongoDatabase database, LabHelper labHelper, UserService userService, SemesterService semesterService)
+    public LabService(IMongoDatabase database, LabHelper labHelper, UserService userService, SemesterService semesterService, PPEService ppeService)
     {
         _labs = database.GetCollection<Lab>("Labs");
         _users = database.GetCollection<User>("Users");
+        _ppes = database.GetCollection<PPE>("PPE");
         _labHelper = labHelper;
         _userService = userService;
         _semesterService = semesterService;
@@ -25,9 +29,18 @@ public class LabService
         return await _labs.Find(_ => true).ToListAsync();
     }
 
-    public async Task<List<Lab>> GetInstructorLabsAsync(int instructorId)
+    public async Task<List<Lab>> GetInstructorLabsAsync(int instructorId, bool active = false)
     {
-        return await _labs.Find(lab => lab.Instructors.Contains(instructorId)).ToListAsync();
+        var instructorFilter = Builders<Lab>.Filter.AnyEq(l => l.Instructors, instructorId);
+        var filter = instructorFilter;
+
+        if (active)
+        {
+            var endLabFilter = Builders<Lab>.Filter.Eq(l => l.EndLab, false);
+            filter = Builders<Lab>.Filter.And(instructorFilter, endLabFilter);
+        }
+
+        return await _labs.Find(filter).ToListAsync();
     }
 
     public async Task<List<User>?> GetStudentsInLabAsync(int labId)
@@ -76,8 +89,84 @@ public class LabService
         return await _labs.Find(lab => lab.Id == id).FirstOrDefaultAsync();
     }
 
-    public async Task<Lab?> CreateLabAsync(Lab lab, List<String> emails)
+    public async Task<OneOf<Lab, ErrorMessage>> CreateLabAsync(Lab lab, List<string> emails)
     {
+        // check if instructors exist in the database
+        foreach (var instructorId in lab.Instructors)
+        {
+            var instructor = await _users.Find(user => user.Id == instructorId).FirstOrDefaultAsync();
+            if (instructor == null || instructor.Role != "instructor")
+                lab.Instructors.Remove(instructorId);
+        }
+        if (lab.Instructors.Count == 0)
+        {
+            return new ErrorMessage { StatusCode = 400, Message = "can't create lab without instructor" };
+        }
+
+        // check if semester exists in the database
+        if (await _semesterService.GetSemesterByIdAsync(lab.SemesterID) == null && lab.SemesterID != 0)
+        {
+            return new ErrorMessage { StatusCode = 404, Message = "semester not found" };
+        }
+
+        // check if PPE exists in the database
+        foreach (var ppeId in lab.PPE)
+        {
+            var ppe = await _ppes.Find(ppe => ppe.Id == ppeId).FirstOrDefaultAsync();
+            if (ppe == null)
+                lab.PPE.Remove(ppeId);
+        }
+
+        // check if time is valid and thier is no conflict in room or with instructor
+        foreach (var labTime in lab.Schedule)
+        {
+            var validDays = new HashSet<string> { "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" };
+
+            if (!validDays.Contains(labTime.DayOfWeek))
+            {
+                return new ErrorMessage { StatusCode = 400, Message = "invalid day" };
+            }
+
+            if (labTime.StartTime.TimeOfDay >= labTime.EndTime.TimeOfDay)
+                return new ErrorMessage { StatusCode = 400, Message = "Start time must be before end time" };
+
+            // check if conflict with room
+            foreach (var roomLab in await _labs.Find(l => l.Room.ToLower() == lab.Room.ToLower() && l.EndLab == false).ToListAsync())
+            {
+                foreach (var roomLabTime in roomLab.Schedule)
+                {
+                    if (labTime.DayOfWeek == roomLabTime.DayOfWeek)
+                    {
+                        if ((labTime.StartTime.TimeOfDay < roomLabTime.EndTime.TimeOfDay && labTime.StartTime.TimeOfDay > roomLabTime.StartTime.TimeOfDay) ||
+                            (labTime.EndTime.TimeOfDay < roomLabTime.EndTime.TimeOfDay && labTime.EndTime.TimeOfDay > roomLabTime.StartTime.TimeOfDay))
+                        {
+                            return new ErrorMessage { StatusCode = 400, Message = "room time conflict" };
+                        }
+                    }
+                }
+            }
+
+            // check if conflict with instructor
+            foreach (var instructorId in lab.Instructors)
+            {
+                var instructor_labs = await GetInstructorLabsAsync(instructorId, true);
+                foreach (var instructorLab in instructor_labs)
+                {
+                    foreach (var instructorLabTime in instructorLab.Schedule)
+                    {
+                        if (labTime.DayOfWeek == instructorLabTime.DayOfWeek)
+                        {
+                            if ((labTime.StartTime.TimeOfDay < instructorLabTime.EndTime.TimeOfDay && labTime.StartTime.TimeOfDay > instructorLabTime.StartTime.TimeOfDay) ||
+                                (labTime.EndTime.TimeOfDay < instructorLabTime.EndTime.TimeOfDay && labTime.EndTime.TimeOfDay > instructorLabTime.StartTime.TimeOfDay))
+                            {
+                                return new ErrorMessage { StatusCode = 400, Message = "instructor time conflict" };
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         // check if students exist in the database
         foreach (var studentEmail in emails)
         {
@@ -95,24 +184,6 @@ public class LabService
                 student_ids.Add(student.Id);
         }
         lab.Students = student_ids;
-
-        // check if instructors exist in the database
-        foreach (var instructorId in lab.Instructors)
-        {
-            var instructor = await _users.Find(user => user.Id == instructorId).FirstOrDefaultAsync();
-            if (instructor == null)
-                lab.Instructors.Remove(instructorId);
-        }
-        if (lab.Instructors.Count == 0)
-        {
-            return null;
-        }
-
-        // check if semester exists in the database
-        if (await _semesterService.GetSemesterByIdAsync(lab.SemesterID) == null && lab.SemesterID != 0)
-        {
-            return null;
-        }
 
         var lastLab = _labs.Find(_ => true).SortByDescending(lab => lab.Id).FirstOrDefault();
         var labId = lastLab == null ? 1 : lastLab.Id + 1;
