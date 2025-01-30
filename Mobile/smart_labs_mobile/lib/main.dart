@@ -7,6 +7,7 @@ import 'package:smart_labs_mobile/screens/student/student_main_wrapper.dart';
 import 'package:smart_labs_mobile/screens/student/student_dashboard.dart';
 import 'package:smart_labs_mobile/screens/student/student_labs.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:smart_labs_mobile/providers/theme_provider.dart';
 
 void main() async {
   await dotenv.load(fileName: ".env");
@@ -71,11 +72,13 @@ class MyApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final themeMode = ref.watch(themeProvider);
+
     return MaterialApp(
       title: 'Smart Labs',
       theme: buildLightTheme(),
       darkTheme: buildDarkTheme(),
-      themeMode: ThemeMode.dark,
+      themeMode: themeMode,
       initialRoute: '/login',
       routes: {
         '/login': (context) => const LoginPage(),
