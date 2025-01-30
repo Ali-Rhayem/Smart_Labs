@@ -134,11 +134,11 @@ namespace backend.Controllers
                     emails.Remove(email);
 
             var createdLab = await _labService.CreateLabAsync(lab, emails);
-            if (createdLab == null)
-            {
-                return BadRequest(new { errors = "Lab creation failed." });
-            }
-            return CreatedAtAction(nameof(GetLabById), new { id = createdLab.Id }, createdLab);
+
+            return createdLab.Match<ActionResult>(
+                lab => CreatedAtAction(nameof(GetLabById), new { id = lab.Id }, lab),
+                error => StatusCode(error.StatusCode, new { errors = error.Message })
+                );
         }
 
         // PUT: api/lab/{id}
