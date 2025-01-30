@@ -4,6 +4,7 @@ import 'package:smart_labs_mobile/models/user_model.dart';
 import 'package:smart_labs_mobile/providers/user_provider.dart';
 import 'package:smart_labs_mobile/services/auth_service.dart';
 import 'package:smart_labs_mobile/utils/secure_storage.dart';
+import 'package:smart_labs_mobile/providers/lab_provider.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
@@ -21,18 +22,18 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   String _email = '';
   String _password = '';
 
-  // Use a bright neon-yellow color to match the “Interview” button from the mockup
-  // You can tweak this to be more lime‐like (#CDFF00) or more yellow (#FFFF00).
+  // Use a bright neon-yellow color to match the "Interview" button from the mockup
+  // You can tweak this to be more lime-like (#CDFF00) or more yellow (#FFFF00).
   static const Color kAccentColor = Color(0xFFFFFF00);
 
   @override
   Widget build(BuildContext context) {
-    // We’ll create a custom theme for dark mode with neon accents.
+    // We'll create a custom theme for dark mode with neon accents.
     final theme = Theme.of(context).copyWith(
       scaffoldBackgroundColor: Colors.black,
       colorScheme: Theme.of(context).colorScheme.copyWith(
             // The primary color is used for widgets like icons, titles, etc.
-            // using a bright neon‐yellow here:
+            // using a bright neon-yellow here:
             primary: kAccentColor,
             // A dark background
             surface: Colors.black,
@@ -252,6 +253,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         );
 
         ref.read(userProvider.notifier).setUser(user);
+        await ref.read(labsProvider.notifier).fetchLabs();
+
         if (userData['role'] == 'instructor' || userData['role'] == 'admin') {
           Navigator.pushReplacementNamed(context, '/instructorMain');
         } else {
