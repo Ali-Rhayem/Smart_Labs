@@ -86,4 +86,9 @@ public class FacultyService
         return await _faculties.Find(f => f.faculty == faculty).AnyAsync();
     }
 
+    public async Task<bool> MajorExistsInFaculty(string? faculty, string major)
+    {
+        return await _faculties.Find(f => f.faculty == faculty && f.Major.Contains(major)).AnyAsync();
+    }
+
 }
