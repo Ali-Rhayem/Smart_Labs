@@ -82,10 +82,11 @@ namespace backend.Controllers
             }
             var result = await _userService.UpdateUser(id, updatedFields);
 
-            if (result == null)
-                return BadRequest(new { errors = "Update failed." });
+            return result.Match<ActionResult>(
+                user => CreatedAtAction(nameof(GetUserById), new { id = user.Id }, user),
+                error => StatusCode(error.StatusCode, new { errors = error.Message })
+            );
 
-            return Ok(result);
         }
 
         // DELETE: api/user/{id}
