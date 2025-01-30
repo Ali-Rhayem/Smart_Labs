@@ -29,7 +29,7 @@ namespace backend.Controllers
         // GET: api/PPE/list
         [HttpGet("list")]
         [Authorize]
-        public async Task<ActionResult<List<PPE>>> GetListOfPPEs([FromQuery] List<int> ids)
+        public async Task<ActionResult<List<PPE>>> GetListOfPPEs([FromBody] List<int> ids)
         {
             var ppe = await _ppeService.GetListOfPPEsAsync(ids);
             return Ok(ppe);

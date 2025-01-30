@@ -9,6 +9,6 @@ public class PPE
     public int Id { get; set; }
 
     [BsonElement("Name")]
-    public string Name { get; set; }
+    public required string Name { get; set; }
 
 }
