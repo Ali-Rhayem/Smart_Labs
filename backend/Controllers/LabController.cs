@@ -271,7 +271,7 @@ namespace backend.Controllers
         // POST: api/lab/{labId}/instructors/{instructorId}
         [HttpPost("{labId}/instructors/{instructorId}")]
         [Authorize(Roles = "admin,instructor")]
-        public async Task<ActionResult> AddInstructorToLab(int labId, int instructorId)
+        public async Task<ActionResult> AddInstructorToLab(int labId, string instructor_email)
         {
             var userRoleClaim = HttpContext.User.FindFirst(ClaimTypes.Role);
             var userIdClaim = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier);
@@ -287,17 +287,21 @@ namespace backend.Controllers
                     return Unauthorized();
                 }
             }
+            // check if email is valid
+            if (!new EmailAddressAttribute().IsValid(instructor_email))
+                return BadRequest(new { errors = "Invalid email." });
+
             // check if instructorid is realy an instructor
-            var instructor = await _userService.GetUserById(instructorId);
+            var instructor = await _userService.GetUserByEmailAsync(instructor_email);
             if (instructor == null || instructor.Role != "instructor")
                 return BadRequest(new { errors = "User is not an instructor." });
 
             // check if instructor in lab
-            if (lab.Instructors.Contains(instructorId))
+            if (lab.Instructors.Contains(instructor.Id))
             {
                 return BadRequest(new { errors = "Instructor already in lab." });
             }
-            var result = await _labService.AddInstructorToLabAsync(labId, instructorId);
+            var result = await _labService.AddInstructorToLabAsync(labId, instructor.Id);
 
             if (!result)
                 return NotFound();
