@@ -39,7 +39,7 @@ class LabDetailScreen extends StatelessWidget {
               margin: const EdgeInsets.only(bottom: 24),
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: const Color(0xFF1C1C1C), // Dark grey container
+                color: const Color(0xFF1C1C1C),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Column(
@@ -60,7 +60,7 @@ class LabDetailScreen extends StatelessWidget {
                   Text(
                     lab.description,
                     style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.7),
+                      color: Colors.white.withOpacity(0.7),
                       fontSize: 16,
                     ),
                   ),
@@ -78,52 +78,58 @@ class LabDetailScreen extends StatelessWidget {
                       Text(
                         'Lab Code: ${lab.labCode}',
                         style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.7),
+                          color: Colors.white.withOpacity(0.7),
                           fontSize: 14,
                         ),
                       ),
                     ],
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Schedule Section
+                  const Text(
+                    'Schedule',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 8),
 
-                  // Date
-                  Row(
-                    children: [
-                      const Icon(
-                        Icons.calendar_month,
-                        color: Colors.white,
-                        size: 18,
+                  // Schedule List
+                  ...lab.schedule.map((schedule) {
+                    String dayName = _getDayName(schedule.dayOfWeek);
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.calendar_today,
+                            color: Colors.white,
+                            size: 18,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            '$dayName:',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            '${schedule.startTime} - ${schedule.endTime}',
+                            style: TextStyle(
+                              color: Colors.white.withOpacity(0.7),
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(width: 8),
-                      Text(
-                        _formatDate(lab.date),
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.7),
-                          fontSize: 14,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-
-                  // Time Range
-                  Row(
-                    children: [
-                      const Icon(
-                        Icons.access_time,
-                        color: Colors.white,
-                        size: 18,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        '${lab.startTime} - ${lab.endTime}',
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.7),
-                          fontSize: 14,
-                        ),
-                      ),
-                    ],
-                  ),
+                    );
+                  }).toList(),
                 ],
               ),
             ),
@@ -147,6 +153,9 @@ class LabDetailScreen extends StatelessWidget {
                   return SessionCard(session: session);
                 },
               ),
+
+            const SizedBox(height: 24),
+            _buildScheduleSection(),
           ],
         ),
       ),
@@ -155,5 +164,78 @@ class LabDetailScreen extends StatelessWidget {
 
   String _formatDate(DateTime date) {
     return '${date.month}/${date.day}/${date.year}';
+  }
+
+  Widget _buildScheduleSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Schedule',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 12),
+        ...lab.schedule
+            .map((schedule) => Container(
+                  margin: const EdgeInsets.only(bottom: 8),
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF1C1C1C),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.calendar_today,
+                        color: Colors.white.withOpacity(0.7),
+                        size: 20,
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        _getDayName(schedule.dayOfWeek),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                        ),
+                      ),
+                      const Spacer(),
+                      Text(
+                        '${schedule.startTime} - ${schedule.endTime}',
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.7),
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ),
+                ))
+            .toList(),
+      ],
+    );
+  }
+
+  String _getDayName(String dayOfWeek) {
+    switch (dayOfWeek.toUpperCase()) {
+      case 'MON':
+        return 'Monday';
+      case 'TUE':
+        return 'Tuesday';
+      case 'WED':
+        return 'Wednesday';
+      case 'THU':
+        return 'Thursday';
+      case 'FRI':
+        return 'Friday';
+      case 'SAT':
+        return 'Saturday';
+      case 'SUN':
+        return 'Sunday';
+      default:
+        return dayOfWeek;
+    }
   }
 }
