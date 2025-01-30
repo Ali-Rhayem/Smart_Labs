@@ -15,7 +15,7 @@ class _StudentLabsScreenState extends ConsumerState<StudentLabsScreen> {
   static const Color kNeonAccent = Color(0xFFFFFF00);
   String _searchQuery = '';
 
-    @override
+  @override
   void initState() {
     super.initState();
     // Detect app lifecycle changes
@@ -38,16 +38,19 @@ class _StudentLabsScreenState extends ConsumerState<StudentLabsScreen> {
   @override
   Widget build(BuildContext context) {
     final labsAsync = ref.watch(labsProvider);
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: const Color.fromRGBO(18, 18, 18, 1),
+      backgroundColor:
+          isDarkMode ? const Color.fromRGBO(18, 18, 18, 1) : Colors.grey[50],
       body: SafeArea(
         child: Column(
           children: [
             SearchAndFilterHeader(
               title: 'Labs',
-              backgroundColor: const Color(0xFF121212),
-              accentColor: kNeonAccent,
+              backgroundColor:
+                  isDarkMode ? const Color(0xFF121212) : Colors.white,
+              accentColor: isDarkMode ? kNeonAccent : Colors.blue,
               onSearchChanged: (query) {
                 setState(() => _searchQuery = query.toLowerCase());
               },
@@ -55,13 +58,17 @@ class _StudentLabsScreenState extends ConsumerState<StudentLabsScreen> {
             ),
             Expanded(
               child: labsAsync.when(
-                loading: () => const Center(
-                  child: CircularProgressIndicator(color: kNeonAccent),
+                loading: () => Center(
+                  child: CircularProgressIndicator(
+                    color: isDarkMode ? kNeonAccent : Colors.blue,
+                  ),
                 ),
                 error: (error, stack) => Center(
                   child: Text(
                     'Error: $error',
-                    style: const TextStyle(color: Colors.white),
+                    style: TextStyle(
+                      color: isDarkMode ? Colors.white : Colors.black87,
+                    ),
                   ),
                 ),
                 data: (labs) {
@@ -75,7 +82,8 @@ class _StudentLabsScreenState extends ConsumerState<StudentLabsScreen> {
                       child: Text(
                         'No labs found',
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.7),
+                          color: (isDarkMode ? Colors.white : Colors.black87)
+                              .withOpacity(0.7),
                           fontSize: 16,
                         ),
                       ),
@@ -83,7 +91,7 @@ class _StudentLabsScreenState extends ConsumerState<StudentLabsScreen> {
                   }
 
                   return RefreshIndicator(
-                    color: kNeonAccent,
+                    color: isDarkMode ? kNeonAccent : Colors.blue,
                     onRefresh: () =>
                         ref.read(labsProvider.notifier).fetchLabs(),
                     child: ListView.builder(
@@ -104,16 +112,33 @@ class _StudentLabsScreenState extends ConsumerState<StudentLabsScreen> {
   }
 
   void _showFilterDialog() {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Filter Options'),
-          content: const Text('Filter labs by date, instructor, etc.'),
+          backgroundColor: isDarkMode ? const Color(0xFF212121) : Colors.white,
+          title: Text(
+            'Filter Options',
+            style: TextStyle(
+              color: isDarkMode ? Colors.white : Colors.black87,
+            ),
+          ),
+          content: Text(
+            'Filter labs by date, instructor, etc.',
+            style: TextStyle(
+              color: isDarkMode ? Colors.white70 : Colors.black54,
+            ),
+          ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Close'),
+              child: Text(
+                'Close',
+                style: TextStyle(
+                  color: isDarkMode ? kNeonAccent : Colors.blue,
+                ),
+              ),
             )
           ],
         );
