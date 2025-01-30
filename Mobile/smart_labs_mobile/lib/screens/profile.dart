@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:smart_labs_mobile/providers/theme_provider.dart';
 import 'package:smart_labs_mobile/providers/user_provider.dart';
 import 'package:smart_labs_mobile/screens/edit_profile.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -124,10 +125,28 @@ class ProfileScreen extends ConsumerWidget {
               },
             ),
             _buildProfileOption(
-              icon: Icons.info_outline,
-              title: 'Information',
+              icon: Icons.brightness_6,
+              title: 'Theme',
+              trailing: Consumer(
+                builder: (context, ref, child) {
+                  final isDark = ref.watch(themeProvider) == ThemeMode.dark;
+                  return Switch(
+                    value: isDark,
+                    onChanged: (value) {
+                      ref.read(themeProvider.notifier).toggleTheme();
+                    },
+                    activeColor: kNeonYellow,
+                    activeTrackColor: kNeonYellow.withOpacity(0.3),
+                  );
+                },
+              ),
+              onTap: () {},
+            ),
+            _buildProfileOption(
+              icon: Icons.settings,
+              title: 'Settings',
               onTap: () {
-                // TODO: Show info
+                // TODO: Navigate to settings
               },
             ),
             const SizedBox(height: 16),
@@ -171,6 +190,7 @@ class ProfileScreen extends ConsumerWidget {
     required IconData icon,
     required String title,
     required VoidCallback onTap,
+    Widget? trailing,
   }) {
     return ListTile(
       leading: Icon(icon, color: kNeonYellow),
@@ -178,7 +198,8 @@ class ProfileScreen extends ConsumerWidget {
         title,
         style: const TextStyle(color: Colors.white),
       ),
-      trailing: const Icon(Icons.chevron_right, color: Colors.white),
+      trailing:
+          trailing ?? const Icon(Icons.chevron_right, color: Colors.white),
       onTap: onTap,
     );
   }
