@@ -31,16 +31,34 @@ class MyApp extends ConsumerWidget {
       brightness: Brightness.light,
       colorScheme: ColorScheme.light(
         primary: Colors.blue.shade700,
-        secondary: kNeonAccent,
+        secondary: const Color(0xFF2196F3),
+        surface: Colors.white,
+        background: Colors.grey.shade50,
+        onSurface: Colors.black87,
       ),
-      scaffoldBackgroundColor: Colors.white,
+      scaffoldBackgroundColor: Colors.grey.shade50,
       inputDecorationTheme: InputDecorationTheme(
-        border: const OutlineInputBorder(),
+        filled: true,
+        fillColor: Colors.white,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(color: Colors.grey.shade300),
+        ),
         enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
           borderSide: BorderSide(color: Colors.grey.shade300),
         ),
         focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
           borderSide: BorderSide(color: Colors.blue.shade700),
+        ),
+        labelStyle: const TextStyle(color: Colors.black87),
+      ),
+      cardTheme: CardTheme(
+        color: Colors.white,
+        elevation: 2,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
         ),
       ),
     );
