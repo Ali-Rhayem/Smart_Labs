@@ -89,14 +89,14 @@ public class LabService
         return await _labs.Find(lab => lab.Id == id).FirstOrDefaultAsync();
     }
 
-    public async Task<OneOf<Lab, ErrorMessage>> CreateLabAsync(Lab lab, List<string> emails)
+    public async Task<OneOf<Lab, ErrorMessage>> CreateLabAsync(Lab lab, List<string> student_emails, List<string> instructors_emails)
     {
         // check if instructors exist in the database
-        foreach (var instructorId in lab.Instructors)
+        foreach (var instructor_email in instructors_emails)
         {
-            var instructor = await _users.Find(user => user.Id == instructorId).FirstOrDefaultAsync();
-            if (instructor == null || instructor.Role != "instructor")
-                lab.Instructors.Remove(instructorId);
+            var instructor = await _userService.GetUserByEmailAsync(instructor_email);
+            if (instructor != null && instructor.Role == "instructor" && !lab.Instructors.Contains(instructor.Id))
+                lab.Instructors.Add(instructor.Id);
         }
         if (lab.Instructors.Count == 0)
         {
@@ -168,7 +168,7 @@ public class LabService
         }
 
         // check if students exist in the database
-        foreach (var studentEmail in emails)
+        foreach (var studentEmail in student_emails)
         {
             var student = await _users.Find(user => user.Email == studentEmail).FirstOrDefaultAsync();
             if (student == null)
@@ -177,7 +177,7 @@ public class LabService
             }
         }
         List<int> student_ids = [];
-        foreach (var studentEmail in emails)
+        foreach (var studentEmail in student_emails)
         {
             var student = await _users.Find(user => user.Email == studentEmail).FirstOrDefaultAsync();
             if (student.Role == "student")
