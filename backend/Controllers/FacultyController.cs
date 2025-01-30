@@ -48,7 +48,7 @@ namespace backend.Controllers
 
         [HttpPost("{id}/major")]
         [Authorize(Roles = "admin")]
-        public async Task<ActionResult<Faculty>> AddMajor(int id, string major)
+        public async Task<ActionResult<Faculty>> AddMajor(int id, [FromBody] string major)
         {
             var updatedFaculty = await _facultyService.AddMajorAsync(id, major);
             if (updatedFaculty == null)
@@ -60,7 +60,7 @@ namespace backend.Controllers
 
         [HttpDelete("{id}/major")]
         [Authorize(Roles = "admin")]
-        public async Task<ActionResult<Faculty>> RemoveMajor(int id, string major)
+        public async Task<ActionResult<Faculty>> RemoveMajor(int id, [FromBody] string major)
         {
             var updatedFaculty = await _facultyService.RemoveMajorAsync(id, major);
             if (updatedFaculty == null)
