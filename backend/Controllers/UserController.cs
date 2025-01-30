@@ -116,7 +116,7 @@ namespace backend.Controllers
 
             if (user == null || !BCrypt.Net.BCrypt.Verify(loginRequest.Password, user.Password))
             {
-                return Unauthorized("Invalid email or password.");
+                return Unauthorized(new { errors = "Invalid email or password." });
             }
 
             // Generate a JWT token

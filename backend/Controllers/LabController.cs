@@ -128,12 +128,17 @@ namespace backend.Controllers
                 return BadRequest(new { errors = "Lab must have at least one instructor." });
             }
             var lab = createLab.Lab;
-            var emails = createLab.Emails;
-            foreach (var email in emails)
+            var students_emails = createLab.Student_Emails;
+            foreach (var email in students_emails)
                 if (!new EmailAddressAttribute().IsValid(email))
-                    emails.Remove(email);
+                    students_emails.Remove(email);
 
-            var createdLab = await _labService.CreateLabAsync(lab, emails);
+            var instructers_emails = createLab.Student_Emails;
+            foreach (var email in instructers_emails)
+                if (!new EmailAddressAttribute().IsValid(email))
+                    instructers_emails.Remove(email);
+
+            var createdLab = await _labService.CreateLabAsync(lab, students_emails, instructers_emails);
 
             return createdLab.Match<ActionResult>(
                 lab => CreatedAtAction(nameof(GetLabById), new { id = lab.Id }, lab),
