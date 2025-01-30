@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:smart_labs_mobile/controllers/edit_profile_controller.dart';
 import 'package:smart_labs_mobile/models/faculty_model.dart';
-import 'package:smart_labs_mobile/providers/faculty_provider.dart';
-import 'package:smart_labs_mobile/utils/secure_storage.dart';
+import 'package:smart_labs_mobile/widgets/edit_profile_widgets.dart';
 import '../models/user_model.dart';
 import '../providers/user_provider.dart';
-import '../services/api_service.dart';
-import 'dart:convert';
+import '../providers/faculty_provider.dart';
 import 'dart:io';
-import 'package:image_picker/image_picker.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class EditProfileScreen extends ConsumerStatefulWidget {
   final User user;
@@ -21,18 +18,17 @@ class EditProfileScreen extends ConsumerStatefulWidget {
 }
 
 class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
-  final SecureStorage _secureStorage = SecureStorage();
   final _formKey = GlobalKey<FormState>();
-  final _apiService = ApiService();
   late TextEditingController _nameController;
   late TextEditingController _emailController;
   bool _isLoading = false;
   File? _imageFile;
-  final ImagePicker _picker = ImagePicker();
   String? _base64Image;
   String? _selectedFaculty;
   String? _selectedMajor;
   List<String> _availableMajors = [];
+  
+  final _controller = EditProfileController();
 
   @override
   void initState() {
@@ -51,33 +47,19 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   }
 
   Future<void> _saveChanges() async {
-    if (!_formKey.currentState!.validate()) return;
-
-    final id = await _secureStorage.readId();
-    final role = await _secureStorage.readRole();
     setState(() => _isLoading = true);
 
-    final Map<String, dynamic> updateData = {
-      'id': int.parse(id!),
-      'email': _emailController.text,
-      'name': _nameController.text,
-      'role': role,
-      'password': '12343',
-      'major': _selectedMajor ?? widget.user.major,
-      'faculty': _selectedFaculty ?? widget.user.faculty,
-    };
-
-    // Add image if it was updated
-    if (_base64Image != null) {
-      updateData['image'] = 'data:image/jpeg;base64,$_base64Image';
-    } else if (widget.user.imageUrl != null) {
-      updateData['image'] = "";
-    }
-
-    final response = await _apiService.put('/User/$id', updateData);
+    final response = await _controller.saveChanges(
+      formKey: _formKey,
+      email: _emailController.text,
+      name: _nameController.text,
+      selectedMajor: _selectedMajor,
+      selectedFaculty: _selectedFaculty,
+      base64Image: _base64Image,
+      currentUser: widget.user,
+    );
 
     if (response['success']) {
-      // Update the user in the provider
       final updatedUser = User(
         id: widget.user.id,
         name: _nameController.text,
@@ -104,27 +86,24 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       Navigator.pop(context);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content: Text(response['message'] ?? 'Failed to update profile')),
+        SnackBar(content: Text(response['message'] ?? 'Failed to update profile')),
       );
     }
 
     setState(() => _isLoading = false);
   }
 
-  Future<void> _pickImage() async {
-    final XFile? pickedFile =
-        await _picker.pickImage(source: ImageSource.gallery);
-
-    if (pickedFile != null) {
-      setState(() {
-        _imageFile = File(pickedFile.path);
-      });
-
-      // Convert image to base64
-      final bytes = await _imageFile!.readAsBytes();
-      _base64Image = base64Encode(bytes);
-    }
+  void _updateFaculty(String? value, List<Faculty> faculties) {
+    setState(() {
+      _selectedFaculty = value;
+      _selectedMajor = null;
+      _availableMajors = faculties
+          .firstWhere(
+            (f) => f.faculty == value,
+            orElse: () => Faculty(id: 0, faculty: '', major: []),
+          )
+          .major;
+    });
   }
 
   @override
@@ -142,14 +121,17 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
           child: Column(
             children: [
               const SizedBox(height: 20),
-              _buildProfileImage(),
-              TextFormField(
-                controller: _nameController,
-                style: const TextStyle(color: Colors.white),
-                decoration: const InputDecoration(
-                  labelText: 'Name',
-                  border: OutlineInputBorder(),
+              ProfileImageWidget(
+                imageFile: _imageFile,
+                userImageUrl: widget.user.imageUrl,
+                onImagePick: () => _controller.pickImage(
+                  (file) => setState(() => _imageFile = file),
+                  (base64) => _base64Image = base64,
                 ),
+              ),
+              CustomTextField(
+                controller: _nameController,
+                labelText: 'Name',
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter your name';
@@ -158,13 +140,9 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                 },
               ),
               const SizedBox(height: 20),
-              TextFormField(
+              CustomTextField(
                 controller: _emailController,
-                style: const TextStyle(color: Colors.white),
-                decoration: const InputDecoration(
-                  labelText: 'Email',
-                  border: OutlineInputBorder(),
-                ),
+                labelText: 'Email',
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter your email';
@@ -177,129 +155,18 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
               ),
               const SizedBox(height: 20),
               ref.watch(facultiesProvider).when(
-                    data: (faculties) => Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Faculty Dropdown
-                        Container(
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF1C1C1C),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: Colors.white24),
-                          ),
-                          child: DropdownButtonFormField<String>(
-                            value: _selectedFaculty,
-                            icon: const Icon(Icons.arrow_drop_down,
-                                color: Color(0xFFFFFF00)),
-                            style: const TextStyle(
-                                color: Colors.white, fontSize: 16),
-                            dropdownColor: const Color(0xFF1C1C1C),
-                            decoration: const InputDecoration(
-                              labelText: 'Faculty',
-                              labelStyle: TextStyle(color: Colors.white70),
-                              contentPadding: EdgeInsets.symmetric(
-                                  horizontal: 16, vertical: 8),
-                              border: InputBorder.none,
-                            ),
-                            items: [
-                              if (widget.user.faculty != null &&
-                                  !faculties.any(
-                                      (f) => f.faculty == widget.user.faculty))
-                                DropdownMenuItem(
-                                  value: widget.user.faculty,
-                                  child: Text(widget.user.faculty!),
-                                ),
-                              ...faculties.map((faculty) {
-                                return DropdownMenuItem(
-                                  value: faculty.faculty,
-                                  child: Text(faculty.faculty),
-                                );
-                              }),
-                            ],
-                            onChanged: (value) {
-                              setState(() {
-                                _selectedFaculty = value;
-                                _selectedMajor = null;
-                                _availableMajors = faculties
-                                    .firstWhere(
-                                      (f) => f.faculty == value,
-                                      orElse: () => Faculty(
-                                          id: 0, faculty: '', major: []),
-                                    )
-                                    .major;
-
-                                if (_selectedMajor != null &&
-                                    !_availableMajors
-                                        .contains(_selectedMajor)) {
-                                  setState(() {
-                                    _selectedMajor = null;
-                                  });
-                                }
-                              });
-                            },
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-
-                        // Major Dropdown
-                        Container(
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF1C1C1C),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: Colors.white24),
-                          ),
-                          child: DropdownButtonFormField<String>(
-                            value: _selectedMajor,
-                            icon: const Icon(Icons.arrow_drop_down,
-                                color: Color(0xFFFFFF00)),
-                            style: const TextStyle(
-                                color: Colors.white, fontSize: 16),
-                            dropdownColor: const Color(0xFF1C1C1C),
-                            decoration: const InputDecoration(
-                              labelText: 'Major',
-                              labelStyle: TextStyle(color: Colors.white70),
-                              contentPadding: EdgeInsets.symmetric(
-                                  horizontal: 16, vertical: 8),
-                              border: InputBorder.none,
-                            ),
-                            items: [
-                              if (widget.user.major != null &&
-                                  !_availableMajors
-                                      .contains(widget.user.major) &&
-                                  _selectedFaculty == widget.user.faculty)
-                                DropdownMenuItem(
-                                  value: widget.user.major,
-                                  child: Text(widget.user.major!),
-                                ),
-                              if (_availableMajors.isEmpty)
-                                const DropdownMenuItem(
-                                  value: 'no_majors',
-                                  enabled: false,
-                                  child: Text('No majors available',
-                                      style: TextStyle(color: Colors.grey)),
-                                )
-                              else
-                                ..._availableMajors.map((major) {
-                                  return DropdownMenuItem(
-                                    value: major,
-                                    child: Text(major),
-                                  );
-                                }),
-                            ],
-                            onChanged: _selectedFaculty == null
-                                ? null
-                                : (value) {
-                                    setState(() {
-                                      _selectedMajor = value;
-                                    });
-                                  },
-                          ),
-                        ),
-                      ],
+                    data: (faculties) => FacultyMajorDropdowns(
+                      selectedFaculty: _selectedFaculty,
+                      selectedMajor: _selectedMajor,
+                      availableMajors: _availableMajors,
+                      onFacultyChanged: (value) => _updateFaculty(value, faculties),
+                      onMajorChanged: (value) => setState(() => _selectedMajor = value),
+                      faculties: faculties,
+                      userFaculty: widget.user.faculty,
+                      userMajor: widget.user.major,
                     ),
                     loading: () => const Center(
-                      child:
-                          CircularProgressIndicator(color: Color(0xFFFFFF00)),
+                      child: CircularProgressIndicator(color: Color(0xFFFFFF00)),
                     ),
                     error: (error, stack) => Center(
                       child: Text(
@@ -332,43 +199,6 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildProfileImage() {
-    return Column(
-      children: [
-        Stack(
-          children: [
-            CircleAvatar(
-              radius: 50,
-              backgroundImage: _imageFile != null
-                  ? FileImage(_imageFile!)
-                  : (widget.user.imageUrl != null
-                      ? NetworkImage(
-                          '${dotenv.env['IMAGE_BASE_URL']}/${widget.user.imageUrl}')
-                      : const NetworkImage(
-                          'https://picsum.photos/200')) as ImageProvider<
-                      Object>,
-            ),
-            Positioned(
-              bottom: 0,
-              right: 0,
-              child: Container(
-                decoration: const BoxDecoration(
-                  color: Color(0xFFFFEB00),
-                  shape: BoxShape.circle,
-                ),
-                child: IconButton(
-                  icon: const Icon(Icons.camera_alt, color: Colors.black),
-                  onPressed: _pickImage,
-                ),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 24),
-      ],
     );
   }
 }
