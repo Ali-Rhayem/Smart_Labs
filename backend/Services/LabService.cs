@@ -140,7 +140,7 @@ public class LabService
                         if ((labTime.StartTime.TimeOfDay < roomLabTime.EndTime.TimeOfDay && labTime.StartTime.TimeOfDay > roomLabTime.StartTime.TimeOfDay) ||
                             (labTime.EndTime.TimeOfDay < roomLabTime.EndTime.TimeOfDay && labTime.EndTime.TimeOfDay > roomLabTime.StartTime.TimeOfDay))
                         {
-                            return new ErrorMessage { StatusCode = 400, Message = "room time conflict" };
+                            return new ErrorMessage { StatusCode = 409, Message = "room time conflict" };
                         }
                     }
                 }
@@ -159,7 +159,7 @@ public class LabService
                             if ((labTime.StartTime.TimeOfDay < instructorLabTime.EndTime.TimeOfDay && labTime.StartTime.TimeOfDay > instructorLabTime.StartTime.TimeOfDay) ||
                                 (labTime.EndTime.TimeOfDay < instructorLabTime.EndTime.TimeOfDay && labTime.EndTime.TimeOfDay > instructorLabTime.StartTime.TimeOfDay))
                             {
-                                return new ErrorMessage { StatusCode = 400, Message = "instructor time conflict" };
+                                return new ErrorMessage { StatusCode = 409, Message = "instructor time conflict" };
                             }
                         }
                     }
