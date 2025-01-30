@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:smart_labs_mobile/providers/user_provider.dart';
 import 'package:smart_labs_mobile/screens/edit_profile.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:smart_labs_mobile/utils/secure_storage.dart';
+import 'package:smart_labs_mobile/providers/lab_provider.dart';
 
 // Example accent color (the bright yellow)
 const Color kNeonYellow = Color(0xFFFFEB00);
@@ -13,7 +15,6 @@ class ProfileScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(userProvider);
-    print(user);
 
     if (user == null) {
       return const Center(child: CircularProgressIndicator());
@@ -46,7 +47,8 @@ class ProfileScreen extends ConsumerWidget {
                 radius: 50,
                 backgroundImage: user.imageUrl != null
                     ? NetworkImage(
-                        '${dotenv.env['IMAGE_BASE_URL']}/${user.imageUrl}',)
+                        '${dotenv.env['IMAGE_BASE_URL']}/${user.imageUrl}',
+                      )
                     : const NetworkImage('https://picsum.photos/200'),
               ),
             ),
@@ -137,9 +139,25 @@ class ProfileScreen extends ConsumerWidget {
                 'Logout',
                 style: TextStyle(color: Colors.red),
               ),
-              onTap: () {
-                Navigator.pushReplacementNamed(context, '/login');
-                // TODO: Handle logout
+              onTap: () async {
+                final secureStorage = SecureStorage();
+
+                // Clear all stored data
+                await secureStorage.clearAll();
+                final role = await secureStorage.readRole();
+                final userId = await secureStorage.readId();
+
+                if (!context.mounted) return;
+
+                // Clear the user state
+                ref.read(userProvider.notifier).clearUser();
+                ref.read(labsProvider.notifier).clearLabs();
+
+                // Navigate to login screen and remove all previous routes
+                Navigator.of(context).pushNamedAndRemoveUntil(
+                  '/login',
+                  (route) => false,
+                );
               },
             ),
           ],
