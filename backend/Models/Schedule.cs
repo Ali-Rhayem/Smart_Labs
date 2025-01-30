@@ -7,8 +7,8 @@ public class Schedule
     public required string DayOfWeek { get; set; }
 
     [BsonElement("StartTime")]
-    public required string StartTime { get; set; }
+    public required DateTime StartTime { get; set; }
 
     [BsonElement("EndTime")]
-    public required string EndTime { get; set; }
+    public required DateTime EndTime { get; set; }
 }
