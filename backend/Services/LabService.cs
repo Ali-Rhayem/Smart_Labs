@@ -290,5 +290,19 @@ public class LabService
         return result.ModifiedCount > 0;
     }
 
+    public async Task<Boolean> SendAnnouncementToLabAsync(int id, Aannouncement announcement)
+    {
+        var lab = await GetLabByIdAsync(id);
+        if (lab == null)
+        {
+            return false;
+        }
+        var last_announcement = lab.Announcements.OrderByDescending(a => a.Id).FirstOrDefault();
+        announcement.Id = last_announcement == null ? 1 : last_announcement.Id + 1;
+        var updateDefinition = Builders<Lab>.Update.Push("Announcements", announcement);
+        var result = await _labs.UpdateOneAsync(lab => lab.Id == id, updateDefinition);
+
+        return result.ModifiedCount > 0;
+    }
     
 }
