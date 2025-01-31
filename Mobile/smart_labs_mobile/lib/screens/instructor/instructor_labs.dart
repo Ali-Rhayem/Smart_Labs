@@ -58,13 +58,13 @@ class _DoctorLabsScreenState extends ConsumerState<DoctorLabsScreen> {
                           Icon(
                             Icons.science_outlined,
                             size: 64,
-                            color: Colors.white.withOpacity(0.5),
+                            color: Colors.white.withValues(alpha: 0.5),
                           ),
                           const SizedBox(height: 16),
                           Text(
                             'No labs found',
                             style: TextStyle(
-                              color: Colors.white.withOpacity(0.7),
+                              color: Colors.white.withValues(alpha: 0.7),
                               fontSize: 18,
                             ),
                           ),
@@ -121,7 +121,7 @@ class _DoctorLabsScreenState extends ConsumerState<DoctorLabsScreen> {
               onPressed: () => Navigator.of(context).pop(),
               child: Text(
                 'Cancel',
-                style: TextStyle(color: Colors.white.withOpacity(0.7)),
+                style: TextStyle(color: Colors.white.withValues(alpha: 0.7)),
               ),
             ),
             ElevatedButton(
