@@ -4,6 +4,7 @@ using MongoDB.Driver;
 using backend.Services;
 using OneOf;
 using System.Globalization;
+using MongoDB.Bson;
 
 public class LabService
 {
@@ -290,7 +291,7 @@ public class LabService
         return result.ModifiedCount > 0;
     }
 
-    public async Task<Boolean> SendAnnouncementToLabAsync(int id, Aannouncement announcement)
+    public async Task<Boolean> SendAnnouncementToLabAsync(int id, Announcement announcement)
     {
         var lab = await GetLabByIdAsync(id);
         if (lab == null)
@@ -299,7 +300,7 @@ public class LabService
         }
         var last_announcement = lab.Announcements.OrderByDescending(a => a.Id).FirstOrDefault();
         announcement.Id = last_announcement == null ? 1 : last_announcement.Id + 1;
-        var updateDefinition = Builders<Lab>.Update.Push("Announcements", announcement);
+        var updateDefinition = Builders<Lab>.Update.Push(lab => lab.Announcements, announcement);
         var result = await _labs.UpdateOneAsync(lab => lab.Id == id, updateDefinition);
 
         return result.ModifiedCount > 0;
@@ -311,6 +312,27 @@ public class LabService
         var result = await _labs.UpdateOneAsync(lab => lab.Id == lab_id, updateDefinition);
 
         return result.ModifiedCount > 0;
+    }
+
+    public async Task<Boolean> CommentOnAnnouncementAsync(int lab_id, int announcementId, Comment comment)
+    {
+        var lab = await GetLabByIdAsync(lab_id);
+        var announcement = lab.Announcements.Find(a => a.Id == announcementId);
+        if (announcement == null)
+        {
+            return false;
+        }
+        var last_comment = announcement.Comments.OrderByDescending(c => c.Id).FirstOrDefault();
+        comment.Id = last_comment == null ? 1 : last_comment.Id + 1;
+        var updateDefinition = Builders<Lab>.Update.Push("Announcements.$[a].Comments", comment);
+        var arrayFilters = new List<ArrayFilterDefinition>
+        {
+            new BsonDocumentArrayFilterDefinition<BsonDocument>(new BsonDocument("a.Id", announcementId))
+        };
+        var result = await _labs.UpdateOneAsync(lab => lab.Id == lab_id, updateDefinition, new UpdateOptions { ArrayFilters = arrayFilters });
+
+        return result.ModifiedCount > 0;
+
     }
 
 }
