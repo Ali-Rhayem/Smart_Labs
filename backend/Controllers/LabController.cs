@@ -366,7 +366,6 @@ namespace backend.Controllers
             return NoContent();
         }
 
-        // endlab
         // POST: api/lab/{labId}/endlab
         [HttpPost("{labId}/endlab")]
         [Authorize(Roles = "admin,instructor")]
@@ -395,7 +394,6 @@ namespace backend.Controllers
             return NoContent();
         }
 
-        // send annaouncement to all students in lab
         // POST: api/lab/{labId}/announcement
         [HttpPost("{labId}/announcement")]
         [Authorize(Roles = "instructor")]
@@ -422,6 +420,29 @@ namespace backend.Controllers
             return NoContent();
         }
 
+        // DELETE: api/lab/{labId}/announcement/{announcementId}
+        [HttpDelete("{labId}/announcement/{announcementId}")]
+        [Authorize(Roles = "instructor")]
+        public async Task<ActionResult> DeleteAnnouncement(int labId, int announcementId)
+        {
+            var userIdClaim = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier);
+            var lab = await _labService.GetLabByIdAsync(labId);
+
+            if (lab == null)
+                return NotFound(new { errors = "Lab not found." });
+
+            if (!lab.Instructors.Contains(int.Parse(userIdClaim!.Value)))
+            {
+                return Unauthorized();
+            }
+
+            var result = await _labService.DeleteAnnouncementFromLabAsync(labId, announcementId);
+
+            if (!result)
+                return NotFound();
+
+            return NoContent();
+        }
 
     }
 }
