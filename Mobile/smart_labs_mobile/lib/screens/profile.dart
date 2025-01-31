@@ -136,7 +136,7 @@ class ProfileScreen extends ConsumerWidget {
                       ref.read(themeProvider.notifier).toggleTheme();
                     },
                     activeColor: kNeonYellow,
-                    activeTrackColor: kNeonYellow.withOpacity(0.3),
+                    activeTrackColor: kNeonYellow.withValues(alpha: 0.3),
                   );
                 },
               ),
@@ -163,8 +163,6 @@ class ProfileScreen extends ConsumerWidget {
 
                 // Clear all stored data
                 await secureStorage.clearAll();
-                final role = await secureStorage.readRole();
-                final userId = await secureStorage.readId();
 
                 if (!context.mounted) return;
 
