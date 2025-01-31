@@ -281,4 +281,14 @@ public class LabService
         var result = await _labs.DeleteOneAsync(lab => lab.Id == id);
         return result.DeletedCount > 0;
     }
+
+    public async Task<Boolean> EndLabAsync(int id)
+    {
+        var updateDefinition = Builders<Lab>.Update.Set(lab => lab.EndLab, true);
+        var result = await _labs.UpdateOneAsync(lab => lab.Id == id, updateDefinition);
+
+        return result.ModifiedCount > 0;
+    }
+
+    
 }
