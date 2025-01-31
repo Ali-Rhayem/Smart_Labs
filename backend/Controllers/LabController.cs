@@ -366,5 +366,34 @@ namespace backend.Controllers
             return NoContent();
         }
 
+        // endlab
+        // POST: api/lab/{labId}/endlab
+        [HttpPost("{labId}/endlab")]
+        [Authorize(Roles = "admin,instructor")]
+        public async Task<ActionResult> EndLab(int labId)
+        {
+            var userRoleClaim = HttpContext.User.FindFirst(ClaimTypes.Role);
+            var userIdClaim = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier);
+            var lab = await _labService.GetLabByIdAsync(labId);
+
+            if (lab == null)
+                return NotFound(new { errors = "Lab not found." });
+
+            if (userRoleClaim!.Value == "instructor")
+            {
+                if (!lab.Instructors.Contains(int.Parse(userIdClaim!.Value)))
+                {
+                    return Unauthorized();
+                }
+            }
+
+            var result = await _labService.EndLabAsync(labId);
+
+            if (!result)
+                return NotFound();
+
+            return NoContent();
+        }
+
     }
 }
