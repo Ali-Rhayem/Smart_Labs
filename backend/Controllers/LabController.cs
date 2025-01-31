@@ -395,5 +395,33 @@ namespace backend.Controllers
             return NoContent();
         }
 
+        // send annaouncement to all students in lab
+        // POST: api/lab/{labId}/announcement
+        [HttpPost("{labId}/announcement")]
+        [Authorize(Roles = "instructor")]
+        public async Task<ActionResult> SendAnnouncementToLab(int labId, Aannouncement announcement)
+        {
+            var userIdClaim = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier);
+            var lab = await _labService.GetLabByIdAsync(labId);
+
+            if (lab == null)
+                return NotFound(new { errors = "Lab not found." });
+
+            if (!lab.Instructors.Contains(int.Parse(userIdClaim!.Value)))
+            {
+                return Unauthorized();
+            }
+
+            announcement.Sender = int.Parse(userIdClaim!.Value);
+
+            var result = await _labService.SendAnnouncementToLabAsync(labId, announcement);
+
+            if (!result)
+                return NotFound();
+
+            return NoContent();
+        }
+
+
     }
 }
