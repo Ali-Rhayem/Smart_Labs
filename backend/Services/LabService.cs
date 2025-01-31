@@ -304,5 +304,13 @@ public class LabService
 
         return result.ModifiedCount > 0;
     }
-    
+
+    public async Task<Boolean> DeleteAnnouncementFromLabAsync(int lab_id, int announcementId)
+    {
+        var updateDefinition = Builders<Lab>.Update.PullFilter(lab => lab.Announcements, announcement => announcement.Id == announcementId);
+        var result = await _labs.UpdateOneAsync(lab => lab.Id == lab_id, updateDefinition);
+
+        return result.ModifiedCount > 0;
+    }
+
 }
