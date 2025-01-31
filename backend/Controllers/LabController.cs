@@ -444,5 +444,41 @@ namespace backend.Controllers
             return NoContent();
         }
 
+        // POST: api/lab/{labId}/announcement/{announcementId}/comment
+        [HttpPost("{labId}/announcement/{announcementId}/comment")]
+        [Authorize(Roles = "instructor,student")]
+        public async Task<ActionResult> CommentOnAnnouncement(int labId, int announcementId, Comment comment)
+        {
+            var userIdClaim = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier);
+            var userRoleClaim = HttpContext.User.FindFirst(ClaimTypes.Role);
+            var lab = await _labService.GetLabByIdAsync(labId);
+
+            if (lab == null)
+                return NotFound(new { errors = "Lab not found." });
+
+            if (userRoleClaim!.Value == "instructor")
+            {
+                if (!lab.Instructors.Contains(int.Parse(userIdClaim!.Value)))
+                {
+                    return Unauthorized();
+                }
+            }else if (userRoleClaim!.Value == "student")
+            {
+                if (!lab.Students.Contains(int.Parse(userIdClaim!.Value)))
+                {
+                    return Unauthorized();
+                }
+            }
+
+            comment.Sender = int.Parse(userIdClaim!.Value);
+
+            var result = await _labService.CommentOnAnnouncementAsync(labId, announcementId, comment);
+
+            if (!result)
+                return NotFound();
+
+            return NoContent();
+        }
+
     }
 }

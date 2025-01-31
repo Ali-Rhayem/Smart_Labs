@@ -41,5 +41,5 @@ public class Lab
     public required string Room { get; set; }
 
     [BsonElement("Announcements")]
-    public List<Comment> Announcements { get; set; } = [];
+    public List<Announcement> Announcements { get; set; } = [];
 }

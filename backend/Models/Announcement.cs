@@ -1,6 +1,6 @@
 using MongoDB.Bson.Serialization.Attributes;
 
-public class Aannouncement
+public class Announcement
 {
     [BsonId]
     public int Id { get; set; }
@@ -11,12 +11,12 @@ public class Aannouncement
     [BsonElement("Message")]
     public required string Message { get; set; }
 
-    [BsonElement("files")]
+    [BsonElement("Files")]
     public List<string> Files { get; set; } = [];
 
     [BsonElement("Time")]
     public DateTime Time { get; set; }
 
-    [BsonElement("comments")]
+    [BsonElement("Comments")]
     public List<Comment> Comments { get; set; } = [];
 }
