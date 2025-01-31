@@ -397,7 +397,7 @@ namespace backend.Controllers
         // POST: api/lab/{labId}/announcement
         [HttpPost("{labId}/announcement")]
         [Authorize(Roles = "instructor")]
-        public async Task<ActionResult> SendAnnouncementToLab(int labId, Aannouncement announcement)
+        public async Task<ActionResult> SendAnnouncementToLab(int labId, Announcement announcement)
         {
             var userIdClaim = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier);
             var lab = await _labService.GetLabByIdAsync(labId);
@@ -462,7 +462,8 @@ namespace backend.Controllers
                 {
                     return Unauthorized();
                 }
-            }else if (userRoleClaim!.Value == "student")
+            }
+            else if (userRoleClaim!.Value == "student")
             {
                 if (!lab.Students.Contains(int.Parse(userIdClaim!.Value)))
                 {
@@ -473,6 +474,42 @@ namespace backend.Controllers
             comment.Sender = int.Parse(userIdClaim!.Value);
 
             var result = await _labService.CommentOnAnnouncementAsync(labId, announcementId, comment);
+
+            if (!result)
+                return NotFound();
+
+            return NoContent();
+        }
+
+        // DELETE: api/lab/{labId}/announcement/{announcementId}/comment/{commentId}
+        [HttpDelete("{labId}/announcement/{announcementId}/comment/{commentId}")]
+        [Authorize(Roles = "instructor,student")]
+        public async Task<ActionResult> DeleteComment(int labId, int announcementId, int commentId)
+        {
+            var userIdClaim = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier);
+            var userRoleClaim = HttpContext.User.FindFirst(ClaimTypes.Role);
+            var lab = await _labService.GetLabByIdAsync(labId);
+
+            if (lab == null)
+                return NotFound(new { errors = "Lab not found." });
+
+            if (userRoleClaim!.Value == "instructor")
+            {
+                if (!lab.Instructors.Contains(int.Parse(userIdClaim!.Value)))
+                {
+                    return Unauthorized();
+                }
+            }
+            else if (userRoleClaim!.Value == "student")
+            {
+                var comment = await _labService.GetCommentByIdAsync(labId, announcementId, commentId);
+                if (comment == null || comment.Sender != int.Parse(userIdClaim!.Value))
+                {
+                    return Unauthorized();
+                }
+            }
+
+            var result = await _labService.DeleteCommentFromAnnouncementAsync(labId, announcementId, commentId);
 
             if (!result)
                 return NotFound();
