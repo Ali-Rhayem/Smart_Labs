@@ -27,6 +27,7 @@
 /Users/jawadalsayed/Desktop/fyp/publish/MongoDB.Bson.dll
 /Users/jawadalsayed/Desktop/fyp/publish/MongoDB.Driver.dll
 /Users/jawadalsayed/Desktop/fyp/publish/Newtonsoft.Json.dll
+/Users/jawadalsayed/Desktop/fyp/publish/OneOf.dll
 /Users/jawadalsayed/Desktop/fyp/publish/SharpCompress.dll
 /Users/jawadalsayed/Desktop/fyp/publish/Snappier.dll
 /Users/jawadalsayed/Desktop/fyp/publish/Swashbuckle.AspNetCore.Swagger.dll
