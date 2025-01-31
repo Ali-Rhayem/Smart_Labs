@@ -335,4 +335,29 @@ public class LabService
 
     }
 
+    public async Task<Comment?> GetCommentByIdAsync(int lab_id, int announcementId, int commentId)
+    {
+        var lab = await GetLabByIdAsync(lab_id);
+        var announcement = lab.Announcements.Find(a => a.Id == announcementId);
+        if (announcement == null)
+        {
+            return null;
+        }
+        return announcement.Comments.Find(c => c.Id == commentId);
+    }
+
+    public async Task<Boolean> DeleteCommentFromAnnouncementAsync(int lab_id, int announcementId, int commentId)
+    {
+        var updateDefinition = Builders<Lab>.Update.PullFilter("Announcements.$[a].Comments", Builders<Comment>.Filter.Eq(comment => comment.Id, commentId));
+        var arrayFilters = new List<ArrayFilterDefinition>
+        {
+            new BsonDocumentArrayFilterDefinition<BsonDocument>(new BsonDocument("a.Id", announcementId))
+        };
+        var result = await _labs.UpdateOneAsync(lab => lab.Id == lab_id, updateDefinition, new UpdateOptions { ArrayFilters = arrayFilters });
+
+        return result.ModifiedCount > 0;
+    }
+
+
+
 }
