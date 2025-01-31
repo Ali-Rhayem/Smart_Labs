@@ -1,6 +1,6 @@
 using MongoDB.Bson.Serialization.Attributes;
 
-public class Chat
+public class Aannouncement
 {
     [BsonId]
     public int Id { get; set; }
