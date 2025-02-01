@@ -37,4 +37,7 @@ public class User
 
     [BsonElement("face_identity_vector")]
     public List<float> FaceIdentityVector { get; set; } = new();
+
+    [BsonElement("fcm_token")]
+    public string? FcmToken { get; set; }
 }
