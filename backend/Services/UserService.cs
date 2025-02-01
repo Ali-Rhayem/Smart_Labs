@@ -131,4 +131,10 @@ public class UserService
         return await _users.Find(u => u.Email == email).Project<User>(projection).FirstOrDefaultAsync();
     }
 
+    public async Task<User> GetUserByFcmTokenAsync(string fcmToken)
+    {
+        var projection = Builders<User>.Projection.Exclude(u => u.FaceIdentityVector);
+        return await _users.Find(u => u.FcmToken == fcmToken).Project<User>(projection).FirstOrDefaultAsync();
+    }
+
 }
