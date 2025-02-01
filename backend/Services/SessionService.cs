@@ -10,4 +10,9 @@ public class SessionService
         _sessions = database.GetCollection<Sessions>("Sessions");
     }
 
+    public async Task<List<Sessions>> GetSessionsOfLabAsync(int labId)
+    {
+        return await _sessions.Find(session => session.LabId == labId).ToListAsync();
+    }
+
 }
