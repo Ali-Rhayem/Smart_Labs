@@ -9,20 +9,20 @@ using MongoDB.Bson;
 public class LabService
 {
     private readonly IMongoCollection<Lab> _labs;
-    private readonly IMongoCollection<User> _users;
-    private readonly IMongoCollection<PPE> _ppes;
     private readonly LabHelper _labHelper;
     private readonly UserService _userService;
     private readonly SemesterService _semesterService;
+    private readonly PPEService _ppeService;
+    private readonly SessionService _sessionService;
 
-    public LabService(IMongoDatabase database, LabHelper labHelper, UserService userService, SemesterService semesterService, PPEService ppeService)
+    public LabService(IMongoDatabase database, LabHelper labHelper, UserService userService, SemesterService semesterService, PPEService ppeService, SessionService sessionService)
     {
         _labs = database.GetCollection<Lab>("Labs");
-        _users = database.GetCollection<User>("Users");
-        _ppes = database.GetCollection<PPE>("PPE");
         _labHelper = labHelper;
         _userService = userService;
         _semesterService = semesterService;
+        _ppeService = ppeService;
+        _sessionService = sessionService;
     }
 
     public async Task<List<Lab>> GetAllLabsAsync()
@@ -113,8 +113,8 @@ public class LabService
         // check if PPE exists in the database
         foreach (var ppeId in lab.PPE)
         {
-            var ppe = await _ppes.Find(ppe => ppe.Id == ppeId).FirstOrDefaultAsync();
-            if (ppe == null)
+            var ppe = await _ppeService.GetListOfPPEsAsync([ppeId]);
+            if (ppe.Count == 0)
                 lab.PPE.Remove(ppeId);
         }
 
@@ -171,7 +171,7 @@ public class LabService
         // check if students exist in the database
         foreach (var studentEmail in student_emails)
         {
-            var student = await _users.Find(user => user.Email == studentEmail).FirstOrDefaultAsync();
+            var student = await _userService.GetUserByEmailAsync(studentEmail);
             if (student == null)
             {
                 _labHelper.CreateStudentIfNotExists(studentEmail);
@@ -180,7 +180,7 @@ public class LabService
         List<int> student_ids = [];
         foreach (var studentEmail in student_emails)
         {
-            var student = await _users.Find(user => user.Email == studentEmail).FirstOrDefaultAsync();
+            var student = await _userService.GetUserByEmailAsync(studentEmail);
             if (student.Role == "student")
                 student_ids.Add(student.Id);
         }
@@ -227,7 +227,7 @@ public class LabService
     {
         foreach (var email in emails)
         {
-            var student = await _users.Find(user => user.Email == email).FirstOrDefaultAsync();
+            var student = await _userService.GetUserByEmailAsync(email);
             if (student == null)
             {
                 _labHelper.CreateStudentIfNotExists(email);
@@ -236,7 +236,7 @@ public class LabService
         List<int> studentsId = [];
         foreach (var email in emails)
         {
-            var student = await _users.Find(user => user.Email == email).FirstOrDefaultAsync();
+            var student = await _userService.GetUserByEmailAsync(email);
             studentsId.Add(student.Id);
         }
         var updateDefinition = Builders<Lab>.Update.PushEach(lab => lab.Students, studentsId);
@@ -358,6 +358,33 @@ public class LabService
         return result.ModifiedCount > 0;
     }
 
+    public async Task<OneOf<Sessions, ErrorMessage>> StartSessionAsync(int lab_id)
+    {
+        var lab = await GetLabByIdAsync(lab_id);
 
+        if (lab.Started)
+        {
+            return new ErrorMessage { StatusCode = 400, Message = "lab is already started" };
+        }
+
+        // check if the lab is in schedule
+        var currentDay = DateTime.Now.ToString("dddd", new CultureInfo("en-US"));
+        var currentTime = TimeOnly.FromDateTime(DateTime.Now.AddMinutes(-5));
+        foreach (var labTime in lab.Schedule)
+        {
+            Console.WriteLine(currentTime);
+            Console.WriteLine(labTime.StartTime);
+            if (labTime.DayOfWeek == currentDay && labTime.StartTime <= currentTime && labTime.EndTime > currentTime)
+            {
+                Sessions session = await _sessionService.CreateSessionAsync(lab_id);
+                var updateDefinition = Builders<Lab>.Update.Set(l => l.Started, true);
+                await _labs.UpdateOneAsync(l => l.Id == lab_id, updateDefinition);
+                // TODO: send to kafka
+                return session;
+            }
+        }
+
+        return new ErrorMessage { StatusCode = 400, Message = "lab is not in schedule" };
+    }
 
 }
