@@ -1,6 +1,5 @@
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
-using System.Collections.Generic;
 
 public class Lab
 {
@@ -42,4 +41,8 @@ public class Lab
 
     [BsonElement("Announcements")]
     public List<Announcement> Announcements { get; set; } = [];
+
+    [BsonElement("Started")]
+    public bool Started { get; set; } = false;
+
 }
