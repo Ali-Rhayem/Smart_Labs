@@ -387,4 +387,20 @@ public class LabService
         return new ErrorMessage { StatusCode = 400, Message = "lab is not in schedule" };
     }
 
+    public async Task<OneOf<bool, ErrorMessage>> EndSessionAsync(int lab_id)
+    {
+        var lab = await GetLabByIdAsync(lab_id);
+
+        if (!lab.Started)
+        {
+            return new ErrorMessage { StatusCode = 400, Message = "lab is not started" };
+        }
+
+        // TODO: send to kafka
+        var updateDefinition = Builders<Lab>.Update.Set(l => l.Started, false);
+        await _labs.UpdateOneAsync(l => l.Id == lab_id, updateDefinition);
+
+        return true;
+    }
+
 }
