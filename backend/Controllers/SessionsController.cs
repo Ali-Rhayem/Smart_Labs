@@ -1,4 +1,5 @@
 using backend.Services;
+using FirebaseAdmin.Messaging;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -16,6 +17,14 @@ namespace backend.Controllers
         public SessionsController(SessionService sessionService)
         {
             _sessionService = sessionService;
+        }
+
+        // GET: api/Sessions/lab/5
+        [HttpGet("lab/{id}")]
+        [Authorize]
+        public async Task<ActionResult<List<Sessions>>> GetSessionsOfLab(int id)
+        {
+            return await _sessionService.GetSessionsOfLabAsync(id);
         }
 
     }
