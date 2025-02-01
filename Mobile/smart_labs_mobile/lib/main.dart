@@ -1,5 +1,7 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:smart_labs_mobile/api/firebase_api.dart';
 import 'package:smart_labs_mobile/screens/instructor/instructor_dashboard.dart';
 import 'package:smart_labs_mobile/screens/instructor/instructor_main_wrapper.dart';
 import 'package:smart_labs_mobile/screens/login.dart';
@@ -11,6 +13,9 @@ import 'package:smart_labs_mobile/providers/theme_provider.dart';
 
 void main() async {
   await dotenv.load(fileName: ".env");
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  await FirebaseApi().initNotification();
   runApp(
     const ProviderScope(
       child: MyApp(),
