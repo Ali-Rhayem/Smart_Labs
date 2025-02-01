@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:smart_labs_mobile/models/lab_model.dart';
+import 'package:smart_labs_mobile/services/api_service.dart';
 
 class CreateLabScreen extends StatefulWidget {
   const CreateLabScreen({super.key});
@@ -13,9 +15,13 @@ class _CreateLabScreenState extends State<CreateLabScreen> {
   late TextEditingController _labCodeController;
   late TextEditingController _descriptionController;
   late TextEditingController _studentInputController;
+  late TextEditingController _roomController;
+  final List<LabSchedule> _schedules = [];
+
   int _selectedWeekday = DateTime.now().weekday;
   TimeOfDay _startTime = TimeOfDay.now();
   TimeOfDay _endTime = TimeOfDay.now();
+  final ApiService _apiService = ApiService();
 
   final List<String> _ppeOptions = [
     'Lab Coat',
@@ -25,8 +31,8 @@ class _CreateLabScreenState extends State<CreateLabScreen> {
     'Closed-toe Shoes',
     'All of the above',
   ];
-  List<String> _selectedPPE = [];
-  List<String> _selectedStudents = [];
+  final List<String> _selectedPPE = [];
+  final List<String> _selectedStudents = [];
 
   @override
   void initState() {
@@ -35,6 +41,7 @@ class _CreateLabScreenState extends State<CreateLabScreen> {
     _labCodeController = TextEditingController();
     _descriptionController = TextEditingController();
     _studentInputController = TextEditingController();
+    _roomController = TextEditingController();
   }
 
   @override
@@ -43,6 +50,7 @@ class _CreateLabScreenState extends State<CreateLabScreen> {
     _labCodeController.dispose();
     _descriptionController.dispose();
     _studentInputController.dispose();
+    _roomController.dispose();
     super.dispose();
   }
 
@@ -61,20 +69,47 @@ class _CreateLabScreenState extends State<CreateLabScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              const Text(
+                'Lab Name',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 10),
               _buildTextField(
                 controller: _labNameController,
-                label: 'Lab Name',
+                label: 'Name',
                 validator: (value) =>
                     value?.isEmpty ?? true ? 'Please enter lab name' : null,
               ),
               const SizedBox(height: 16),
+              const Text(
+                'Lab Code',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 10),
               _buildTextField(
                 controller: _labCodeController,
-                label: 'Lab Code',
+                label: 'Code',
                 validator: (value) =>
                     value?.isEmpty ?? true ? 'Please enter lab code' : null,
               ),
               const SizedBox(height: 16),
+              const Text(
+                'Lab Description',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 10),
               _buildTextField(
                 controller: _descriptionController,
                 label: 'Description',
@@ -89,7 +124,25 @@ class _CreateLabScreenState extends State<CreateLabScreen> {
               const SizedBox(height: 16),
               _buildTimeSelectors(),
               const SizedBox(height: 16),
+              _buildSchedulesList(),
+              const SizedBox(height: 16),
               _buildStudentInput(),
+              const SizedBox(height: 16),
+              const Text(
+                'Room',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 10),
+              _buildTextField(
+                controller: _roomController,
+                label: 'Room',
+                validator: (value) =>
+                    value?.isEmpty ?? true ? 'Please enter room number' : null,
+              ),
               const SizedBox(height: 16),
               SizedBox(
                 width: double.infinity,
@@ -178,10 +231,8 @@ class _CreateLabScreenState extends State<CreateLabScreen> {
                 setState(() {
                   if (selected) {
                     _selectedPPE.add(ppe);
-                    print(_selectedPPE);
                   } else {
                     _selectedPPE.remove(ppe);
-                    print(_selectedPPE);
                   }
                 });
               },
@@ -441,7 +492,8 @@ class _CreateLabScreenState extends State<CreateLabScreen> {
               backgroundColor: const Color(0xFFFFFF00),
               side: const BorderSide(color: Colors.black),
               labelStyle: const TextStyle(color: Colors.black),
-              deleteIcon: const Icon(Icons.close, size: 18, color: Colors.black),
+              deleteIcon:
+                  const Icon(Icons.close, size: 18, color: Colors.black),
               onDeleted: () {
                 setState(() {
                   _selectedStudents.remove(student);
@@ -454,18 +506,143 @@ class _CreateLabScreenState extends State<CreateLabScreen> {
     );
   }
 
-  void _submitForm() {
+  Widget _buildSchedulesList() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Schedules',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 8),
+        ..._schedules
+            .map((schedule) => Card(
+                  color: const Color(0xFF1C1C1C),
+                  margin: const EdgeInsets.only(bottom: 8),
+                  child: ListTile(
+                    title: Text(
+                      '${schedule.dayOfWeek}',
+                      style: const TextStyle(color: Colors.white),
+                    ),
+                    subtitle: Text(
+                      '${schedule.startTime} - ${schedule.endTime}',
+                      style: const TextStyle(color: Colors.white70),
+                    ),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.delete, color: Colors.red),
+                      onPressed: () {
+                        setState(() {
+                          _schedules.remove(schedule);
+                        });
+                      },
+                    ),
+                  ),
+                ))
+            .toList(),
+        ElevatedButton.icon(
+          onPressed: _addSchedule,
+          icon: const Icon(Icons.add, color: Colors.black),
+          label: const Text('Add Schedule'),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFFFFFF00),
+            foregroundColor: Colors.black,
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _addSchedule() {
+    setState(() {
+      _schedules.add(
+        LabSchedule(
+          dayOfWeek: _getWeekdayName(_selectedWeekday),
+          startTime: _formatTimeToHHMM(_startTime),
+          endTime: _formatTimeToHHMM(_endTime),
+        ),
+      );
+    });
+  }
+
+  String _formatTimeToHHMM(TimeOfDay time) {
+    final hour = time.hour.toString().padLeft(2, '0');
+    final minute = time.minute.toString().padLeft(2, '0');
+    return '$hour:$minute';
+  }
+
+  String _getWeekdayName(int weekday) {
+    switch (weekday) {
+      case 1:
+        return 'Monday';
+      case 2:
+        return 'Tuesday';
+      case 3:
+        return 'Wednesday';
+      case 4:
+        return 'Thursday';
+      case 5:
+        return 'Friday';
+      case 6:
+        return 'Saturday';
+      case 7:
+        return 'Sunday';
+      default:
+        return '';
+    }
+  }
+
+  Future<void> _submitForm() async {
     if (_formKey.currentState?.validate() ?? false) {
       if (_selectedPPE.isEmpty) {
-        setState(() {}); // Trigger rebuild to show error message
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please select required PPE')),
+        );
         return;
       }
       if (_selectedStudents.isEmpty) {
-        // You might want to show an error message here
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please add at least one student')),
+        );
         return;
       }
-      // TODO: Implement lab creation logic with students
-      Navigator.pop(context);
+      if (_schedules.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please add at least one schedule')),
+        );
+        return;
+      }
+
+      final labData = {
+        "lab": {
+          "labCode": _labCodeController.text,
+          "labName": _labNameController.text,
+          "schedule": _schedules.map((s) => s.toJson()).toList(),
+          "description": _descriptionController.text,
+          "endLab": false,
+          "room": _roomController.text,
+        },
+        "student_Emails": _selectedStudents
+      };
+
+      try {
+        final response = await _apiService.post('/Lab', labData);
+        if (response['success']) {
+          Navigator.pop(context);
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+                content: Text(response['message'] ?? 'Failed to create lab')),
+          );
+        }
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to create lab: $e')),
+        );
+      }
     }
   }
 }
