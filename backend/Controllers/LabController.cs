@@ -517,5 +517,28 @@ namespace backend.Controllers
             return NoContent();
         }
 
+        // POST: api/lab/5/startSession
+        [HttpPost("{id}/startSession")]
+        [Authorize(Roles = "instructor")]
+        public async Task<ActionResult> StartSession(int id)
+        {
+            var userIdClaim = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier);
+            var lab = await _labService.GetLabByIdAsync(id);
+
+            if (lab == null)
+                return NotFound(new { errors = "Lab not found." });
+
+            if (!lab.Instructors.Contains(int.Parse(userIdClaim!.Value)))
+            {
+                return Unauthorized();
+            }
+
+            var result = await _labService.StartSessionAsync(id);
+
+            return result.Match<ActionResult>(
+                _ => NoContent(),
+                error => StatusCode(error.StatusCode, new { errors = error.Message })
+                );
+        }
     }
 }
