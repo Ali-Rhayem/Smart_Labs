@@ -1,6 +1,6 @@
 
 
-public class Notification
+public class NotificationModel
 {
     public List<string> TargetFcmTokens { get; set; } = [];
     public string Title { get; set; } = "";
