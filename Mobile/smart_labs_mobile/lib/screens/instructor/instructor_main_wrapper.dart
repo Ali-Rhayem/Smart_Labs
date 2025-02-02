@@ -65,8 +65,8 @@ class _InstructorMainWrapperState extends State<InstructorMainWrapper> {
             label: 'Analytics',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.message_outlined),
-            label: 'Messages',
+            icon: Icon(Icons.notifications_none),
+            label: 'Notifications',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person_outline),
