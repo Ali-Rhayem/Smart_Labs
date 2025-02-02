@@ -1,11 +1,12 @@
 {
   "version": 2,
-  "dgSpecHash": "Z9R94g6A/oQ=",
+  "dgSpecHash": "qks4iwCpAYY=",
   "success": true,
   "projectFilePath": "/Users/jawadalsayed/Desktop/fyp/Smart_Labs/backend/backend.csproj",
   "expectedPackageFiles": [
     "/Users/jawadalsayed/.nuget/packages/bcrypt.net-next/4.0.3/bcrypt.net-next.4.0.3.nupkg.sha512",
     "/Users/jawadalsayed/.nuget/packages/bouncycastle.cryptography/2.5.0/bouncycastle.cryptography.2.5.0.nupkg.sha512",
+    "/Users/jawadalsayed/.nuget/packages/confluent.kafka/2.8.0/confluent.kafka.2.8.0.nupkg.sha512",
     "/Users/jawadalsayed/.nuget/packages/dnsclient/1.6.1/dnsclient.1.6.1.nupkg.sha512",
     "/Users/jawadalsayed/.nuget/packages/firebaseadmin/3.1.0/firebaseadmin.3.1.0.nupkg.sha512",
     "/Users/jawadalsayed/.nuget/packages/google.api.gax/4.8.0/google.api.gax.4.8.0.nupkg.sha512",
@@ -14,6 +15,7 @@
     "/Users/jawadalsayed/.nuget/packages/google.apis.auth/1.68.0/google.apis.auth.1.68.0.nupkg.sha512",
     "/Users/jawadalsayed/.nuget/packages/google.apis.core/1.68.0/google.apis.core.1.68.0.nupkg.sha512",
     "/Users/jawadalsayed/.nuget/packages/google.apis.gmail.v1/1.68.0.3427/google.apis.gmail.v1.1.68.0.3427.nupkg.sha512",
+    "/Users/jawadalsayed/.nuget/packages/librdkafka.redist/2.8.0/librdkafka.redist.2.8.0.nupkg.sha512",
     "/Users/jawadalsayed/.nuget/packages/microsoft.aspnetcore.authentication.jwtbearer/9.0.0/microsoft.aspnetcore.authentication.jwtbearer.9.0.0.nupkg.sha512",
     "/Users/jawadalsayed/.nuget/packages/microsoft.aspnetcore.openapi/9.0.0/microsoft.aspnetcore.openapi.9.0.0.nupkg.sha512",
     "/Users/jawadalsayed/.nuget/packages/microsoft.bcl.asyncinterfaces/6.0.0/microsoft.bcl.asyncinterfaces.6.0.0.nupkg.sha512",

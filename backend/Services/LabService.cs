@@ -5,6 +5,7 @@ using backend.Services;
 using OneOf;
 using System.Globalization;
 using MongoDB.Bson;
+using System.Text.Json;
 
 public class LabService
 {
@@ -14,8 +15,9 @@ public class LabService
     private readonly SemesterService _semesterService;
     private readonly PPEService _ppeService;
     private readonly SessionService _sessionService;
+    private readonly KafkaProducer _kafkaProducer;
 
-    public LabService(IMongoDatabase database, LabHelper labHelper, UserService userService, SemesterService semesterService, PPEService ppeService, SessionService sessionService)
+    public LabService(IMongoDatabase database, LabHelper labHelper, UserService userService, SemesterService semesterService, PPEService ppeService, SessionService sessionService, KafkaProducer kafkaProducer)
     {
         _labs = database.GetCollection<Lab>("Labs");
         _labHelper = labHelper;
@@ -23,6 +25,7 @@ public class LabService
         _semesterService = semesterService;
         _ppeService = ppeService;
         _sessionService = sessionService;
+        _kafkaProducer = kafkaProducer;
     }
 
     public async Task<List<Lab>> GetAllLabsAsync()
@@ -382,8 +385,11 @@ public class LabService
             {
                 Sessions session = await _sessionService.CreateSessionAsync(lab_id);
                 var updateDefinition = Builders<Lab>.Update.Set(l => l.Started, true);
+                var ppe_list = await _ppeService.GetListOfPPEsAsync(lab.PPE);
+                var ppe_names = ppe_list.Select(ppe => ppe.Name).ToList();
                 await _labs.UpdateOneAsync(l => l.Id == lab_id, updateDefinition);
-                // TODO: send to kafka
+                var message = new { ppe_arr = ppe_names, session_id = session.Id, lab_id = lab_id, room = lab.Room, status = "start" };
+                await _kafkaProducer.ProduceAsync("Lab_rooms", JsonSerializer.Serialize(message));
                 return session;
             }
         }
@@ -400,7 +406,7 @@ public class LabService
             return new ErrorMessage { StatusCode = 400, Message = "lab is not started" };
         }
 
-        // TODO: send to kafka
+        await _kafkaProducer.ProduceAsync("Lab_rooms", JsonSerializer.Serialize(new { room = lab.Room, status = "end" }));
         var updateDefinition = Builders<Lab>.Update.Set(l => l.Started, false);
         await _labs.UpdateOneAsync(l => l.Id == lab_id, updateDefinition);
 
