@@ -63,4 +63,14 @@ public class NotificationService
         var notification = await _notifications.Find(filter).FirstOrDefaultAsync();
         return notification;
     }
+
+    public async Task<List<Notifications>> GetNotificationsByUserIdAsync(int userId)
+    {
+        var filter = Builders<Notifications>.Filter.Eq(n => n.UserID, userId)
+        & Builders<Notifications>.Filter.Eq(n => n.IsDeleted, false)
+        & Builders<Notifications>.Filter.Eq(n => n.IsRead, false);
+
+        var notifications = await _notifications.Find(filter).ToListAsync();
+        return notifications;
+    }
 }
