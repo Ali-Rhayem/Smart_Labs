@@ -30,7 +30,8 @@ def produce(message):
     # Configuring the Kafka producer
     conf = {
         'bootstrap.servers': os.getenv("BOOTSTRAP_SERVERS"),  # Replace with your Kafka server address
-        'client.id': 'python-producer'
+        'client.id': 'python-producer',
+        'message.max.bytes': 15728640,  
     }
     producer = Producer(conf)
     try:
