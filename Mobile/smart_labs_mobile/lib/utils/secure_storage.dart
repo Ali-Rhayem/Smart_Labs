@@ -38,4 +38,12 @@ class SecureStorage {
   Future<void> clearAll() async {
     await _storage.deleteAll();
   }
+
+  Future<void> storeFcmToken(String token) async {
+    await _storage.write(key: 'Fcm_token', value: token);
+  }
+
+  Future<String?> readFcmToken() async {
+    return await _storage.read(key: 'Fcm_token');
+  }
 }
