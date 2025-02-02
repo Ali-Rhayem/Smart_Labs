@@ -174,7 +174,9 @@ public class LabService
             var student = await _userService.GetUserByEmailAsync(studentEmail);
             if (student == null)
             {
-                _labHelper.CreateStudentIfNotExists(studentEmail);
+                bool create_student = _labHelper.CreateStudentIfNotExists(studentEmail);
+                if (!create_student)
+                    return new ErrorMessage { StatusCode = 400, Message = "can't create student" };
             }
         }
         List<int> student_ids = [];
@@ -230,7 +232,9 @@ public class LabService
             var student = await _userService.GetUserByEmailAsync(email);
             if (student == null)
             {
-                _labHelper.CreateStudentIfNotExists(email);
+                bool create_student = _labHelper.CreateStudentIfNotExists(email);
+                if (!create_student)
+                    return false;
             }
         }
         List<int> studentsId = [];
