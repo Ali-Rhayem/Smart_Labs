@@ -120,6 +120,15 @@ namespace backend.Controllers
                 return Unauthorized(new { errors = "Invalid email or password." });
             }
 
+            if (loginRequest.Fcm_token != null)
+            {
+                bool Fcm_token_saved = await _userService.SaveFcmToken(user.Id, loginRequest.Fcm_token);
+                if (!Fcm_token_saved)
+                {
+                    return StatusCode(500, new { errors = "Failed to save FCM token." });
+                }
+            }
+
             // Generate a JWT token
             var token = _jwtTokenHelper.GenerateToken(user.Id, user.Role);
 
