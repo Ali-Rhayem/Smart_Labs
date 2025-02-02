@@ -40,6 +40,12 @@ public class LabHelper
         }
 
         var password = GenerateTempPassword();
+        // send email to student with temp password
+        bool send_email = SendEmail(student_email, password);
+        if (!send_email)
+        {
+            return false;
+        }
         // If student does not exist, create a new student
         // find the last id
         var lastStudent = _users.Find(_ => true).SortByDescending(user => user.Id).FirstOrDefault();
@@ -56,8 +62,6 @@ public class LabHelper
         // insert student into the database
         _users.InsertOne(newStudent);
 
-        // send email to student with temp password
-        SendEmail(student_email, password);
 
         return true;
 
@@ -74,30 +78,37 @@ public class LabHelper
             stringChars[i] = chars[random.Next(chars.Length)];
         }
 
-        return new String(stringChars);
+        return new string(stringChars);
     }
 
 
-    private void SendEmail(string student_email, string password)
+    private bool SendEmail(string student_email, string password)
     {
         string[] Scopes = { GmailService.Scope.GmailSend };
         string ApplicationName = "smart_lab";
         var EmailSettings = _configuration.GetSection("EmailSettings");
         var appDir = AppDomain.CurrentDomain.BaseDirectory;
         var credPath = Path.Combine(appDir, "gmail_api", "credentials");
-        var tokenPath = Path.Combine(appDir, "gmail_api", "token.json");
+        var tokenPath = Path.Combine(appDir, "gmail_api", "gmail_token.json");
         // Load credentials.json file
         UserCredential credential;
         using (var stream = new FileStream(tokenPath, FileMode.Open, FileAccess.Read))
         {
-            credential = GoogleWebAuthorizationBroker.AuthorizeAsync(
-                GoogleClientSecrets.FromStream(stream).Secrets,
-                Scopes,
-                "user",
-                CancellationToken.None,
-                new FileDataStore(credPath)).Result;
-
-            Console.WriteLine("Credential file saved to: " + credPath);
+            try
+            {
+                credential = GoogleWebAuthorizationBroker.AuthorizeAsync(
+                    GoogleClientSecrets.FromStream(stream).Secrets,
+                    Scopes,
+                    "user",
+                    CancellationToken.None,
+                    new FileDataStore(credPath)).Result;
+                Console.WriteLine("Credential file saved to: " + credPath);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("An error occurred: " + ex.Message);
+                return false;
+            }
         }
 
         // Create Gmail API service
@@ -134,10 +145,12 @@ public class LabHelper
                 var request = service.Users.Messages.Send(message, "me");
                 request.Execute();
                 Console.WriteLine("Email sent successfully!");
+                return true;
             }
             catch (Exception ex)
             {
                 Console.WriteLine("An error occurred: " + ex.Message);
+                return false;
             }
         }
 

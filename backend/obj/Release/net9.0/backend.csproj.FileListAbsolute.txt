@@ -64,3 +64,8 @@
 /Users/jawadalsayed/Desktop/fyp/Smart_Labs/backend/bin/Release/net9.0/appsettings_example.json
 /Users/jawadalsayed/Desktop/fyp/Smart_Labs/backend/bin/Release/net9.0/backend.staticwebassets.runtime.json
 /Users/jawadalsayed/Desktop/fyp/Smart_Labs/backend/bin/Release/net9.0/OneOf.dll
+/Users/jawadalsayed/Desktop/fyp/Smart_Labs/backend/bin/Release/net9.0/Firebase/token.json
+/Users/jawadalsayed/Desktop/fyp/Smart_Labs/backend/bin/Release/net9.0/FirebaseAdmin.dll
+/Users/jawadalsayed/Desktop/fyp/Smart_Labs/backend/bin/Release/net9.0/Google.Api.Gax.dll
+/Users/jawadalsayed/Desktop/fyp/Smart_Labs/backend/bin/Release/net9.0/Google.Api.Gax.Rest.dll
+/Users/jawadalsayed/Desktop/fyp/Smart_Labs/backend/bin/Release/net9.0/Microsoft.Bcl.AsyncInterfaces.dll

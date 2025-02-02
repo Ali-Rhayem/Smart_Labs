@@ -2,6 +2,7 @@
 /Users/jawadalsayed/Desktop/publish/appsettings.Development.json
 /Users/jawadalsayed/Desktop/publish/appsettings.json
 /Users/jawadalsayed/Desktop/publish/appsettings_example.json
+/Users/jawadalsayed/Desktop/publish/Firebase/token.json
 /Users/jawadalsayed/Desktop/publish/gmail_api/token.json
 /Users/jawadalsayed/Desktop/publish/backend.dll
 /Users/jawadalsayed/Desktop/publish/backend.deps.json
@@ -10,12 +11,16 @@
 /Users/jawadalsayed/Desktop/publish/BCrypt.Net-Next.dll
 /Users/jawadalsayed/Desktop/publish/BouncyCastle.Cryptography.dll
 /Users/jawadalsayed/Desktop/publish/DnsClient.dll
+/Users/jawadalsayed/Desktop/publish/FirebaseAdmin.dll
+/Users/jawadalsayed/Desktop/publish/Google.Api.Gax.dll
+/Users/jawadalsayed/Desktop/publish/Google.Api.Gax.Rest.dll
 /Users/jawadalsayed/Desktop/publish/Google.Apis.dll
 /Users/jawadalsayed/Desktop/publish/Google.Apis.Auth.dll
 /Users/jawadalsayed/Desktop/publish/Google.Apis.Core.dll
 /Users/jawadalsayed/Desktop/publish/Google.Apis.Gmail.v1.dll
 /Users/jawadalsayed/Desktop/publish/Microsoft.AspNetCore.Authentication.JwtBearer.dll
 /Users/jawadalsayed/Desktop/publish/Microsoft.AspNetCore.OpenApi.dll
+/Users/jawadalsayed/Desktop/publish/Microsoft.Bcl.AsyncInterfaces.dll
 /Users/jawadalsayed/Desktop/publish/Microsoft.IdentityModel.Abstractions.dll
 /Users/jawadalsayed/Desktop/publish/Microsoft.IdentityModel.JsonWebTokens.dll
 /Users/jawadalsayed/Desktop/publish/Microsoft.IdentityModel.Logging.dll
@@ -27,6 +32,7 @@
 /Users/jawadalsayed/Desktop/publish/MongoDB.Bson.dll
 /Users/jawadalsayed/Desktop/publish/MongoDB.Driver.dll
 /Users/jawadalsayed/Desktop/publish/Newtonsoft.Json.dll
+/Users/jawadalsayed/Desktop/publish/OneOf.dll
 /Users/jawadalsayed/Desktop/publish/SharpCompress.dll
 /Users/jawadalsayed/Desktop/publish/Snappier.dll
 /Users/jawadalsayed/Desktop/publish/Swashbuckle.AspNetCore.Swagger.dll

@@ -2,6 +2,7 @@
 /Users/jawadalsayed/Desktop/fyp/publish/appsettings.Development.json
 /Users/jawadalsayed/Desktop/fyp/publish/appsettings.json
 /Users/jawadalsayed/Desktop/fyp/publish/appsettings_example.json
+/Users/jawadalsayed/Desktop/fyp/publish/Firebase/token.json
 /Users/jawadalsayed/Desktop/fyp/publish/gmail_api/token.json
 /Users/jawadalsayed/Desktop/fyp/publish/backend.dll
 /Users/jawadalsayed/Desktop/fyp/publish/backend.deps.json
@@ -10,12 +11,16 @@
 /Users/jawadalsayed/Desktop/fyp/publish/BCrypt.Net-Next.dll
 /Users/jawadalsayed/Desktop/fyp/publish/BouncyCastle.Cryptography.dll
 /Users/jawadalsayed/Desktop/fyp/publish/DnsClient.dll
+/Users/jawadalsayed/Desktop/fyp/publish/FirebaseAdmin.dll
+/Users/jawadalsayed/Desktop/fyp/publish/Google.Api.Gax.dll
+/Users/jawadalsayed/Desktop/fyp/publish/Google.Api.Gax.Rest.dll
 /Users/jawadalsayed/Desktop/fyp/publish/Google.Apis.dll
 /Users/jawadalsayed/Desktop/fyp/publish/Google.Apis.Auth.dll
 /Users/jawadalsayed/Desktop/fyp/publish/Google.Apis.Core.dll
 /Users/jawadalsayed/Desktop/fyp/publish/Google.Apis.Gmail.v1.dll
 /Users/jawadalsayed/Desktop/fyp/publish/Microsoft.AspNetCore.Authentication.JwtBearer.dll
 /Users/jawadalsayed/Desktop/fyp/publish/Microsoft.AspNetCore.OpenApi.dll
+/Users/jawadalsayed/Desktop/fyp/publish/Microsoft.Bcl.AsyncInterfaces.dll
 /Users/jawadalsayed/Desktop/fyp/publish/Microsoft.IdentityModel.Abstractions.dll
 /Users/jawadalsayed/Desktop/fyp/publish/Microsoft.IdentityModel.JsonWebTokens.dll
 /Users/jawadalsayed/Desktop/fyp/publish/Microsoft.IdentityModel.Logging.dll
