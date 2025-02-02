@@ -46,5 +46,21 @@ namespace backend.Controllers
             var notifications = await _notificationService.GetNotificationsByUserIdAsync(userId);
             return Ok(notifications);
         }
+
+        // PUT: api/Notification/mark-as-read/{notificationId}
+        [HttpPut("mark-as-read/{notificationId}")]
+        [Authorize]
+        public async Task<ActionResult> MarkNotificationAsRead(int notificationId)
+        {
+            var userIdClaim = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier);
+            var notification = await _notificationService.GetNotificationByIdAsync(notificationId);
+            if (notification == null || notification.UserID != int.Parse(userIdClaim!.Value))
+            {
+                return Unauthorized();
+            }
+
+            await _notificationService.MarkNotificationAsReadAsync(notificationId);
+            return Ok();
+        }
     }
 }
