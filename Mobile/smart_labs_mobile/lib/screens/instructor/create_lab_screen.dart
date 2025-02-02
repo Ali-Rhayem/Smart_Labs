@@ -1,15 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
 import 'package:smart_labs_mobile/models/lab_model.dart';
+import 'package:smart_labs_mobile/providers/ppe_povider.dart';
 import 'package:smart_labs_mobile/services/api_service.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class CreateLabScreen extends StatefulWidget {
+var logger = Logger();
+// TODO: add error display message
+
+class CreateLabScreen extends ConsumerStatefulWidget {
   const CreateLabScreen({super.key});
 
   @override
-  State<CreateLabScreen> createState() => _CreateLabScreenState();
+  ConsumerState<CreateLabScreen> createState() => _CreateLabScreenState();
 }
 
-class _CreateLabScreenState extends State<CreateLabScreen> {
+class _CreateLabScreenState extends ConsumerState<CreateLabScreen> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _labNameController;
   late TextEditingController _labCodeController;
@@ -23,16 +29,9 @@ class _CreateLabScreenState extends State<CreateLabScreen> {
   TimeOfDay _endTime = TimeOfDay.now();
   final ApiService _apiService = ApiService();
 
-  final List<String> _ppeOptions = [
-    'Lab Coat',
-    'Safety Goggles',
-    'Gloves',
-    'Face Mask',
-    'Closed-toe Shoes',
-    'All of the above',
-  ];
   final List<String> _selectedPPE = [];
   final List<String> _selectedStudents = [];
+  final List<String> _selectedPPEIds = [];
 
   @override
   void initState() {
@@ -202,48 +201,72 @@ class _CreateLabScreenState extends State<CreateLabScreen> {
   }
 
   Widget _buildPPEDropdown() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Required PPE',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 16),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: _ppeOptions.map((String ppe) {
-            final isSelected = _selectedPPE.contains(ppe);
-            return FilterChip(
-              label: Text(
-                ppe,
-                style: TextStyle(
-                  color: isSelected ? Colors.black : Colors.white,
+    return Consumer(
+      builder: (context, ref, child) {
+        return ref.watch(ppeProvider).when(
+              data: (ppeList) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Required PPE',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: ppeList.map((ppe) {
+                        final isSelected =
+                            _selectedPPEIds.contains(ppe.id.toString());
+                        return FilterChip(
+                          label: Text(
+                            ppe.name,
+                            style: TextStyle(
+                              color: isSelected ? Colors.black : Colors.white,
+                            ),
+                          ),
+                          selected: isSelected,
+                          onSelected: (bool selected) {
+                            setState(() {
+                              if (selected) {
+                                _selectedPPEIds.add(ppe.id.toString());
+                                logger.w("Selected PPE: ${ppe.name}");
+                                logger.w("selected ppe id's ${_selectedPPEIds}");
+                                _selectedPPE.add(ppe.name);
+                              } else {
+                                _selectedPPEIds.remove(ppe.id.toString());
+                                _selectedPPE.remove(ppe.name);
+                              }
+                            });
+                          },
+                          backgroundColor: const Color(0xFF1C1C1C),
+                          selectedColor: const Color(0xFFFFFF00),
+                          checkmarkColor: Colors.black,
+                          side: const BorderSide(color: Colors.white24),
+                        );
+                      }).toList(),
+                    ),
+                  ],
+                );
+              },
+              loading: () => const Center(
+                child: CircularProgressIndicator(
+                  color: Color(0xFFFFFF00),
                 ),
               ),
-              selected: isSelected,
-              onSelected: (bool selected) {
-                setState(() {
-                  if (selected) {
-                    _selectedPPE.add(ppe);
-                  } else {
-                    _selectedPPE.remove(ppe);
-                  }
-                });
-              },
-              backgroundColor: const Color(0xFF1C1C1C),
-              selectedColor: const Color(0xFFFFFF00),
-              checkmarkColor: Colors.black,
-              side: const BorderSide(color: Colors.white24),
+              error: (error, stack) => Center(
+                child: Text(
+                  'Error loading PPE items: $error',
+                  style: const TextStyle(color: Colors.red),
+                ),
+              ),
             );
-          }).toList(),
-        ),
-      ],
+      },
     );
   }
 
@@ -624,6 +647,7 @@ class _CreateLabScreenState extends State<CreateLabScreen> {
           "description": _descriptionController.text,
           "endLab": false,
           "room": _roomController.text,
+          "ppeIds": _selectedPPEIds,
         },
         "student_Emails": _selectedStudents
       };
