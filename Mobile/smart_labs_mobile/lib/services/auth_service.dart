@@ -1,3 +1,4 @@
+import 'package:logger/logger.dart';
 import '../utils/secure_storage.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'api_service.dart';
@@ -7,9 +8,10 @@ class AuthService {
   final SecureStorage _secureStorage = SecureStorage();
 
   Future<Map<String, dynamic>> login(String email, String password) async {
+    final String? fcmToken = await _secureStorage.readFcmToken();
     final response = await _apiService.post(
       '/User/login',
-      {'email': email, 'password': password},
+      {'email': email, 'password': password, 'Fcm_token': fcmToken},
       requiresAuth: false,
     );
 
@@ -19,8 +21,10 @@ class AuthService {
 
       // Decode the token
       Map<String, dynamic> decodedToken = JwtDecoder.decode(token);
-      var id = decodedToken['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'];
-      var role = decodedToken['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
+      var id = decodedToken[
+          'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'];
+      var role = decodedToken[
+          'http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
       await _secureStorage.storeId(id);
       await _secureStorage.storeRole(role);
 
