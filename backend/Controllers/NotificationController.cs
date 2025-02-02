@@ -31,5 +31,20 @@ namespace backend.Controllers
             await _notificationService.SendNotificationAsync(notification);
             return Ok();
         }
+
+        // GET: api/Notification/user/{userId}
+        [HttpGet("user/{userId}")]
+        [Authorize]
+        public async Task<ActionResult> GetNotificationsByUserId(int userId)
+        {
+            var userIdClaim = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userId != int.Parse(userIdClaim!.Value))
+            {
+                return Unauthorized();
+            }
+
+            var notifications = await _notificationService.GetNotificationsByUserIdAsync(userId);
+            return Ok(notifications);
+        }
     }
 }
