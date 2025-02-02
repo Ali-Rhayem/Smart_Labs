@@ -137,4 +137,10 @@ public class UserService
         return await _users.Find(u => u.FcmToken == fcmToken).Project<User>(projection).FirstOrDefaultAsync();
     }
 
+    public async Task<bool> SaveFcmToken(int id, string fcmToken)
+    {
+        var update = Builders<User>.Update.Set(u => u.FcmToken, fcmToken);
+        var result = await _users.UpdateOneAsync(u => u.Id == id, update);
+        return result.IsAcknowledged && result.ModifiedCount > 0;
+    }
 }
