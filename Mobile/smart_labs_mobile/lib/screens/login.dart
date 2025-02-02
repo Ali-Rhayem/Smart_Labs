@@ -225,7 +225,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
     final result = await _authService.login(_email, _password);
     
-        // Check if widget is still mounted before proceeding
+    // Check if widget is still mounted before proceeding
     if (!mounted) return;
 
     if (result['success']) {
