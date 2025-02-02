@@ -1,5 +1,6 @@
 import json
 import os
+import datetime
 from producer_utils import *
 
 images_folder = "./test_images"
@@ -12,7 +13,7 @@ for filename in os.listdir(images_folder):
             "ppe_arr": ["gloves", "goggles"],
             "session_id" : 1,
             "lab_id" : 1,
-            "date": "2021-08-01",
-            "time": "12:00:00"
+            "date": datetime.date.today().strftime("%Y-%m-%d"),
+            "time": datetime.datetime.now().strftime("%H:%M:%S")
         }
         produce(json.dumps(image_data))
