@@ -88,5 +88,15 @@ namespace backend.Controllers
             await _notificationService.MarkAllNotificationsAsReadAsync(int.Parse(userIdClaim!.Value));
             return Ok();
         }
+
+        // PUT: api/Notification/mark-all-as-deleted
+        [HttpPut("mark-all-as-deleted")]
+        [Authorize]
+        public async Task<ActionResult> MarkAllNotificationsAsDeleted()
+        {
+            var userIdClaim = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier);
+            await _notificationService.MarkAllNotificationsAsDeletedAsync(int.Parse(userIdClaim!.Value));
+            return Ok();
+        }
     }
 }
