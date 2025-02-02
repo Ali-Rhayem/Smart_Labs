@@ -18,7 +18,7 @@ db = client[os.getenv("MONGO_DB")]
 
 model = None
 usersProfiles = None
-model_path = './models/yolov8_ppe3.pt'
+model_path = './models/yolov8_ppe1.pt'
 
 def display_image(img_rgb):
     if img_rgb is None:
@@ -112,10 +112,13 @@ def recognize_face(image, bounding_box):
 
     x1, y1, x2, y2 = bounding_box
     padding = 20
+    dimensions = image.shape
+    height, width, channels = dimensions
+    
     x1 = int(max(0, x1 - padding))
     y1 = int(max(0, y1 - padding))
-    x2 = int(min(640, x2 + padding))
-    y2 = int(min(640, y2 + padding))
+    x2 = int(min(width, x2 + padding))
+    y2 = int(min(height, y2 + padding))
     
     face_crop = image[y1:y2, x1:x2]
     
