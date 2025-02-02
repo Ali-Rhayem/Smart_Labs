@@ -6,17 +6,19 @@ import numpy as np
 from pprint import pprint
 import time
 from consumer_utils import *
-from producer_utils import *
+import os
+from dotenv import load_dotenv
+load_dotenv()
 
 conf = {
-    'bootstrap.servers': 'localhost:9092',
-    'group.id': 'python-consumer',
+    'bootstrap.servers': os.getenv("BOOTSTRAP_SERVERS"),
+    'group.id': os.getenv("GROUP_ID"),
     'auto.offset.reset': 'earliest'
 }
 
 consumer = Consumer(conf)
 
-consumer.subscribe(['test'])
+consumer.subscribe([os.getenv("TOPIC")])
 
 try:
     while True:
@@ -46,6 +48,7 @@ try:
                     person_objs = []
                     faces = []
                     other_objs = []
+                    
                     
                     
                     # Extracting objects from the image
@@ -82,7 +85,7 @@ try:
                         except Exception as e:
                             print(f"Error processing bounding box: {e}")
                             continue
-                    # print("Passed phase 1")
+
                     # Assigning faces to people
                     for face in faces:
                         fbbox = face["bounding_box"]
@@ -107,7 +110,7 @@ try:
                         person_objs[index]["identity"] = face["identity"]
                         person_objs[index]["_id"] = face["_id"]
                         person_objs[index]["identity_confidence"] = face["identity_confidence"]
-                    # print("Passed phase 2")
+
                     # Deleting people without faces
                     person_objs = [person for person in person_objs if "face" in person]
 
@@ -158,8 +161,8 @@ try:
                             if "gloves" not in person_objs[index]:
                                 person_objs[index]["gloves"] = []
                             person_objs[index]["gloves"].append(object_bbox)
-                    # print("Passed phase 3")
-                    draw_objects(image, person_objs)
+
+                    # draw_objects(image, person_objs)
                     people = []
                     pprint(person_objs)
                     
@@ -177,7 +180,7 @@ try:
                                 person_data["ppe"][ppe] = 1
 
                         people.append(person_data)
-                    # print("Passed phase 4")
+
                     session_exists = sessions.find_one({"_id": session_id})
 
                     if not session_exists:
@@ -215,5 +218,4 @@ finally:
         consumer.close()
     except Exception as e:
         print(f"Error closing the consumer: {e}")
-
-
+     
