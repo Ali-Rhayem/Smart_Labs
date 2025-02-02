@@ -8,9 +8,7 @@ class Lab {
   final String ppe;
   final List<String> instructors;
   final List<String> students;
-  final DateTime date;
-  final String startTime;
-  final String endTime;
+  final List<LabSchedule> schedule;
   final String report;
   final String semesterId;
   final List<Session> sessions;
@@ -23,11 +21,27 @@ class Lab {
     required this.ppe,
     required this.instructors,
     required this.students,
-    required this.date,
-    required this.startTime,
-    required this.endTime,
+    required this.schedule,
     required this.report,
     required this.semesterId,
     required this.sessions,
   });
+}
+
+class LabSchedule {
+  String dayOfWeek;
+  String startTime;
+  String endTime;
+
+  LabSchedule({
+    required this.dayOfWeek,
+    required this.startTime,
+    required this.endTime,
+  });
+
+  Map<String, dynamic> toJson() => {
+    'dayOfWeek': dayOfWeek,
+    'startTime': startTime,
+    'endTime': endTime,
+  };
 }
