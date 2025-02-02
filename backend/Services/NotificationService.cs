@@ -80,4 +80,11 @@ public class NotificationService
         var update = Builders<Notifications>.Update.Set(n => n.IsRead, true);
         await _notifications.UpdateOneAsync(filter, update);
     }
+
+    public async Task MarkNotificationAsDeletedAsync(int notificationId)
+    {
+        var filter = Builders<Notifications>.Filter.Eq(n => n.Id, notificationId);
+        var update = Builders<Notifications>.Update.Set(n => n.IsDeleted, true);
+        await _notifications.UpdateOneAsync(filter, update);
+    }
 }
