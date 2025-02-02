@@ -30,38 +30,26 @@ def display_image(img_rgb):
     plt.axis('off')  # Hide the axes for better visualization
     plt.show()
     
-def analyze_image(image):
+def analyze_image(base64_str):
     global model
     if model is None:
         model = YOLO(model_path)
     
-    if image is None:
-        raise ValueError("Failed to resize the input image.")
-
+    if base64_str is None:
+        raise ValueError("Failed to import the input image.")
+    
+    image_data = base64.b64decode(base64_str)
+    
+    np_arr = np.frombuffer(image_data, np.uint8)
+    image = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+    
     image_array = np.array(image)
 
     results = model.predict(source=image_array)
     
-    return results
-
-def resize_base64_image_to_image(base64_str, target_size=(640, 640)):
-    try:
-        image_data = base64.b64decode(base64_str)
-
-        np_arr = np.frombuffer(image_data, np.uint8)
-        img = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
-
-        if img is None:
-            raise ValueError("Failed to decode the image. Ensure the Base64 input is valid.")
-
-        resized_img = cv2.resize(img, target_size)
-
-        return resized_img
-
-    except Exception as e:
-        print(f"Error resizing image: {e}")
-        return None
+    return results, image
     
+ 
 def facenet_embed(img_rgb: np.ndarray):
     try:
         model = InceptionResnetV1(pretrained='vggface2').eval()
