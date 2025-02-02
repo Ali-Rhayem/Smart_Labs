@@ -13,7 +13,7 @@ for filename in os.listdir(images_folder):
             "ppe_arr": ["gloves", "goggles"],
             "session_id" : 1,
             "lab_id" : 1,
-            "room"
+            "room": "B-103",
             "date": datetime.date.today().strftime("%Y-%m-%d"),
             "time": datetime.datetime.now().strftime("%H:%M:%S")
         }
