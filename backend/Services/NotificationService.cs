@@ -73,4 +73,11 @@ public class NotificationService
         var notifications = await _notifications.Find(filter).ToListAsync();
         return notifications;
     }
+
+    public async Task MarkNotificationAsReadAsync(int notificationId)
+    {
+        var filter = Builders<Notifications>.Filter.Eq(n => n.Id, notificationId);
+        var update = Builders<Notifications>.Update.Set(n => n.IsRead, true);
+        await _notifications.UpdateOneAsync(filter, update);
+    }
 }
