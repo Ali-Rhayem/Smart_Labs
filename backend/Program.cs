@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using backend.helpers;
+using FirebaseAdmin;
+using Google.Apis.Auth.OAuth2;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,6 +32,7 @@ builder.Services.AddScoped<SemesterService>();
 builder.Services.AddScoped<PPEService>();
 builder.Services.AddScoped<FacultyService>();
 builder.Services.AddScoped<SessionService>();
+builder.Services.AddScoped<NotificationService>();
 builder.Services.AddScoped<LabHelper>();
 
 builder.Services.AddSingleton<JwtTokenHelper>();
@@ -79,7 +82,10 @@ builder.Services.AddSwaggerGen(c =>
         }
     });
 });
-
+FirebaseApp.Create(new AppOptions
+{
+    Credential = GoogleCredential.FromFile(builder.Configuration["Firebase:credentials_path"])
+});
 var app = builder.Build();
 
 // add swagger
