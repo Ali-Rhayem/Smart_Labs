@@ -94,4 +94,11 @@ public class NotificationService
         var update = Builders<Notifications>.Update.Set(n => n.IsRead, true);
         await _notifications.UpdateManyAsync(filter, update);
     }
+
+    public async Task MarkAllNotificationsAsDeletedAsync(int userId)
+    {
+        var filter = Builders<Notifications>.Filter.Eq(n => n.UserID, userId);
+        var update = Builders<Notifications>.Update.Set(n => n.IsDeleted, true);
+        await _notifications.UpdateManyAsync(filter, update);
+    }
 }
