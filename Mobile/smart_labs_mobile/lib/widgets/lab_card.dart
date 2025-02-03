@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:smart_labs_mobile/models/lab_model.dart';
+import 'package:smart_labs_mobile/screens/instructor/instructor_lab_details.dart';
 import 'package:smart_labs_mobile/screens/student/lab_details.dart';
+import 'package:smart_labs_mobile/utils/secure_storage.dart';
 
 class LabCard extends StatelessWidget {
   const LabCard({
@@ -8,7 +10,23 @@ class LabCard extends StatelessWidget {
     required this.lab,
     this.showManageButton = false,
   });
-  
+
+  Future<void> _navigateToDetails(BuildContext context) async {
+    final storage = SecureStorage();
+    final role = await storage.readRole();
+
+    if (!context.mounted) return;
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (ctx) => role == 'instructor'
+            ? InstructorLabDetailScreen(lab: lab)
+            : LabDetailScreen(lab: lab),
+      ),
+    );
+  }
+
   final Lab lab;
   final bool showManageButton;
   static const Color kNeonAccent = Color(0xFFFFFF00);
@@ -16,14 +34,7 @@ class LabCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (ctx) => LabDetailScreen(lab: lab),
-          ),
-        );
-      },
+      onTap: () => _navigateToDetails(context),
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         padding: const EdgeInsets.all(16),
