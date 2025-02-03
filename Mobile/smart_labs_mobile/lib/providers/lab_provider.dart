@@ -97,4 +97,10 @@ class LabNotifier extends StateNotifier<AsyncValue<List<Lab>>> {
   void clearLabs() {
     state = const AsyncValue.data([]);
   }
+
+  void addLab(Lab lab) {
+    state.whenData((labs) {
+      state = AsyncValue.data([...labs, lab]);
+    });
+  }
 }
