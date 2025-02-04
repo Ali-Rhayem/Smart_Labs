@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:smart_labs_mobile/screens/instructor/create_lab_screen.dart';
 import 'package:smart_labs_mobile/screens/instructor/instructor_dashboard.dart';
 import 'package:smart_labs_mobile/screens/instructor/instructor_labs.dart';
+import 'package:smart_labs_mobile/screens/notifications_screen.dart';
 import 'package:smart_labs_mobile/screens/profile.dart';
 
 class InstructorMainWrapper extends StatefulWidget {
@@ -17,10 +18,10 @@ class _InstructorMainWrapperState extends State<InstructorMainWrapper> {
   // A list of pages in the same order as the BottomNavigationBar items.
   // We now have 4 items: Labs, Analytics, Messages, Profile.
   late final List<Widget> _pages = [
-    const DoctorLabsScreen(),         // index 0
-    const InstructorDashboardScreen(),    // index 1
-    const DoctorLabsScreen(),         // index 2 (Messages placeholder)
-    const ProfileScreen(),   // index 3
+    const DoctorLabsScreen(),
+    const InstructorDashboardScreen(),
+    const NotificationsScreen(),
+    const ProfileScreen(),
   ];
 
   void _onItemTapped(int index) {
