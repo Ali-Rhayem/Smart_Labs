@@ -2,13 +2,17 @@ import json
 import os
 import datetime
 from producer_utils import *
-
+from kafka import KafkaProducer
+import time
 images_folder = "./test_images"
+
+producer = KafkaProducer(bootstrap_servers=os.getenv("BOOTSTRAP_SERVERS"), value_serializer=lambda v: str(v).encode('utf-8'))
+topic = 'test_topic'
 
 for filename in os.listdir(images_folder):
     if filename.endswith(".jpg") or filename.endswith(".png"):
         image_path = os.path.join(images_folder, filename)
-        image_data = {
+        data = {
             "encoding": images_to_base64(image_path),
             "ppe_arr": ["gloves", "goggles"],
             "session_id" : 1,
@@ -17,4 +21,5 @@ for filename in os.listdir(images_folder):
             "date": datetime.date.today().strftime("%Y-%m-%d"),
             "time": datetime.datetime.now().strftime("%H:%M:%S")
         }
-        produce(json.dumps(image_data))
+        producer.send(topic, value=json.dumps(data))
+        print(f"Sent: {filename}")
