@@ -63,4 +63,93 @@ class AuthService {
       };
     }
   }
+
+  Future<Map<String, dynamic>> getNotifications(String userId) async {
+    final response = await _apiService.get('/Notification/user/$userId');
+
+    if (response['success']) {
+      return {
+        'success': true,
+        'data': response['data'],
+      };
+    } else {
+      return {
+        'success': false,
+        'message': response['message'] ?? 'Failed to fetch notifications',
+      };
+    }
+  }
+
+  Future<Map<String, dynamic>> markNotificationAsRead(
+      String notificationId) async {
+    final response =
+        await _apiService.put('/Notification/mark-as-read/$notificationId', {});
+
+    if (response['success']) {
+      return {
+        'success': true,
+        'data': response['data'],
+      };
+    } else {
+      return {
+        'success': false,
+        'message': response['message'] ?? 'Failed to mark notification as read',
+      };
+    }
+  }
+
+  Future<Map<String, dynamic>> markNotificationAsDeleted(
+      String notificationId) async {
+    final response = await _apiService
+        .put('/Notification/mark-as-deleted/$notificationId', {});
+
+    if (response['success']) {
+      return {
+        'success': true,
+        'data': response['data'],
+      };
+    } else {
+      return {
+        'success': false,
+        'message':
+            response['message'] ?? 'Failed to mark notification as deleted',
+      };
+    }
+  }
+
+  Future<Map<String, dynamic>> markAllNotificationsAsRead() async {
+    final response =
+        await _apiService.put('/Notification/mark-all-as-read', {});
+
+    if (response['success']) {
+      return {
+        'success': true,
+        'data': response['data'],
+      };
+    } else {
+      return {
+        'success': false,
+        'message':
+            response['message'] ?? 'Failed to mark all notifications as read',
+      };
+    }
+  }
+
+  Future<Map<String, dynamic>> markAllNotificationsAsDeleted() async {
+    final response =
+        await _apiService.put('/Notification/mark-all-as-deleted', {});
+
+    if (response['success']) {
+      return {
+        'success': true,
+        'data': response['data'],
+      };
+    } else {
+      return {
+        'success': false,
+        'message': response['message'] ??
+            'Failed to mark all notifications as deleted',
+      };
+    }
+  }
 }
