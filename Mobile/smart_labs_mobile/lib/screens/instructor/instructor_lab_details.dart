@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
 import 'package:smart_labs_mobile/models/lab_model.dart';
 import '../../widgets/session_card.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,6 +10,8 @@ final labStudentsProvider = StateNotifierProvider.family<LabStudentsNotifier,
     AsyncValue<List<User>>, String>(
   (ref, labId) => LabStudentsNotifier(labId),
 );
+
+var logger = Logger();
 
 class LabStudentsNotifier extends StateNotifier<AsyncValue<List<User>>> {
   final String labId;
@@ -47,6 +50,37 @@ class LabStudentsNotifier extends StateNotifier<AsyncValue<List<User>>> {
       }
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
+    }
+  }
+
+  Future<void> addStudents(List<String> emails) async {
+    try {
+      final response =
+          await _apiService.postRaw('/Lab/$labId/students', emails);
+      if (response['success'] != false) {
+        // Refresh the students list
+        await fetchStudents();
+      } else {
+        throw Exception(response['message'] ?? 'Failed to add students');
+      }
+    } catch (e) {
+      throw Exception('Failed to add students: $e');
+    }
+  }
+
+  Future<void> removeStudent(String studentId) async {
+    try {
+      final response =
+          await _apiService.delete('/Lab/$labId/students/$studentId');
+      logger.w('Response: $response');
+      if (response['success'] != false) {
+        // Refresh the students list
+        await fetchStudents();
+      } else {
+        throw Exception(response['message'] ?? 'Failed to remove student');
+      }
+    } catch (e) {
+      throw Exception('Failed to remove student: $e');
     }
   }
 }
@@ -240,91 +274,116 @@ class InstructorLabDetailScreen extends StatelessWidget {
       builder: (context, ref, child) {
         final studentsAsync = ref.watch(labStudentsProvider(lab.labId));
 
-        return studentsAsync.when(
-          loading: () => const Center(
-            child: CircularProgressIndicator(color: kNeonAccent),
-          ),
-          error: (error, stack) => Center(
-            child: Text(
-              'Error: $error',
-              style: const TextStyle(color: Colors.white70),
+        return Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: ElevatedButton.icon(
+                onPressed: () => _showAddStudentsDialog(context, ref),
+                icon: const Icon(Icons.person_add),
+                label: const Text('Add Students'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: kNeonAccent,
+                  foregroundColor: Colors.black,
+                ),
+              ),
             ),
-          ),
-          data: (students) {
-            if (students.isEmpty) {
-              return Center(
-                child: Text(
-                  'No students enrolled',
-                  style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.7),
-                    fontSize: 16,
+            Expanded(
+              child: studentsAsync.when(
+                loading: () => const Center(
+                  child: CircularProgressIndicator(color: kNeonAccent),
+                ),
+                error: (error, stack) => Center(
+                  child: Text(
+                    'Error: $error',
+                    style: const TextStyle(color: Colors.white70),
                   ),
                 ),
-              );
-            }
-
-            return ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: students.length,
-              itemBuilder: (context, index) {
-                final student = students[index];
-                return Card(
-                  color: const Color(0xFF1C1C1C),
-                  child: ExpansionTile(
-                    leading: CircleAvatar(
-                      backgroundColor: kNeonAccent,
+                data: (students) {
+                  if (students.isEmpty) {
+                    return Center(
                       child: Text(
-                        student.name[0].toUpperCase(),
-                        style: const TextStyle(
-                          color: Colors.black,
-                          fontWeight: FontWeight.bold,
+                        'No students enrolled',
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.7),
+                          fontSize: 16,
                         ),
                       ),
-                    ),
-                    title: Text(
-                      student.name,
-                      style: const TextStyle(color: Colors.white),
-                    ),
-                    subtitle: Text(
-                      student.email,
-                      style: TextStyle(
-                        color: Colors.white.withValues(alpha:  0.7),
-                      ),
-                    ),
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                    );
+                  }
+
+                  return ListView.builder(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: students.length,
+                    itemBuilder: (context, index) {
+                      final student = students[index];
+                      return Card(
+                        color: const Color(0xFF1C1C1C),
+                        child: ExpansionTile(
+                          leading: CircleAvatar(
+                            backgroundColor: kNeonAccent,
+                            child: Text(
+                              student.name[0].toUpperCase(),
+                              style: const TextStyle(
+                                color: Colors.black,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          title: Text(
+                            student.name,
+                            style: const TextStyle(color: Colors.white),
+                          ),
+                          subtitle: Text(
+                            student.email,
+                            style: TextStyle(
+                              color: Colors.white.withOpacity(0.7),
+                            ),
+                          ),
+                          trailing: IconButton(
+                            icon: const Icon(Icons.remove_circle_outline,
+                                color: Colors.red),
+                            onPressed: () =>
+                                _showRemoveStudentDialog(context, ref, student),
+                          ),
                           children: [
-                            if (student.faculty != null)
-                              _buildDetailRow('Faculty', student.faculty!),
-                            if (student.major != null)
-                              _buildDetailRow('Major', student.major!),
-                            const SizedBox(height: 8),
-                            // Row(
-                            //   mainAxisAlignment: MainAxisAlignment.end,
-                            //   children: [
-                            //     TextButton(
-                            //       onPressed: () {
-                            //         // TODO: Implement view student analytics
-                            //       },
-                            //       child: const Text(
-                            //         'View Analytics',
-                            //         style: TextStyle(color: kNeonAccent),
-                            //       ),
-                            //     ),
-                            //   ],
-                            // ),
+                            Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  if (student.faculty != null)
+                                    _buildDetailRow(
+                                        'Faculty', student.faculty!),
+                                  if (student.major != null)
+                                    _buildDetailRow('Major', student.major!),
+                                  const SizedBox(height: 8),
+                                  // Row(
+                                  //   mainAxisAlignment: MainAxisAlignment.end,
+                                  //   children: [
+                                  //     TextButton(
+                                  //       onPressed: () {
+                                  //         // TODO: Implement view student analytics
+                                  //       },
+                                  //       child: const Text(
+                                  //         'View Analytics',
+                                  //         style: TextStyle(color: kNeonAccent),
+                                  //       ),
+                                  //     ),
+                                  //   ],
+                                  // ),
+                                ],
+                              ),
+                            ),
                           ],
                         ),
-                      ),
-                    ],
-                  ),
-                );
-              },
-            );
-          },
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
+          ],
         );
       },
     );
@@ -440,5 +499,110 @@ class InstructorLabDetailScreen extends StatelessWidget {
       default:
         return dayOfWeek;
     }
+  }
+
+  Future<void> _showAddStudentsDialog(
+      BuildContext context, WidgetRef ref) async {
+    final TextEditingController emailsController = TextEditingController();
+
+    return showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF1C1C1C),
+        title:
+            const Text('Add Students', style: TextStyle(color: Colors.white)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'Enter student emails (one per line):',
+              style: TextStyle(color: Colors.white70),
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: emailsController,
+              style: const TextStyle(color: Colors.white),
+              maxLines: 5,
+              decoration: InputDecoration(
+                hintText: 'student1@example.com\nstudent2@example.com',
+                hintStyle: TextStyle(color: Colors.white.withOpacity(0.3)),
+                border: const OutlineInputBorder(),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),
+                ),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child:
+                const Text('Cancel', style: TextStyle(color: Colors.white70)),
+          ),
+          TextButton(
+            onPressed: () async {
+              final emails = emailsController.text
+                  .split('\n')
+                  .map((e) => e.trim())
+                  .where((e) => e.isNotEmpty)
+                  .toList();
+
+              if (emails.isEmpty) return;
+
+              try {
+                await ref
+                    .read(labStudentsProvider(lab.labId).notifier)
+                    .addStudents(emails);
+                Navigator.pop(context);
+              } catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(e.toString())),
+                );
+              }
+            },
+            child: Text('Add', style: TextStyle(color: kNeonAccent)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _showRemoveStudentDialog(
+      BuildContext context, WidgetRef ref, User student) async {
+    return showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF1C1C1C),
+        title:
+            const Text('Remove Student', style: TextStyle(color: Colors.white)),
+        content: Text(
+          'Are you sure you want to remove ${student.name} from this lab?',
+          style: const TextStyle(color: Colors.white70),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child:
+                const Text('Cancel', style: TextStyle(color: Colors.white70)),
+          ),
+          TextButton(
+            onPressed: () async {
+              try {
+                await ref
+                    .read(labStudentsProvider(lab.labId).notifier)
+                    .removeStudent(student.id.toString());
+                Navigator.pop(context);
+              } catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(e.toString())),
+                );
+              }
+            },
+            child: const Text('Remove', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
   }
 }
