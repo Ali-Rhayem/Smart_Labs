@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:smart_labs_mobile/models/user_model.dart';
+import 'package:smart_labs_mobile/screens/notifications_screen.dart';
 import 'package:smart_labs_mobile/screens/profile.dart';
 import 'package:smart_labs_mobile/screens/student/student_dashboard.dart';
 import 'package:smart_labs_mobile/screens/student/student_labs.dart';
@@ -22,7 +22,7 @@ class _StudentMainWrapperState extends State<StudentMainWrapper> {
   late final List<Widget> _pages = [
     const StudentLabsScreen(),         // index 0
     const StudentDashboardScreen(),    // index 1
-    const StudentLabsScreen(),         // index 2 (Messages placeholder)
+    const NotificationsScreen(),
     const ProfileScreen(),    // index 3
   ];
 
