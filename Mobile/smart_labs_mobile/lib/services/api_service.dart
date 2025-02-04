@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:smart_labs_mobile/main.dart';
 import '../utils/secure_storage.dart';
 
 class ApiService {
@@ -48,6 +49,7 @@ class ApiService {
     Map<String, dynamic> body, {
     bool requiresAuth = true,
   }) async {
+    logger.i('post: $endpoint, body: $body');
     try {
       final headers = await _getHeaders(requiresAuth: requiresAuth);
       final response = await http.post(
@@ -55,6 +57,7 @@ class ApiService {
         headers: headers,
         body: json.encode(body),
       );
+      logger.w('response: ${response.body}');
       return _handleResponse(response);
     } catch (e) {
       return {'success': false, 'message': 'Network error: $e'};
@@ -101,6 +104,10 @@ class ApiService {
         };
       }
 
+      logger.w('response: ${response.body}');
+      if (response.statusCode == 204) {
+        return {'success': true};
+      }
       final body = json.decode(response.body);
 
       if (response.statusCode >= 200 && response.statusCode < 300) {
@@ -118,6 +125,26 @@ class ApiService {
         'message': 'Failed to process response: $e',
         'statusCode': response.statusCode,
       };
+    }
+  }
+
+  Future<Map<String, dynamic>> postRaw(
+    String endpoint,
+    dynamic body, {
+    bool requiresAuth = true,
+  }) async {
+    logger.i('postRaw: $endpoint, body: $body');
+    try {
+      final headers = await _getHeaders(requiresAuth: requiresAuth);
+      final response = await http.post(
+        Uri.parse('$baseUrl$endpoint'),
+        headers: headers,
+        body: json.encode(body),
+      );
+      logger.w('response: ${response.body}');
+      return _handleResponse(response);
+    } catch (e) {
+      return {'success': false, 'message': 'Network error: $e'};
     }
   }
 }
