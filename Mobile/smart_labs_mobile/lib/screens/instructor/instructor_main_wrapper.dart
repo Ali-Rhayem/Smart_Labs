@@ -1,18 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:smart_labs_mobile/screens/instructor/create_lab_screen.dart';
 import 'package:smart_labs_mobile/screens/instructor/instructor_dashboard.dart';
 import 'package:smart_labs_mobile/screens/instructor/instructor_labs.dart';
 import 'package:smart_labs_mobile/screens/notifications_screen.dart';
 import 'package:smart_labs_mobile/screens/profile.dart';
+import 'package:smart_labs_mobile/providers/notification_provider.dart';
 
-class InstructorMainWrapper extends StatefulWidget {
+class InstructorMainWrapper extends ConsumerStatefulWidget {
   const InstructorMainWrapper({super.key});
 
   @override
-  State<InstructorMainWrapper> createState() => _InstructorMainWrapperState();
+  ConsumerState<InstructorMainWrapper> createState() =>
+      _InstructorMainWrapperState();
 }
 
-class _InstructorMainWrapperState extends State<InstructorMainWrapper> {
+class _InstructorMainWrapperState extends ConsumerState<InstructorMainWrapper> {
   int _currentIndex = 0;
 
   // A list of pages in the same order as the BottomNavigationBar items.
@@ -32,6 +35,8 @@ class _InstructorMainWrapperState extends State<InstructorMainWrapper> {
 
   @override
   Widget build(BuildContext context) {
+    final unreadCount = ref.watch(notificationsProvider).unreadCount;
+
     return Scaffold(
       // the current page is determined by _currentIndex
       body: _pages[_currentIndex],
@@ -56,20 +61,25 @@ class _InstructorMainWrapperState extends State<InstructorMainWrapper> {
         type: BottomNavigationBarType.fixed,
         currentIndex: _currentIndex,
         onTap: _onItemTapped,
-        items: const [
-          BottomNavigationBarItem(
+        items: [
+          const BottomNavigationBarItem(
             icon: Icon(Icons.biotech_outlined),
             label: 'Labs',
           ),
-          BottomNavigationBarItem(
+          const BottomNavigationBarItem(
             icon: Icon(Icons.show_chart),
             label: 'Analytics',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.notifications_none),
+            icon: Badge(
+              backgroundColor: const Color(0xFFFFFF00),
+              isLabelVisible: unreadCount > 0,
+              label: Text(unreadCount.toString()),
+              child: const Icon(Icons.notifications_none),
+            ),
             label: 'Notifications',
           ),
-          BottomNavigationBarItem(
+          const BottomNavigationBarItem(
             icon: Icon(Icons.person_outline),
             label: 'Profile',
           ),
