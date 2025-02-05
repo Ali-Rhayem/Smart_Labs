@@ -5,13 +5,13 @@ public class RoomService
 {
 
     private readonly IMongoCollection<Rooms> _rooms;
-    private readonly LabService _labService;
+    private readonly IServiceProvider _serviceProvider;
 
 
-    public RoomService(IMongoDatabase database, LabService labService)
+    public RoomService(IMongoDatabase database, IServiceProvider serviceProvider)
     {
         _rooms = database.GetCollection<Rooms>("Rooms");
-        _labService = labService;
+        _serviceProvider = serviceProvider;
     }
 
     public async Task<List<Rooms>> GetAllRoomsAsync()
@@ -32,6 +32,7 @@ public class RoomService
 
     public async Task<Rooms> UpdateRoomAsync(string name, Rooms room)
     {
+        var _labService = _serviceProvider.GetRequiredService<LabService>();
         await _rooms.ReplaceOneAsync(r => r.Name == name, room);
         var labs = await _labService.GetLabsByRoomAsync(name);
         foreach (var lab in labs)

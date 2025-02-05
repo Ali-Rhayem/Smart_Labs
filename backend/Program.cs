@@ -30,6 +30,7 @@ builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<LabService>();
 builder.Services.AddScoped<SemesterService>();
 builder.Services.AddScoped<PPEService>();
+builder.Services.AddScoped<RoomService>();
 builder.Services.AddScoped<FacultyService>();
 builder.Services.AddScoped<SessionService>();
 builder.Services.AddScoped<NotificationService>();
