@@ -1,17 +1,29 @@
-import 'package:logger/logger.dart';
 import '../utils/secure_storage.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'api_service.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 class AuthService {
   final ApiService _apiService = ApiService();
   final SecureStorage _secureStorage = SecureStorage();
 
   Future<Map<String, dynamic>> login(String email, String password) async {
-    final String? fcmToken = await _secureStorage.readFcmToken();
+    final firebaseMessaging = FirebaseMessaging.instance;
+    await firebaseMessaging.deleteToken();
+
+    final fcmToken = await firebaseMessaging.getToken();
+
+    if (fcmToken != null) {
+      await _secureStorage.storeFcmToken(fcmToken);
+    }
+
     final response = await _apiService.post(
       '/User/login',
-      {'email': email, 'password': password, 'Fcm_token': fcmToken},
+      {
+        'email': email,
+        'password': password,
+        'fcm_token': fcmToken
+      }, // Include the token in login
       requiresAuth: false,
     );
 
@@ -45,7 +57,10 @@ class AuthService {
   }
 
   Future<void> logout() async {
-    await _secureStorage.deleteToken();
+    final firebaseMessaging = FirebaseMessaging.instance;
+    await firebaseMessaging.deleteToken();
+
+    await _secureStorage.clearAll();
   }
 
   Future<Map<String, dynamic>> getUserById(String userId) async {
