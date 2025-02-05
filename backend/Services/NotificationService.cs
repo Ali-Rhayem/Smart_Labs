@@ -67,8 +67,7 @@ public class NotificationService
     public async Task<List<Notifications>> GetNotificationsByUserIdAsync(int userId)
     {
         var filter = Builders<Notifications>.Filter.Eq(n => n.UserID, userId)
-        & Builders<Notifications>.Filter.Eq(n => n.IsDeleted, false)
-        & Builders<Notifications>.Filter.Eq(n => n.IsRead, false);
+        & Builders<Notifications>.Filter.Eq(n => n.IsDeleted, false);
 
         var notifications = await _notifications.Find(filter).ToListAsync();
         return notifications;
