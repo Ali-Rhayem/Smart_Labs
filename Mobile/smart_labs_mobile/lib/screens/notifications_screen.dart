@@ -1,71 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:smart_labs_mobile/providers/user_provider.dart';
-import 'package:smart_labs_mobile/services/auth_service.dart';
+import 'package:smart_labs_mobile/providers/notification_provider.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
-class NotificationsScreen extends ConsumerStatefulWidget {
+class NotificationsScreen extends ConsumerWidget {
   const NotificationsScreen({super.key});
 
   @override
-  ConsumerState<NotificationsScreen> createState() =>
-      _NotificationsScreenState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final notificationsState = ref.watch(notificationsProvider);
+    final notifications = notificationsState.notifications;
+    final isLoading = notificationsState.isLoading;
 
-class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
-  final AuthService _authService = AuthService();
-  List<dynamic> _notifications = [];
-  bool _isLoading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _fetchNotifications();
-  }
-
-  Future<void> _fetchNotifications() async {
-    final user = ref.read(userProvider);
-    if (user != null) {
-      final result = await _authService.getNotifications(user.id.toString());
-      if (result['success']) {
-        setState(() {
-          _notifications = result['data'];
-          _isLoading = false;
-        });
-      }
-    }
-  }
-
-  Future<void> _markAsRead(String notificationId) async {
-    final result = await _authService.markNotificationAsRead(notificationId);
-    if (result['success']) {
-      await _fetchNotifications();
-    }
-  }
-
-  Future<void> _markAsDeleted(String notificationId) async {
-    final result = await _authService.markNotificationAsDeleted(notificationId);
-    if (result['success']) {
-      await _fetchNotifications();
-    }
-  }
-
-  Future<void> _markAllAsRead() async {
-    final result = await _authService.markAllNotificationsAsRead();
-    if (result['success']) {
-      await _fetchNotifications();
-    }
-  }
-
-  Future<void> _markAllAsDeleted() async {
-    final result = await _authService.markAllNotificationsAsDeleted();
-    if (result['success']) {
-      await _fetchNotifications();
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF121212),
       appBar: AppBar(
@@ -75,25 +21,27 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
           style: TextStyle(color: Colors.white),
         ),
         actions: [
-          if (_notifications.isNotEmpty) ...[
+          if (notifications.isNotEmpty) ...[
             IconButton(
               icon: const Icon(Icons.done_all, color: Color(0xFFFFFF00)),
-              onPressed: _markAllAsRead,
+              onPressed: () =>
+                  ref.read(notificationsProvider.notifier).markAllAsRead(),
               tooltip: 'Mark all as read',
             ),
             IconButton(
               icon: const Icon(Icons.delete_sweep, color: Color(0xFFFFFF00)),
-              onPressed: _markAllAsDeleted,
+              onPressed: () =>
+                  ref.read(notificationsProvider.notifier).markAllAsDeleted(),
               tooltip: 'Clear all',
             ),
           ],
         ],
       ),
-      body: _isLoading
+      body: isLoading
           ? const Center(
               child: CircularProgressIndicator(color: Color(0xFFFFFF00)),
             )
-          : _notifications.isEmpty
+          : notifications.isEmpty
               ? Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -101,13 +49,13 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
                       Icon(
                         Icons.notifications_none,
                         size: 64,
-                        color: Colors.white.withValues(alpha: 0.5),
+                        color: Colors.white.withOpacity(0.5),
                       ),
                       const SizedBox(height: 16),
                       Text(
                         'No notifications',
                         style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.7),
+                          color: Colors.white.withOpacity(0.7),
                           fontSize: 16,
                         ),
                       ),
@@ -116,11 +64,13 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
                 )
               : RefreshIndicator(
                   color: const Color(0xFFFFFF00),
-                  onRefresh: _fetchNotifications,
+                  onRefresh: () => ref
+                      .read(notificationsProvider.notifier)
+                      .refreshNotifications(),
                   child: ListView.builder(
-                    itemCount: _notifications.length,
+                    itemCount: notifications.length,
                     itemBuilder: (context, index) {
-                      final notification = _notifications[index];
+                      final notification = notifications[index];
                       final DateTime date =
                           DateTime.parse(notification['date']);
 
@@ -133,7 +83,9 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
                           child: const Icon(Icons.delete, color: Colors.white),
                         ),
                         onDismissed: (direction) {
-                          _markAsDeleted(notification['id'].toString());
+                          ref
+                              .read(notificationsProvider.notifier)
+                              .markAsDeleted(notification['id'].toString());
                         },
                         child: Card(
                           color: notification['isRead']
@@ -155,14 +107,14 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
                                 Text(
                                   notification['message'],
                                   style: TextStyle(
-                                    color: Colors.white.withValues(alpha: 0.7),
+                                    color: Colors.white.withOpacity(0.7),
                                   ),
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
                                   timeago.format(date),
                                   style: TextStyle(
-                                    color: Colors.white.withValues(alpha: 0.5),
+                                    color: Colors.white.withOpacity(0.5),
                                     fontSize: 12,
                                   ),
                                 ),
@@ -174,8 +126,9 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
                                       Icons.mark_email_read,
                                       color: Color(0xFFFFFF00),
                                     ),
-                                    onPressed: () => _markAsRead(
-                                        notification['id'].toString()),
+                                    onPressed: () => ref
+                                        .read(notificationsProvider.notifier)
+                                        .markAsRead(notification['id'].toString()),
                                   )
                                 : null,
                           ),
