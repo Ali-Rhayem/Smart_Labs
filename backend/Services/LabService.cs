@@ -413,4 +413,9 @@ public class LabService
         return true;
     }
 
+    public async Task<List<Lab>> GetLabsByRoomAsync(string room)
+    {
+        return await _labs.Find(l => l.Room == room && l.EndLab == false).ToListAsync();
+    }
+
 }
