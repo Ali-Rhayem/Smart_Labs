@@ -1,3 +1,4 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:smart_labs_mobile/providers/theme_provider.dart';
@@ -160,6 +161,8 @@ class ProfileScreen extends ConsumerWidget {
               ),
               onTap: () async {
                 final secureStorage = SecureStorage();
+                final firebaseMessaging = FirebaseMessaging.instance;
+                await firebaseMessaging.deleteToken();
 
                 // Clear all stored data
                 await secureStorage.clearAll();
