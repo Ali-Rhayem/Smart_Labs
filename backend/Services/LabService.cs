@@ -14,10 +14,11 @@ public class LabService
     private readonly UserService _userService;
     private readonly SemesterService _semesterService;
     private readonly PPEService _ppeService;
+    private readonly RoomService _roomService;
     private readonly SessionService _sessionService;
     private readonly KafkaProducer _kafkaProducer;
 
-    public LabService(IMongoDatabase database, LabHelper labHelper, UserService userService, SemesterService semesterService, PPEService ppeService, SessionService sessionService, KafkaProducer kafkaProducer)
+    public LabService(IMongoDatabase database, LabHelper labHelper, UserService userService, SemesterService semesterService, PPEService ppeService, SessionService sessionService, KafkaProducer kafkaProducer, RoomService roomService)
     {
         _labs = database.GetCollection<Lab>("Labs");
         _labHelper = labHelper;
@@ -26,6 +27,7 @@ public class LabService
         _ppeService = ppeService;
         _sessionService = sessionService;
         _kafkaProducer = kafkaProducer;
+        _roomService = roomService;
     }
 
     public async Task<List<Lab>> GetAllLabsAsync()
@@ -119,6 +121,13 @@ public class LabService
             var ppe = await _ppeService.GetListOfPPEsAsync([ppeId]);
             if (ppe.Count == 0)
                 lab.PPE.Remove(ppeId);
+        }
+
+        // check if room exists in the database
+        var rooms = await _roomService.GetAllRoomsAsync();
+        if (!rooms.Any(room => room.Name == lab.Room))
+        {
+            return new ErrorMessage { StatusCode = 404, Message = "room not found" };
         }
 
         // check if time is valid and thier is no conflict in room or with instructor
