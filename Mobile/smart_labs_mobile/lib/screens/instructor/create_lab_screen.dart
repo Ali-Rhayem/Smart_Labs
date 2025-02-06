@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import 'package:smart_labs_mobile/models/lab_model.dart';
-import 'package:smart_labs_mobile/providers/ppe_povider.dart';
 import 'package:smart_labs_mobile/services/api_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:smart_labs_mobile/utils/date_time_utils.dart';
+import 'package:smart_labs_mobile/widgets/lab_schedules_list.dart';
+import 'package:smart_labs_mobile/widgets/lab_student_input.dart';
+import 'package:smart_labs_mobile/widgets/lab_text_field.dart';
+import 'package:smart_labs_mobile/widgets/ppe_dropdwon.dart';
+import 'package:smart_labs_mobile/widgets/time_selectors.dart';
+import 'package:smart_labs_mobile/widgets/week_day_selector.dart';
 
 var logger = Logger();
 // TODO: add error display message
@@ -77,7 +83,7 @@ class _CreateLabScreenState extends ConsumerState<CreateLabScreen> {
                 ),
               ),
               const SizedBox(height: 10),
-              _buildTextField(
+              LabTextField(
                 controller: _labNameController,
                 label: 'Name',
                 validator: (value) =>
@@ -93,7 +99,7 @@ class _CreateLabScreenState extends ConsumerState<CreateLabScreen> {
                 ),
               ),
               const SizedBox(height: 10),
-              _buildTextField(
+              LabTextField(
                 controller: _labCodeController,
                 label: 'Code',
                 validator: (value) =>
@@ -109,7 +115,7 @@ class _CreateLabScreenState extends ConsumerState<CreateLabScreen> {
                 ),
               ),
               const SizedBox(height: 10),
-              _buildTextField(
+              LabTextField(
                 controller: _descriptionController,
                 label: 'Description',
                 maxLines: 3,
@@ -117,15 +123,59 @@ class _CreateLabScreenState extends ConsumerState<CreateLabScreen> {
                     value?.isEmpty ?? true ? 'Please enter description' : null,
               ),
               const SizedBox(height: 16),
-              _buildPPEDropdown(),
+              PPEDropdown(
+                selectedPPEIds: _selectedPPEIds,
+                onAddPPE: (ppeId, ppeName) {
+                  setState(() {
+                    _selectedPPEIds.add(ppeId);
+                    _selectedPPE.add(ppeName);
+                  });
+                },
+                onRemovePPE: (ppeId, ppeName) {
+                  setState(() {
+                    _selectedPPEIds.remove(ppeId);
+                    _selectedPPE.remove(ppeName);
+                  });
+                },
+              ),
               const SizedBox(height: 16),
-              _buildWeekdaySelector(),
+              WeekdaySelector(
+                selectedWeekday:
+                    _selectedWeekday, // The current day from your State
+                onWeekdayChanged: (newDay) {
+                  setState(() {
+                    _selectedWeekday = newDay;
+                  });
+                },
+              ),
               const SizedBox(height: 16),
-              _buildTimeSelectors(),
+              TimeSelectors(
+                label: 'Lab Schedule',
+                startTime: _startTime,
+                endTime: _endTime,
+                onSelectStartTime: () => _selectTime(true),
+                onSelectEndTime: () => _selectTime(false),
+              ),
               const SizedBox(height: 16),
-              _buildSchedulesList(),
+              LabSchedulesList(
+                schedules: _schedules,
+                onAddSchedule: _addSchedule, // calls the parent's method
+                onRemoveSchedule: (schedule) {
+                  setState(() {
+                    _schedules.remove(schedule);
+                  });
+                },
+              ),
               const SizedBox(height: 16),
-              _buildStudentInput(),
+              LabStudentInput(
+                students: _selectedStudents,
+                onAddStudent: (newStudent) {
+                  setState(() => _selectedStudents.add(newStudent));
+                },
+                onRemoveStudent: (studentToRemove) {
+                  setState(() => _selectedStudents.remove(studentToRemove));
+                },
+              ),
               const SizedBox(height: 16),
               const Text(
                 'Room',
@@ -136,7 +186,7 @@ class _CreateLabScreenState extends ConsumerState<CreateLabScreen> {
                 ),
               ),
               const SizedBox(height: 10),
-              _buildTextField(
+              LabTextField(
                 controller: _roomController,
                 label: 'Room',
                 validator: (value) =>
@@ -165,258 +215,6 @@ class _CreateLabScreenState extends ConsumerState<CreateLabScreen> {
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildTextField({
-    required TextEditingController controller,
-    required String label,
-    int maxLines = 1,
-    String? Function(String?)? validator,
-  }) {
-    return TextFormField(
-      controller: controller,
-      style: const TextStyle(color: Colors.white),
-      maxLines: maxLines,
-      decoration: InputDecoration(
-        labelText: label,
-        labelStyle: const TextStyle(color: Colors.white70),
-        filled: true,
-        fillColor: const Color(0xFF1C1C1C),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: Colors.white24),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: Colors.white24),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: Color(0xFFFFFF00)),
-        ),
-      ),
-      validator: validator,
-    );
-  }
-
-  Widget _buildPPEDropdown() {
-    return Consumer(
-      builder: (context, ref, child) {
-        return ref.watch(ppeProvider).when(
-              data: (ppeList) {
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Required PPE',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: ppeList.map((ppe) {
-                        final isSelected =
-                            _selectedPPEIds.contains(ppe.id.toString());
-                        return FilterChip(
-                          label: Text(
-                            ppe.name,
-                            style: TextStyle(
-                              color: isSelected ? Colors.black : Colors.white,
-                            ),
-                          ),
-                          selected: isSelected,
-                          onSelected: (bool selected) {
-                            setState(() {
-                              if (selected) {
-                                _selectedPPEIds.add(ppe.id.toString());
-                                logger.w("Selected PPE: ${ppe.name}");
-                                logger.w("selected ppe id's ${_selectedPPEIds}");
-                                _selectedPPE.add(ppe.name);
-                              } else {
-                                _selectedPPEIds.remove(ppe.id.toString());
-                                _selectedPPE.remove(ppe.name);
-                              }
-                            });
-                          },
-                          backgroundColor: const Color(0xFF1C1C1C),
-                          selectedColor: const Color(0xFFFFFF00),
-                          checkmarkColor: Colors.black,
-                          side: const BorderSide(color: Colors.white24),
-                        );
-                      }).toList(),
-                    ),
-                  ],
-                );
-              },
-              loading: () => const Center(
-                child: CircularProgressIndicator(
-                  color: Color(0xFFFFFF00),
-                ),
-              ),
-              error: (error, stack) => Center(
-                child: Text(
-                  'Error loading PPE items: $error',
-                  style: const TextStyle(color: Colors.red),
-                ),
-              ),
-            );
-      },
-    );
-  }
-
-  Widget _buildWeekdaySelector() {
-    final weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Day of Week',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 16),
-        Container(
-          height: 50,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            itemCount: weekdays.length,
-            itemBuilder: (context, index) {
-              return Padding(
-                padding: const EdgeInsets.only(right: 8),
-                child: InkWell(
-                  onTap: () {
-                    setState(() {
-                      _selectedWeekday = index + 1;
-                    });
-                  },
-                  child: Container(
-                    width: 45,
-                    decoration: BoxDecoration(
-                      color: _selectedWeekday == index + 1
-                          ? const Color(0xFFFFFF00)
-                          : const Color(0xFF1C1C1C),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.white24),
-                    ),
-                    child: Center(
-                      child: Text(
-                        weekdays[index],
-                        style: TextStyle(
-                          color: _selectedWeekday == index + 1
-                              ? Colors.black
-                              : Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildTimeSelectors() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Lab Schedule',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 16),
-        Row(
-          children: [
-            Expanded(
-              child: InkWell(
-                onTap: () => _selectTime(true),
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF1C1C1C),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.white24),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Start Time',
-                        style: TextStyle(
-                          color: Colors.white70,
-                          fontSize: 12,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        _startTime.format(context),
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: InkWell(
-                onTap: () => _selectTime(false),
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF1C1C1C),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.white24),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'End Time',
-                        style: TextStyle(
-                          color: Colors.white70,
-                          fontSize: 12,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        _endTime.format(context),
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ],
     );
   }
 
@@ -449,173 +247,16 @@ class _CreateLabScreenState extends ConsumerState<CreateLabScreen> {
     }
   }
 
-  Widget _buildStudentInput() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Add Students',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 16),
-        Row(
-          children: [
-            Expanded(
-              child: TextFormField(
-                controller: _studentInputController,
-                style: const TextStyle(color: Colors.white),
-                decoration: InputDecoration(
-                  hintText: 'Enter student ID',
-                  hintStyle: const TextStyle(color: Colors.white54),
-                  filled: true,
-                  fillColor: const Color(0xFF1C1C1C),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: const BorderSide(color: Colors.white24),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: const BorderSide(color: Colors.white24),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: const BorderSide(color: Color(0xFFFFFF00)),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(width: 8),
-            IconButton(
-              onPressed: () {
-                if (_studentInputController.text.isNotEmpty) {
-                  setState(() {
-                    _selectedStudents.add(_studentInputController.text);
-                    _studentInputController.clear();
-                  });
-                }
-              },
-              icon: const Icon(Icons.add, color: Color(0xFFFFFF00)),
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: _selectedStudents.map((student) {
-            return Chip(
-              label: Text(
-                student,
-                style: const TextStyle(color: Colors.black),
-              ),
-              backgroundColor: const Color(0xFFFFFF00),
-              side: const BorderSide(color: Colors.black),
-              labelStyle: const TextStyle(color: Colors.black),
-              deleteIcon:
-                  const Icon(Icons.close, size: 18, color: Colors.black),
-              onDeleted: () {
-                setState(() {
-                  _selectedStudents.remove(student);
-                });
-              },
-            );
-          }).toList(),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSchedulesList() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Schedules',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 8),
-        ..._schedules
-            .map((schedule) => Card(
-                  color: const Color(0xFF1C1C1C),
-                  margin: const EdgeInsets.only(bottom: 8),
-                  child: ListTile(
-                    title: Text(
-                      '${schedule.dayOfWeek}',
-                      style: const TextStyle(color: Colors.white),
-                    ),
-                    subtitle: Text(
-                      '${schedule.startTime} - ${schedule.endTime}',
-                      style: const TextStyle(color: Colors.white70),
-                    ),
-                    trailing: IconButton(
-                      icon: const Icon(Icons.delete, color: Colors.red),
-                      onPressed: () {
-                        setState(() {
-                          _schedules.remove(schedule);
-                        });
-                      },
-                    ),
-                  ),
-                ))
-            .toList(),
-        ElevatedButton.icon(
-          onPressed: _addSchedule,
-          icon: const Icon(Icons.add, color: Colors.black),
-          label: const Text('Add Schedule'),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFFFFFF00),
-            foregroundColor: Colors.black,
-          ),
-        ),
-      ],
-    );
-  }
-
   void _addSchedule() {
     setState(() {
       _schedules.add(
         LabSchedule(
-          dayOfWeek: _getWeekdayName(_selectedWeekday),
-          startTime: _formatTimeToHHMM(_startTime),
-          endTime: _formatTimeToHHMM(_endTime),
+          dayOfWeek: getWeekdayName(_selectedWeekday),
+          startTime: formatTimeToHHMM(_startTime),
+          endTime: formatTimeToHHMM(_endTime),
         ),
       );
     });
-  }
-
-  String _formatTimeToHHMM(TimeOfDay time) {
-    final hour = time.hour.toString().padLeft(2, '0');
-    final minute = time.minute.toString().padLeft(2, '0');
-    return '$hour:$minute';
-  }
-
-  String _getWeekdayName(int weekday) {
-    switch (weekday) {
-      case 1:
-        return 'Monday';
-      case 2:
-        return 'Tuesday';
-      case 3:
-        return 'Wednesday';
-      case 4:
-        return 'Thursday';
-      case 5:
-        return 'Friday';
-      case 6:
-        return 'Saturday';
-      case 7:
-        return 'Sunday';
-      default:
-        return '';
-    }
   }
 
   Future<void> _submitForm() async {
@@ -647,7 +288,7 @@ class _CreateLabScreenState extends ConsumerState<CreateLabScreen> {
           "description": _descriptionController.text,
           "endLab": false,
           "room": _roomController.text,
-          "ppeIds": _selectedPPEIds,
+          "PPE": _selectedPPEIds,
         },
         "student_Emails": _selectedStudents
       };
@@ -655,17 +296,23 @@ class _CreateLabScreenState extends ConsumerState<CreateLabScreen> {
       try {
         final response = await _apiService.post('/Lab', labData);
         if (response['success']) {
-          Navigator.pop(context);
+          if (mounted) {
+            Navigator.pop(context);
+          }
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-                content: Text(response['message'] ?? 'Failed to create lab')),
-          );
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                  content: Text(response['message'] ?? 'Failed to create lab')),
+            );
+          }
         }
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to create lab: $e')),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Failed to create lab: $e')),
+          );
+        }
       }
     }
   }
