@@ -11,6 +11,11 @@ final labStudentsProvider = StateNotifierProvider.family<LabStudentsNotifier,
   (ref, labId) => LabStudentsNotifier(labId),
 );
 
+final labInstructorsProvider = StateNotifierProvider.family<
+    LabInstructorsNotifier, AsyncValue<List<User>>, String>(
+  (ref, labId) => LabInstructorsNotifier(labId),
+);
+
 var logger = Logger();
 
 class LabStudentsNotifier extends StateNotifier<AsyncValue<List<User>>> {
@@ -81,6 +86,61 @@ class LabStudentsNotifier extends StateNotifier<AsyncValue<List<User>>> {
       }
     } catch (e) {
       throw Exception('Failed to remove student: $e');
+    }
+  }
+}
+
+class LabInstructorsNotifier extends StateNotifier<AsyncValue<List<User>>> {
+  final String labId;
+  final ApiService _apiService = ApiService();
+
+  LabInstructorsNotifier(this.labId) : super(const AsyncValue.loading()) {
+    fetchInstructors();
+  }
+
+  Future<void> fetchInstructors() async {
+    try {
+      state = const AsyncValue.loading();
+      final response = await _apiService.get('/Lab/$labId/instructors');
+
+      if (response['success'] != false) {
+        final List<dynamic> data = response['data'];
+        final instructors = data
+            .map((json) => User(
+                  id: json['id'],
+                  name: json['name'],
+                  email: json['email'],
+                  role: json['role'],
+                  major: json['major'],
+                  faculty: json['faculty'],
+                  imageUrl: json['image'],
+                  faceIdentityVector: json['faceIdentityVector'],
+                ))
+            .toList();
+
+        state = AsyncValue.data(instructors);
+      } else {
+        state = AsyncValue.error(
+          'Failed to fetch instructors',
+          StackTrace.current,
+        );
+      }
+    } catch (e, stack) {
+      state = AsyncValue.error(e, stack);
+    }
+  }
+
+  Future<void> addInstructors(List<String> emails) async {
+    try {
+      final response =
+          await _apiService.postRaw('/Lab/$labId/instructors', emails);
+      if (response['success'] != false) {
+        await fetchInstructors();
+      } else {
+        throw Exception(response['message'] ?? 'Failed to add instructors');
+      }
+    } catch (e) {
+      throw Exception('Failed to add instructors: $e');
     }
   }
 }
@@ -278,14 +338,33 @@ class InstructorLabDetailScreen extends StatelessWidget {
           children: [
             Padding(
               padding: const EdgeInsets.all(16.0),
-              child: ElevatedButton.icon(
-                onPressed: () => _showAddStudentsDialog(context, ref),
-                icon: const Icon(Icons.person_add),
-                label: const Text('Add Students'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: kNeonAccent,
-                  foregroundColor: Colors.black,
-                ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: () => _showAddStudentsDialog(context, ref),
+                      icon: const Icon(Icons.person_add),
+                      label: const Text('Add Students'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: kNeonAccent,
+                        foregroundColor: Colors.black,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: () => _showAddInstructorsDialog(context, ref),
+                      icon: const Icon(Icons.school),
+                      label: const Text('Add Instructors'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: kNeonAccent,
+                        foregroundColor: Colors.black,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
             Expanded(
@@ -600,6 +679,100 @@ class InstructorLabDetailScreen extends StatelessWidget {
               }
             },
             child: const Text('Remove', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _showAddInstructorsDialog(
+      BuildContext context, WidgetRef ref) async {
+    final TextEditingController emailsController = TextEditingController();
+
+    return showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF1C1C1C),
+        title: const Text(
+          'Add Instructors',
+          style: TextStyle(color: Colors.white),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'Enter instructor emails (one per line):',
+              style: TextStyle(color: Colors.white70),
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: emailsController,
+              style: const TextStyle(color: Colors.white),
+              maxLines: 5,
+              decoration: InputDecoration(
+                hintText: 'instructor1@example.com\ninstructor2@example.com',
+                hintStyle: TextStyle(color: Colors.white.withOpacity(0.3)),
+                border: const OutlineInputBorder(),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: kNeonAccent),
+                ),
+                filled: true,
+                fillColor: Colors.black12,
+              ),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Note: Instructors will receive an email invitation to join the lab.',
+              style: TextStyle(color: Colors.white54, fontSize: 12),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text(
+              'Cancel',
+              style: TextStyle(color: Colors.white70),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              final emails = emailsController.text
+                  .split('\n')
+                  .map((e) => e.trim())
+                  .where((e) => e.isNotEmpty)
+                  .toList();
+
+              if (emails.isEmpty) return;
+
+              try {
+                await ref
+                    .read(labInstructorsProvider(lab.labId).notifier)
+                    .addInstructors(emails);
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Instructors added successfully'),
+                    backgroundColor: Colors.green,
+                  ),
+                );
+              } catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(e.toString()),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: kNeonAccent,
+              foregroundColor: Colors.black,
+            ),
+            child: const Text('Add Instructors'),
           ),
         ],
       ),
