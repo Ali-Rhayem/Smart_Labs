@@ -28,7 +28,7 @@ for filename in os.listdir(images_folder):
         
         # Prepare message
         data = {
-            "command": "end",
+            "command": "start",
             "encoding": images_to_base64(image_path),
             "ppe_arr": ["gloves", "goggles"],
             "session_id": 1,
