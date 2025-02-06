@@ -299,7 +299,7 @@ class InstructorLabDetailScreen extends StatelessWidget {
                 ],
               ),
             );
-          }).toList(),
+          })
         ],
       ),
     );
@@ -384,7 +384,7 @@ class InstructorLabDetailScreen extends StatelessWidget {
                       child: Text(
                         'No students enrolled',
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.7),
+                          color: Colors.white.withValues(alpha: 0.7),
                           fontSize: 16,
                         ),
                       ),
@@ -416,7 +416,7 @@ class InstructorLabDetailScreen extends StatelessWidget {
                           subtitle: Text(
                             student.email,
                             style: TextStyle(
-                              color: Colors.white.withOpacity(0.7),
+                              color: Colors.white.withValues(alpha: 0.7),
                             ),
                           ),
                           trailing: IconButton(
@@ -586,7 +586,7 @@ class InstructorLabDetailScreen extends StatelessWidget {
 
     return showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (BuildContext dialogContext) => AlertDialog(
         backgroundColor: const Color(0xFF1C1C1C),
         title:
             const Text('Add Students', style: TextStyle(color: Colors.white)),
@@ -604,10 +604,10 @@ class InstructorLabDetailScreen extends StatelessWidget {
               maxLines: 5,
               decoration: InputDecoration(
                 hintText: 'student1@example.com\nstudent2@example.com',
-                hintStyle: TextStyle(color: Colors.white.withOpacity(0.3)),
+                hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.3)),
                 border: const OutlineInputBorder(),
                 enabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),
+                  borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.3)),
                 ),
               ),
             ),
@@ -615,7 +615,7 @@ class InstructorLabDetailScreen extends StatelessWidget {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(dialogContext),
             child:
                 const Text('Cancel', style: TextStyle(color: Colors.white70)),
           ),
@@ -633,14 +633,18 @@ class InstructorLabDetailScreen extends StatelessWidget {
                 await ref
                     .read(labStudentsProvider(lab.labId).notifier)
                     .addStudents(emails);
-                Navigator.pop(context);
+                if (dialogContext.mounted) {
+                  Navigator.pop(dialogContext);
+                }
               } catch (e) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(e.toString())),
-                );
+                if (dialogContext.mounted) {
+                  ScaffoldMessenger.of(dialogContext).showSnackBar(
+                    SnackBar(content: Text(e.toString())),
+                  );
+                }
               }
             },
-            child: Text('Add', style: TextStyle(color: kNeonAccent)),
+            child: const Text('Add', style: TextStyle(color: kNeonAccent)),
           ),
         ],
       ),
@@ -651,7 +655,7 @@ class InstructorLabDetailScreen extends StatelessWidget {
       BuildContext context, WidgetRef ref, User student) async {
     return showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (BuildContext dialogContext) => AlertDialog(
         backgroundColor: const Color(0xFF1C1C1C),
         title:
             const Text('Remove Student', style: TextStyle(color: Colors.white)),
@@ -661,7 +665,7 @@ class InstructorLabDetailScreen extends StatelessWidget {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(dialogContext),
             child:
                 const Text('Cancel', style: TextStyle(color: Colors.white70)),
           ),
@@ -671,11 +675,15 @@ class InstructorLabDetailScreen extends StatelessWidget {
                 await ref
                     .read(labStudentsProvider(lab.labId).notifier)
                     .removeStudent(student.id.toString());
-                Navigator.pop(context);
+                if (dialogContext.mounted) {
+                  Navigator.pop(dialogContext);
+                }
               } catch (e) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(e.toString())),
-                );
+                if (dialogContext.mounted) {
+                  ScaffoldMessenger.of(dialogContext).showSnackBar(
+                    SnackBar(content: Text(e.toString())),
+                  );
+                }
               }
             },
             child: const Text('Remove', style: TextStyle(color: Colors.red)),
@@ -691,7 +699,7 @@ class InstructorLabDetailScreen extends StatelessWidget {
 
     return showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (BuildContext dialogContext) => AlertDialog(
         backgroundColor: const Color(0xFF1C1C1C),
         title: const Text(
           'Add Instructors',
@@ -711,12 +719,12 @@ class InstructorLabDetailScreen extends StatelessWidget {
               maxLines: 5,
               decoration: InputDecoration(
                 hintText: 'instructor1@example.com\ninstructor2@example.com',
-                hintStyle: TextStyle(color: Colors.white.withOpacity(0.3)),
+                hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.3)),
                 border: const OutlineInputBorder(),
                 enabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),
+                  borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.3)),
                 ),
-                focusedBorder: OutlineInputBorder(
+                focusedBorder: const OutlineInputBorder(
                   borderSide: BorderSide(color: kNeonAccent),
                 ),
                 filled: true,
@@ -732,7 +740,7 @@ class InstructorLabDetailScreen extends StatelessWidget {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(dialogContext),
             child: const Text(
               'Cancel',
               style: TextStyle(color: Colors.white70),
@@ -752,20 +760,24 @@ class InstructorLabDetailScreen extends StatelessWidget {
                 await ref
                     .read(labInstructorsProvider(lab.labId).notifier)
                     .addInstructors(emails);
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Instructors added successfully'),
-                    backgroundColor: Colors.green,
-                  ),
-                );
+                if (dialogContext.mounted) {
+                  Navigator.pop(dialogContext);
+                  ScaffoldMessenger.of(dialogContext).showSnackBar(
+                    const SnackBar(
+                      content: Text('Instructors added successfully'),
+                      backgroundColor: Colors.green,
+                    ),
+                  );
+                }
               } catch (e) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(e.toString()),
-                    backgroundColor: Colors.red,
-                  ),
-                );
+                if (dialogContext.mounted) {
+                  ScaffoldMessenger.of(dialogContext).showSnackBar(
+                    SnackBar(
+                      content: Text(e.toString()),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
               }
             },
             style: ElevatedButton.styleFrom(
