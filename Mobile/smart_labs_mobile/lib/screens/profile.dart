@@ -1,12 +1,12 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:smart_labs_mobile/providers/provider_reset.dart';
 import 'package:smart_labs_mobile/providers/theme_provider.dart';
 import 'package:smart_labs_mobile/providers/user_provider.dart';
 import 'package:smart_labs_mobile/screens/edit_profile.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:smart_labs_mobile/utils/secure_storage.dart';
-import 'package:smart_labs_mobile/providers/lab_provider.dart';
 
 // Example accent color (the bright yellow)
 const Color kNeonYellow = Color(0xFFFFEB00);
@@ -162,16 +162,14 @@ class ProfileScreen extends ConsumerWidget {
               onTap: () async {
                 final secureStorage = SecureStorage();
                 final firebaseMessaging = FirebaseMessaging.instance;
+
                 await firebaseMessaging.deleteToken();
 
-                // Clear all stored data
                 await secureStorage.clearAll();
 
                 if (!context.mounted) return;
 
-                // Clear the user state
-                ref.read(userProvider.notifier).clearUser();
-                ref.read(labsProvider.notifier).clearLabs();
+                resetAllProviders(ref);
 
                 // Navigate to login screen and remove all previous routes
                 Navigator.of(context).pushNamedAndRemoveUntil(
