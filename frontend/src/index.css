@@ -19,7 +19,7 @@
   --secondary-background-dark: #252525;
   --color-card-dark: #2f2f2f;
   --color-text-dark: #f1f1f1;
-  --secondary-text-dark: #E0E0E0; /* #A0A0A0; */
+  --secondary-text-dark: #A0A0A0; /* #E0E0E0; */
 }
 
 [data-theme="dark"] {
