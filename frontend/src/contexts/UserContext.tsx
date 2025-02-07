@@ -1,7 +1,7 @@
 import React, { createContext, useContext, ReactNode, useState } from "react";
 import { Role } from "../config/routes";
 
-interface User {
+export interface User {
 	id: number;
 	role: Role;
 	token: string;
