@@ -6,15 +6,20 @@ import { Role } from "./config/routes";
 import PublicLayout from "./layouts/PublicLayout";
 import ProtectedLayout from "./layouts/ProtectedLayout";
 import NotFoundPage from "./pages/NotFoundPage";
-import { UserProvider } from "./contexts/UserContext";
+import { useUser } from "./contexts/UserContext";
 import UnauthorizedPage from "./pages/UnauthorizedPage";
 import ProtectedRoute from "./contexts/ProtectedRoute";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
-const currentUserRole: Role = "instructor";
+const queryClient = new QueryClient();
 
 const App: React.FC = () => {
+	const { user } = useUser();
+	const currentUserRole: Role = user?.role as Role;
+
 	return (
-		<UserProvider>
+		<QueryClientProvider client={queryClient}>
 			<Router>
 				<Routes>
 					<Route element={<PublicLayout />}>
@@ -48,7 +53,8 @@ const App: React.FC = () => {
 					</Route>
 				</Routes>
 			</Router>
-		</UserProvider>
+			<ReactQueryDevtools initialIsOpen={false} />
+		</QueryClientProvider>
 	);
 };
 

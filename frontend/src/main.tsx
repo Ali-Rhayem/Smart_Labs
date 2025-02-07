@@ -1,19 +1,19 @@
 import ReactDOM from "react-dom/client";
 import App from "./App";
 import "./index.css";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import ThemeProviderComponent from "./themes/ThemeContext";
+import { UserProvider } from "./contexts/UserContext";
 
-const queryClient = new QueryClient();
+// const queryClient = new QueryClient();
 
 const root = ReactDOM.createRoot(
 	document.getElementById("root") as HTMLElement
 );
 
 root.render(
-	<QueryClientProvider client={queryClient}>
-		<ThemeProviderComponent>
+	<ThemeProviderComponent>
+		<UserProvider>
 			<App />
-		</ThemeProviderComponent>
-	</QueryClientProvider>
+		</UserProvider>
+	</ThemeProviderComponent>
 );
