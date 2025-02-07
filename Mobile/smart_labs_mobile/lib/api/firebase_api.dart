@@ -4,6 +4,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:smart_labs_mobile/providers/notification_provider.dart';
 import 'package:smart_labs_mobile/utils/secure_storage.dart';
+import 'package:smart_labs_mobile/services/api_service.dart';
 
 Future<void> handleBackgroundMessage(RemoteMessage message) async {
   print('Title: ${message.notification?.title}');
@@ -99,11 +100,11 @@ class FirebaseApi {
 
     FirebaseMessaging.onBackgroundMessage(handleBackgroundMessage);
 
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
       final notification = message.notification;
       if (notification == null) return;
 
-      _localNotifications.show(
+      await _localNotifications.show(
         notification.hashCode,
         notification.title,
         notification.body,
@@ -113,25 +114,41 @@ class FirebaseApi {
             _androidChannel.name,
             channelDescription: _androidChannel.description,
             icon: '@drawable/ic_launcher',
+            importance: Importance.max,
+            priority: Priority.high,
+          ),
+          iOS: const DarwinNotificationDetails(
+            presentAlert: true,
+            presentBadge: true,
+            presentSound: true,
           ),
         ),
         payload: jsonEncode(message.toMap()),
       );
 
-      if (message.data.isNotEmpty) {
-        final notificationData = {
-          'id': message.data['id'] ??
-              DateTime.now().millisecondsSinceEpoch.toString(),
-          'title': notification.title ?? '',
-          'message': notification.body ?? '',
-          'date': DateTime.now().toIso8601String(),
-          'isRead': false,
-          'data': message.data,
-        };
+      // Create a notification object from the message
+      final notificationData = {
+        'id': notification.hashCode,
+        'title': notification.title,
+        'message': notification.body,
+        'date': DateTime.now().toIso8601String(),
+        'isRead': false,
+        'isDeleted': false,
+        'data': message.data,
+        'userID': await _secureStorage.readId(),
+      };
 
-        ref
-            .read(notificationsProvider.notifier)
-            .addNotification(notificationData);
+      // Add the notification to the provider immediately
+      ref
+          .read(notificationsProvider.notifier)
+          .addNotification(notificationData);
+
+      // Then fetch the latest notifications from the server
+      if (message.data.isNotEmpty) {
+        final userId = await _secureStorage.readId();
+        if (userId != null) {
+          await ref.read(notificationsProvider.notifier).refreshNotifications();
+        }
       }
     });
   }
