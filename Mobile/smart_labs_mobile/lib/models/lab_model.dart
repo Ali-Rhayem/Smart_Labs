@@ -12,6 +12,7 @@ class Lab {
   final String report;
   final String semesterId;
   final List<Session> sessions;
+  final bool started;
 
   const Lab({
     required this.labId,
@@ -25,6 +26,7 @@ class Lab {
     required this.report,
     required this.semesterId,
     required this.sessions,
+    required this.started,
   });
 }
 
@@ -40,8 +42,8 @@ class LabSchedule {
   });
 
   Map<String, dynamic> toJson() => {
-    'dayOfWeek': dayOfWeek,
-    'startTime': startTime,
-    'endTime': endTime,
-  };
+        'dayOfWeek': dayOfWeek,
+        'startTime': startTime,
+        'endTime': endTime,
+      };
 }
