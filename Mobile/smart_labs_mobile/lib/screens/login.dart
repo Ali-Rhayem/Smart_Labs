@@ -5,6 +5,7 @@ import 'package:smart_labs_mobile/providers/user_provider.dart';
 import 'package:smart_labs_mobile/services/auth_service.dart';
 import 'package:smart_labs_mobile/utils/secure_storage.dart';
 import 'package:smart_labs_mobile/providers/lab_provider.dart';
+import 'package:smart_labs_mobile/providers/session_provider.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
@@ -254,6 +255,13 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
         ref.read(userProvider.notifier).setUser(user);
         await ref.read(labsProvider.notifier).fetchLabs();
+
+        final labs = ref.read(labsProvider).value ?? [];
+        for (final lab in labs) {
+          await ref
+              .read(labSessionsProvider(lab.labId).notifier)
+              .fetchSessions();
+        }
 
         if (userData['role'] == 'instructor' || userData['role'] == 'admin') {
           Navigator.pushReplacementNamed(context, '/instructorMain');
