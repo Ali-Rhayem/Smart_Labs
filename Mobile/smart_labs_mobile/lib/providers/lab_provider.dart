@@ -75,6 +75,7 @@ class LabNotifier extends StateNotifier<AsyncValue<List<Lab>>> {
             report: lab['report'] ?? 'N/A',
             semesterId: lab['semesterID'].toString(),
             sessions: [], // or map your entire schedule if needed
+            started: lab['started'],
             // Possibly consider storing `endLab: lab['endLab']` if you need it
           );
         }).toList();
