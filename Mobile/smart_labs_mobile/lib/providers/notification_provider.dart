@@ -1,7 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:logger/logger.dart';
+import 'package:smart_labs_mobile/main.dart';
 import 'package:smart_labs_mobile/models/notification_state.dart';
 import 'package:smart_labs_mobile/providers/user_provider.dart';
 import 'package:smart_labs_mobile/services/auth_service.dart';
+
+var logger = Logger();
 
 final notificationsProvider =
     StateNotifierProvider<NotificationsNotifier, NotificationsState>((ref) {
@@ -47,7 +51,7 @@ class NotificationsNotifier extends StateNotifier<NotificationsState> {
       return notification;
     }).toList();
     state = state.copyWith(notifications: updatedNotifications);
-
+    logger.i('notificationId: $notificationId');
     final result = await authService.markNotificationAsRead(notificationId);
     if (!result['success']) {
       // In case of failure, you might want to revert the change or refetch
@@ -92,7 +96,7 @@ class NotificationsNotifier extends StateNotifier<NotificationsState> {
   }
 
   Future<void> refreshNotifications() async {
-    state = state.copyWith(isLoading: true);
+    // state = state.copyWith(isLoading: true);
     await _fetchNotifications();
   }
 
