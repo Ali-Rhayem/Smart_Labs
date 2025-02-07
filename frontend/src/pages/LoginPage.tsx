@@ -4,81 +4,88 @@ import Logo from "../components/Logo";
 import InputField from "../components/InputField";
 import Card from "../components/Card";
 import { useNavigate } from "react-router-dom";
+import { LoginData, useLogin } from "../Hooks/useLogin";
+import ErrorAlert from "../components/ErrorAlertProps";
+import { useUser } from "../contexts/UserContext";
+import { Role } from "../config/routes";
+
+interface error {
+	email: string[];
+	password: string[];
+}
 
 const LoginPage: React.FC = () => {
-	const [email, setEmail] = useState("");
-	const [password, setPassword] = useState("");
-	const navigate = useNavigate();
-
-	const [errors, setErrors] = useState<{
-		email?: string;
-		password?: string[];
-	}>({
-		password: [],
+	const [openSnackbar, setOpenSnackbar] = useState(false);
+	const [alertMessage, setAlertMessage] = useState("");
+	const [severity, setSeverity] = useState<"error" | "success">("error");
+	const [errors, setErrors] = useState<error>({ email: [], password: [] });
+	const [formData, setFormData] = useState<LoginData>({
+		email: "",
+		password: "",
+		fcm_token: null,
 	});
+	const navigate = useNavigate();
+	const { login: userLogin } = useUser();
 
-	// Handle form submission
+	const { mutate: login, isPending } = useLogin();
+
+	const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const { name, value } = e.target;
+		setFormData((prev) => ({
+			...prev,
+			[name]: value,
+		}));
+	};
+
+	const handleLogin = (data: LoginData) => {
+		login(data, {
+			onSuccess: (response) => {
+				userLogin({
+					id: response.userId,
+					role: response.role as Role,
+					token: response.token,
+				});
+				navigate("/labs");
+			},
+			onError: (err: any) => {
+				const messages = err.response?.data?.errors;
+				if (messages) {
+					console.log("Error data:", messages);
+					setAlertMessage(messages);
+				} else {
+					setAlertMessage("An error occurred. Please try again.");
+				}
+				setSeverity("error");
+				setOpenSnackbar(true);
+			},
+		});
+	};
+
 	const handleSubmit = (e: React.FormEvent) => {
 		e.preventDefault();
 
-		// Reset errors
-		setErrors({ email: undefined, password: [] });
+		setErrors({ email: [], password: [] });
 
-		// Validation
 		let valid = true;
-		const newErrors: { email?: string; password?: string[] } = {
-			password: [],
-		};
+		const newErrors: error = { email: [], password: [] };
 
-		// Email validation
-		if (!email) {
-			newErrors.email = "Email is required";
-			valid = false;
-		} else if (!/\S+@\S+\.\S+/.test(email)) {
-			newErrors.email = "Please enter a valid email address";
-			valid = false;
+		if (!formData.email) {
+			newErrors.email.push("Email is required");
+		} else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+			newErrors.email.push("Please enter a valid email address");
 		}
 
-		// Password validation
-		if (!password) {
-			newErrors.password?.push("Password is required");
-			valid = false;
-		} else {
-			// Check password strength requirements
-			if (password.length < 8) {
-				newErrors.password?.push(
-					"Password must be at least 8 characters long"
-				);
-			}
-			if (!/[A-Z]/.test(password)) {
-				newErrors.password?.push(
-					"Password must contain at least one uppercase letter"
-				);
-			}
-			if (!/[a-z]/.test(password)) {
-				newErrors.password?.push(
-					"Password must contain at least one lowercase letter"
-				);
-			}
-			if (!/\d/.test(password)) {
-				newErrors.password?.push(
-					"Password must contain at least one number"
-				);
-			}
-			if (!/[!@#$%^&*()_+={}|:;'<>,.?/-]/.test(password)) {
-				newErrors.password?.push(
-					"Password must contain at least one special character"
-				);
-			}
+		if (!formData.password) {
+			newErrors.password.push("Password is required");
 		}
 
-		if (newErrors.password?.length || newErrors.email) {
+		if (newErrors.password.length || newErrors.email.length) {
 			setErrors(newErrors);
 			valid = false;
 		}
 
 		if (valid) {
-			navigate("/labs");
+			handleLogin(formData);
 		}
 	};
 
@@ -116,32 +123,26 @@ const LoginPage: React.FC = () => {
 				<form onSubmit={handleSubmit} className="space-y-6">
 					<InputField
 						id="email"
+						name="email"
 						label="Email Address"
 						placeholder="Enter your email"
 						type="email"
-						value={email}
-						onChange={(e) => setEmail(e.target.value)}
+						value={formData.email}
+						error={errors.email}
+						disabled={isPending}
+						onChange={handleInputChange}
 					/>
-					{errors.email && (
-						<p className="text-red-500 text-xs mt-1">
-							{errors.email}
-						</p>
-					)}
 					<InputField
 						id="password"
+						name="password"
 						label="Password"
 						placeholder="Enter your password"
 						type="password"
-						value={password}
-						onChange={(e) => setPassword(e.target.value)}
+						value={formData.password}
+						error={errors.password}
+						disabled={isPending}
+						onChange={handleInputChange}
 					/>
-					{errors.password && errors.password.length > 0 && (
-						<ul className="text-red-500 text-xs mt-1">
-							{errors.password.map((error, index) => (
-								<li key={index}>{error}</li>
-							))}
-						</ul>
-					)}
 
 					<div className="flex justify-between items-center">
 						<Link href="#" className="text-sm text-primary">
@@ -153,6 +154,7 @@ const LoginPage: React.FC = () => {
 						type="submit"
 						variant="contained"
 						fullWidth
+						disabled={isPending}
 						className="mt-4 py-3 rounded-lg text-lg font-medium shadow-lg transition-transform hover:scale-105"
 						style={{
 							backgroundColor: "var(--color-primary)",
@@ -163,6 +165,12 @@ const LoginPage: React.FC = () => {
 					</Button>
 				</form>
 			</Card>
+			<ErrorAlert
+				open={openSnackbar}
+				message={alertMessage}
+				severity={severity}
+				onClose={() => setOpenSnackbar(false)}
+			/>
 		</div>
 	);
 };
