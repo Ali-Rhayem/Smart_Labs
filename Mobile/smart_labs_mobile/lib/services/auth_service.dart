@@ -167,4 +167,18 @@ class AuthService {
       };
     }
   }
+
+   Future<List<Map<String, dynamic>>?> getUserNotifications(String userId) async {
+    try {
+      final response = await _apiService.get('/Notification/user/$userId');
+
+      if (response['success']) {
+        final List<dynamic> data = response['data'];
+        return data.cast<Map<String, dynamic>>();
+      }
+      return null;
+    } catch (e) {
+      return null;
+    }
+  }
 }
