@@ -4,10 +4,11 @@ import Logo from "../components/Logo";
 import InputField from "../components/InputField";
 import Card from "../components/Card";
 import { useNavigate } from "react-router-dom";
-import { LoginData, useLogin } from "../Hooks/useLogin";
 import ErrorAlert from "../components/ErrorAlertProps";
 import { useUser } from "../contexts/UserContext";
 import { Role } from "../config/routes";
+import { authService } from "../services/authService";
+import type { LoginData } from "../types/auth";
 
 interface error {
 	email: string[];
@@ -26,8 +27,7 @@ const LoginPage: React.FC = () => {
 	});
 	const navigate = useNavigate();
 	const { login: userLogin } = useUser();
-
-	const { mutate: login, isPending } = useLogin();
+	const [isLoading, setIsLoading] = useState(false);
 
 	const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const { name, value } = e.target;
@@ -37,28 +37,28 @@ const LoginPage: React.FC = () => {
 		}));
 	};
 
-	const handleLogin = (data: LoginData) => {
-		login(data, {
-			onSuccess: (response) => {
-				userLogin({
-					id: response.userId,
-					role: response.role as Role,
-					token: response.token,
-				});
-				navigate("/labs");
-			},
-			onError: (err: any) => {
-				const messages = err.response?.data?.errors;
-				if (messages) {
-					console.log("Error data:", messages);
-					setAlertMessage(messages);
-				} else {
-					setAlertMessage("An error occurred. Please try again.");
-				}
-				setSeverity("error");
-				setOpenSnackbar(true);
-			},
-		});
+	const handleLogin = async (data: LoginData) => {
+		setIsLoading(true);
+		try {
+			const response = await authService.login(data);
+			userLogin({
+				id: response.userId,
+				role: response.role as Role,
+				token: response.token,
+			});
+			navigate("/labs");
+		} catch (err: any) {
+			const messages = err.response?.data?.errors;
+			if (messages) {
+				setAlertMessage(messages);
+			} else {
+				setAlertMessage("An error occurred. Please try again.");
+			}
+			setSeverity("error");
+			setOpenSnackbar(true);
+		} finally {
+			setIsLoading(false);
+		}
 	};
 
 	const handleSubmit = (e: React.FormEvent) => {
@@ -129,7 +129,7 @@ const LoginPage: React.FC = () => {
 						type="email"
 						value={formData.email}
 						error={errors.email}
-						disabled={isPending}
+						disabled={isLoading}
 						onChange={handleInputChange}
 					/>
 					<InputField
@@ -140,7 +140,7 @@ const LoginPage: React.FC = () => {
 						type="password"
 						value={formData.password}
 						error={errors.password}
-						disabled={isPending}
+						disabled={isLoading}
 						onChange={handleInputChange}
 					/>
 
@@ -154,7 +154,7 @@ const LoginPage: React.FC = () => {
 						type="submit"
 						variant="contained"
 						fullWidth
-						disabled={isPending}
+						disabled={isLoading}
 						className="mt-4 py-3 rounded-lg text-lg font-medium shadow-lg transition-transform hover:scale-105"
 						style={{
 							backgroundColor: "var(--color-primary)",
