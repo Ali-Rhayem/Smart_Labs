@@ -14,7 +14,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 }) => {
     const { user } = useUser();
     
-	if (!user) {
+	if (!user?.token) {
 		return <Navigate to="/" replace />;
 	}
 
