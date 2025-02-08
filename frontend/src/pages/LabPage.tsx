@@ -6,7 +6,7 @@ import {
 	Tab,
 	Chip,
 	Button,
-	CircularProgress,
+	IconButton,
 } from "@mui/material";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useUser } from "../contexts/UserContext";
@@ -150,17 +150,44 @@ const LabPage: React.FC = () => {
 							<ScheduleView schedules={lab.schedule} />
 						</Box>
 						<Box sx={{ mt: 3 }}>
-							<Typography
-								variant="h6"
-								gutterBottom
+							<Box
 								sx={{
 									display: "flex",
+									justifyContent: "space-between",
 									alignItems: "center",
-									gap: 1,
+									mb: 2,
 								}}
 							>
-								<SafetyIcon /> Required PPE
-							</Typography>
+								<Typography
+									variant="h6"
+									sx={{
+										display: "flex",
+										alignItems: "center",
+										gap: 1,
+									}}
+								>
+									<SafetyIcon />
+									Required PPE
+									{canManageLab && (
+										<IconButton
+											size="small"
+											onClick={() =>
+												console.log("Edit PPE")
+											}
+											sx={{
+												ml: 1,
+												p: 0.5,
+												color: "var(--color-text-secondary)",
+												"&:hover": {
+													color: "var(--color-primary)",
+												},
+											}}
+										>
+											<EditIcon fontSize="small" />
+										</IconButton>
+									)}
+								</Typography>
+							</Box>
 							<Box
 								sx={{
 									display: "flex",
