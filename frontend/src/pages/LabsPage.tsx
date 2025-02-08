@@ -28,7 +28,7 @@ const LabsPage: React.FC = () => {
 	}, [error]);
 
 	const handleViewLab = (lab: Lab) => {
-		navigate(`/labs/${lab.id}`);
+		navigate(`/labs/${lab.id}`, { state: { lab } });
 	};
 
 	if (isLoading) {

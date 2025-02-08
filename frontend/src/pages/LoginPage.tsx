@@ -6,7 +6,6 @@ import Card from "../components/Card";
 import { useNavigate } from "react-router-dom";
 import ErrorAlert from "../components/ErrorAlertProps";
 import { useUser } from "../contexts/UserContext";
-import { Role } from "../types/user";
 import { authService } from "../services/authService";
 import type { LoginData } from "../types/auth";
 
@@ -43,7 +42,7 @@ const LoginPage: React.FC = () => {
 			const response = await authService.login(data);
 			userLogin({
 				id: response.userId,
-				role: response.role as Role,
+				role: response.role,
 				token: response.token,
 			});
 			navigate("/labs");
