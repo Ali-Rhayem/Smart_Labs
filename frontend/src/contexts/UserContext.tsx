@@ -1,5 +1,5 @@
 import React, { createContext, useContext, ReactNode, useState } from "react";
-import { Role } from "../config/routes";
+import { Role } from "../types/user";
 
 export interface User {
 	id: number;

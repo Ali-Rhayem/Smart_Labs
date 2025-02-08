@@ -1,7 +1,7 @@
 import React from "react";
 import { Navigate } from "react-router-dom";
 import { useUser } from "../contexts/UserContext";
-import { Role } from "../config/routes";
+import { Role } from "../types/user";
 
 interface ProtectedRouteProps {
 	requiredRoles: Role[];

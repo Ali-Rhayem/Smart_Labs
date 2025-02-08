@@ -6,7 +6,7 @@ import Card from "../components/Card";
 import { useNavigate } from "react-router-dom";
 import ErrorAlert from "../components/ErrorAlertProps";
 import { useUser } from "../contexts/UserContext";
-import { Role } from "../config/routes";
+import { Role } from "../types/user";
 import { authService } from "../services/authService";
 import type { LoginData } from "../types/auth";
 

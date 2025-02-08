@@ -2,7 +2,7 @@ import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import LoginPage from "./pages/LoginPage";
 import LabsPage from "./pages/LabsPage";
-import { Role } from "./config/routes";
+import { Role } from "./types/user";
 import PublicLayout from "./layouts/PublicLayout";
 import ProtectedLayout from "./layouts/ProtectedLayout";
 import NotFoundPage from "./pages/NotFoundPage";
@@ -11,6 +11,7 @@ import UnauthorizedPage from "./pages/UnauthorizedPage";
 import ProtectedRoute from "./contexts/ProtectedRoute";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import LabPage from "./pages/LabPage";
 
 const queryClient = new QueryClient();
 
@@ -47,6 +48,20 @@ const App: React.FC = () => {
 									]}
 								>
 									<LabsPage />
+								</ProtectedRoute>
+							}
+							/>
+						<Route
+							path="/labs/:id"
+							element={
+								<ProtectedRoute
+									requiredRoles={[
+										"student",
+										"instructor",
+										"admin",
+									]}
+								>
+									<LabPage />
 								</ProtectedRoute>
 							}
 						/>
