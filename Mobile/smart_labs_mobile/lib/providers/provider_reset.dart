@@ -1,10 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:smart_labs_mobile/providers/lab_instructor_provider.dart';
-import 'package:smart_labs_mobile/providers/lab_provider.dart';
 import 'package:smart_labs_mobile/providers/lab_student_provider.dart';
 import 'package:smart_labs_mobile/providers/notification_provider.dart';
 import 'package:smart_labs_mobile/providers/session_provider.dart';
-import 'package:smart_labs_mobile/providers/user_provider.dart';
 
 void resetAllProviders(WidgetRef ref) {
   // // Clear user data
