@@ -1,5 +1,13 @@
 import React, { useState } from "react";
-import { Box, Typography, Tabs, Tab, Chip, Button } from "@mui/material";
+import {
+	Box,
+	Typography,
+	Tabs,
+	Tab,
+	Chip,
+	Button,
+	CircularProgress,
+} from "@mui/material";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useUser } from "../contexts/UserContext";
 import ErrorAlert from "../components/ErrorAlertProps";
@@ -8,6 +16,8 @@ import PeopleTab from "../components/PeopleTab";
 import { useLabUsers } from "../hooks/useLabsQuery";
 import EditLabModal from "../components/EditLabModal";
 import EditIcon from "@mui/icons-material/Edit";
+import { usePPE } from "../hooks/usePPE";
+import SafetyIcon from "@mui/icons-material/VerifiedUser";
 
 interface TabPanelProps {
 	children?: React.ReactNode;
@@ -42,6 +52,7 @@ const LabPage: React.FC = () => {
 		students,
 		isLoading: usersLoading,
 	} = useLabUsers(lab.id);
+	const { data: ppes = [], isLoading: ppesLoading } = usePPE(lab.ppe);
 
 	const canManageLab =
 		user! && (user.role === "instructor" || user.role === "admin");
@@ -138,6 +149,49 @@ const LabPage: React.FC = () => {
 						<Box sx={{ mt: 2 }}>
 							<ScheduleView schedules={lab.schedule} />
 						</Box>
+						<Box sx={{ mt: 3 }}>
+							<Typography
+								variant="h6"
+								gutterBottom
+								sx={{
+									display: "flex",
+									alignItems: "center",
+									gap: 1,
+								}}
+							>
+								<SafetyIcon /> Required PPE
+							</Typography>
+							<Box
+								sx={{
+									display: "flex",
+									gap: 2,
+									flexWrap: "wrap",
+								}}
+							>
+								{ppes.length > 0
+									? ppes.map((ppe) => (
+											<Chip
+												key={ppe.id}
+												label={ppe.name}
+												variant={"outlined"}
+												sx={{
+													bgcolor: "transparent",
+													borderColor:
+														"var(--color-primary)",
+													color: "var(--color-primary)",
+												}}
+											/>
+									  ))
+									: !ppesLoading && (
+											<Typography
+												variant="body2"
+												color="var(--color-text-secondary)"
+											>
+												No PPE requirements specified
+											</Typography>
+									  )}
+							</Box>
+						</Box>
 					</Box>
 					<Box sx={{ display: "flex", gap: 1, alignItems: "start" }}>
 						<Chip
@@ -147,13 +201,16 @@ const LabPage: React.FC = () => {
 						/>
 						{lab.endLab && (
 							<Chip size="small" color="error" label="Ended" />
-							)}
+						)}
 						{canManageLab && (
 							<Button
 								variant="contained"
 								startIcon={<EditIcon />}
 								onClick={() => setEditModalOpen(true)}
-								sx={{ bgcolor: "var(--color-primary)", color: "var(--color-text-button)" }}
+								sx={{
+									bgcolor: "var(--color-primary)",
+									color: "var(--color-text-button)",
+								}}
 							>
 								Edit Lab
 							</Button>
