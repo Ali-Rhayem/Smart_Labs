@@ -1,11 +1,13 @@
 import React, { useState } from "react";
-import { Box, Typography, Tabs, Tab, Chip } from "@mui/material";
+import { Box, Typography, Tabs, Tab, Chip, Button } from "@mui/material";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useUser } from "../contexts/UserContext";
 import ErrorAlert from "../components/ErrorAlertProps";
 import ScheduleView from "../components/ScheduleView";
 import PeopleTab from "../components/PeopleTab";
 import { useLabUsers } from "../hooks/useLabsQuery";
+import EditLabModal from "../components/EditLabModal";
+import EditIcon from "@mui/icons-material/Edit";
 
 interface TabPanelProps {
 	children?: React.ReactNode;
@@ -34,6 +36,7 @@ const LabPage: React.FC = () => {
 	const [openSnackbar, setOpenSnackbar] = useState(false);
 	const [alertMessage, setAlertMessage] = useState("");
 	const [severity, setSeverity] = useState<"error" | "success">("error");
+	const [editModalOpen, setEditModalOpen] = useState(false);
 	const {
 		instructors,
 		students,
@@ -73,6 +76,20 @@ const LabPage: React.FC = () => {
 			setOpenSnackbar(true);
 		} catch (err) {
 			setAlertMessage("Failed to remove student");
+			setSeverity("error");
+			setOpenSnackbar(true);
+		}
+	};
+
+	const handleEditLab = async (data: Partial<Lab>) => {
+		try {
+			await labService.updateLab(lab.id, data);
+			setAlertMessage("Lab updated successfully");
+			setSeverity("success");
+			setOpenSnackbar(true);
+			setEditModalOpen(false);
+		} catch (err) {
+			setAlertMessage("Failed to update lab");
 			setSeverity("error");
 			setOpenSnackbar(true);
 		}
@@ -130,6 +147,16 @@ const LabPage: React.FC = () => {
 						/>
 						{lab.endLab && (
 							<Chip size="small" color="error" label="Ended" />
+							)}
+						{canManageLab && (
+							<Button
+								variant="contained"
+								startIcon={<EditIcon />}
+								onClick={() => setEditModalOpen(true)}
+								sx={{ bgcolor: "var(--color-primary)", color: "var(--color-text-button)" }}
+							>
+								Edit Lab
+							</Button>
 						)}
 					</Box>
 				</Box>
@@ -184,6 +211,13 @@ const LabPage: React.FC = () => {
 				message={alertMessage}
 				severity={severity}
 				onClose={() => setOpenSnackbar(false)}
+			/>
+
+			<EditLabModal
+				open={editModalOpen}
+				onClose={() => setEditModalOpen(false)}
+				onSubmit={handleEditLab}
+				lab={lab}
 			/>
 		</Box>
 	);
