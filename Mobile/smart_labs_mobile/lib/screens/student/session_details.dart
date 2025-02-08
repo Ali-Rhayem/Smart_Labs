@@ -75,7 +75,7 @@ class SessionDetailScreen extends StatelessWidget {
               Text(
                 'No student data available.',
                 style: TextStyle(
-                  color: Colors.white.withOpacity(0.7),
+                  color: Colors.white.withValues(alpha: 0.7),
                 ),
               )
             else
@@ -111,9 +111,10 @@ class SessionDetailScreen extends StatelessWidget {
                             Text(
                               'ID: ${studentRecord.studentId}',
                               style: TextStyle(
-                                color: Colors.white.withOpacity(0.7),
+                                color: Colors.white.withValues(alpha: 0.7),
                                 fontSize: 14,
                               ),
+
                             ),
                           ],
                         ),
@@ -172,7 +173,7 @@ class SessionDetailScreen extends StatelessWidget {
           child: Text(
             value,
             style: TextStyle(
-              color: Colors.white.withOpacity(0.8),
+              color: Colors.white.withValues(alpha: 0.8),
             ),
           ),
         ),
