@@ -4,7 +4,6 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:smart_labs_mobile/providers/notification_provider.dart';
 import 'package:smart_labs_mobile/utils/secure_storage.dart';
-import 'package:smart_labs_mobile/services/api_service.dart';
 
 Future<void> handleBackgroundMessage(RemoteMessage message) async {
   print('Title: ${message.notification?.title}');
