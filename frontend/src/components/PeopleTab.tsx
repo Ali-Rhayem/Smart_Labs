@@ -7,10 +7,13 @@ import {
 	Divider,
 	CircularProgress,
 	IconButton,
+	Button,
 } from "@mui/material";
 import { User } from "../types/user";
 import { imageUrl } from "../config/config";
 import PersonRemoveIcon from "@mui/icons-material/PersonRemove";
+import PersonAddIcon from "@mui/icons-material/PersonAdd";
+import SchoolIcon from "@mui/icons-material/School";
 
 interface UserCardProps {
 	user: User;
@@ -78,6 +81,8 @@ interface PeopleTabProps {
 	students: User[];
 	isLoading?: boolean;
 	canManage?: boolean;
+	onAddInstructor?: () => void;
+	onAddStudent?: () => void;
 	onRemoveInstructor?: (user: User) => void;
 	onRemoveStudent?: (user: User) => void;
 }
@@ -87,6 +92,8 @@ const PeopleTab: React.FC<PeopleTabProps> = ({
 	students,
 	isLoading,
 	canManage,
+	onAddInstructor,
+	onAddStudent,
 	onRemoveInstructor,
 	onRemoveStudent,
 }) => {
@@ -96,9 +103,32 @@ const PeopleTab: React.FC<PeopleTabProps> = ({
 
 	return (
 		<Box>
-			<Typography variant="h6" sx={{ mb: 2 }}>
-				Instructors ({instructors.length})
-			</Typography>
+			<Box
+				sx={{
+					display: "flex",
+					justifyContent: "space-between",
+					alignItems: "center",
+					mb: 2,
+				}}
+			>
+				<Typography variant="h6">
+					Instructors ({instructors.length})
+				</Typography>
+				{canManage && (
+					<Button
+						variant="contained"
+						size="small"
+						startIcon={<PersonAddIcon />}
+						onClick={onAddInstructor}
+						sx={{
+							bgcolor: "var(--color-primary)",
+							color: "var(--color-text-button)",
+						}}
+					>
+						Add Instructor
+					</Button>
+				)}
+			</Box>
 			<Grid container spacing={2} sx={{ mb: 4 }}>
 				{instructors.map((instructor) => (
 					<Grid item xs={12} sm={6} md={4} key={instructor.id}>
@@ -113,9 +143,32 @@ const PeopleTab: React.FC<PeopleTabProps> = ({
 
 			<Divider sx={{ my: 4 }} />
 
-			<Typography variant="h6" sx={{ mb: 2 }}>
-				Students ({students.length})
-			</Typography>
+			<Box
+				sx={{
+					display: "flex",
+					justifyContent: "space-between",
+					alignItems: "center",
+					mb: 2,
+				}}
+			>
+				<Typography variant="h6">
+					Students ({students.length})
+				</Typography>
+				{canManage && (
+					<Button
+						variant="contained"
+						size="small"
+						startIcon={<SchoolIcon />}
+						onClick={onAddStudent}
+						sx={{
+							bgcolor: "var(--color-primary)",
+							color: "var(--color-text-button)",
+						}}
+					>
+						Add Student
+					</Button>
+				)}
+			</Box>
 			<Grid container spacing={2}>
 				{students.map((student) => (
 					<Grid item xs={12} sm={6} md={4} key={student.id}>
