@@ -161,7 +161,7 @@ class InstructorDashboardScreen extends StatelessWidget {
             child: Text(
               title,
               style: TextStyle(
-                color: Colors.white.withOpacity(0.7),
+                color: Colors.white.withValues(alpha: 0.7),
                 fontSize: 14,
               ),
               textAlign: TextAlign.center,
@@ -208,10 +208,10 @@ class InstructorDashboardScreen extends StatelessWidget {
 
   LineChartData _buildLineChartData(List<double> values, List<String> labels) {
     return LineChartData(
-      gridData: FlGridData(show: false),
+      gridData: const FlGridData(show: false),
       titlesData: FlTitlesData(
-        rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-        topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+        rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+        topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
         bottomTitles: AxisTitles(
           sideTitles: SideTitles(
             showTitles: true,
@@ -236,7 +236,7 @@ class InstructorDashboardScreen extends StatelessWidget {
           isCurved: true,
           color: const Color(0xFFFFFF00),
           barWidth: 3,
-          dotData: FlDotData(show: false),
+          dotData: const FlDotData(show: false),
         ),
       ],
     );
