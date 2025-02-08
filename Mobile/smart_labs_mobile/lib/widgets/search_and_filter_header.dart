@@ -63,7 +63,7 @@ class SearchAndFilterHeader extends StatelessWidget {
               cursorColor: accentColor,
               decoration: InputDecoration(
                 hintText: 'Search...',
-                hintStyle: TextStyle(color: textColor.withOpacity(0.5)),
+                hintStyle: TextStyle(color: textColor.withValues(alpha: 0.5)),
                 prefixIcon: Icon(Icons.search, color: textColor),
                 border: InputBorder.none,
                 contentPadding:
