@@ -8,3 +8,11 @@ export const usePPE = (ppeList: number[]) => {
 		staleTime: 30 * 60 * 1000,
 	});
 };
+
+export const useAllPPEs = () => {
+	return useQuery({
+		queryKey: ["allPPEs"],
+		queryFn: ppeService.getPPEs,
+		staleTime: 30 * 60 * 1000,
+	});
+};
