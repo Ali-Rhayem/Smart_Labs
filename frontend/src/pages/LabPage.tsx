@@ -18,6 +18,8 @@ import EditLabModal from "../components/EditLabModal";
 import EditIcon from "@mui/icons-material/Edit";
 import { usePPE } from "../hooks/usePPE";
 import SafetyIcon from "@mui/icons-material/VerifiedUser";
+import { useAllPPEs } from "../hooks/usePPE";
+import EditPPEModal from "../components/EditPPEModal";
 
 interface TabPanelProps {
 	children?: React.ReactNode;
@@ -47,12 +49,14 @@ const LabPage: React.FC = () => {
 	const [alertMessage, setAlertMessage] = useState("");
 	const [severity, setSeverity] = useState<"error" | "success">("error");
 	const [editModalOpen, setEditModalOpen] = useState(false);
+	const [editPPEOpen, setEditPPEOpen] = useState(false);
 	const {
 		instructors,
 		students,
 		isLoading: usersLoading,
 	} = useLabUsers(lab.id);
 	const { data: ppes = [], isLoading: ppesLoading } = usePPE(lab.ppe);
+	const { data: allPPEs = [] } = useAllPPEs();
 
 	const canManageLab =
 		user! && (user.role === "instructor" || user.role === "admin");
@@ -104,6 +108,19 @@ const LabPage: React.FC = () => {
 			setSeverity("error");
 			setOpenSnackbar(true);
 		}
+	};
+
+	const handleSavePPE = async (selectedPPEs: PPE[]) => {
+		try {
+			await labService.updateLabPPE(lab.id, selectedPPEs);
+			setAlertMessage('PPE requirements updated successfully');
+			setSeverity('success');
+			setEditPPEOpen(false);
+		} catch (err) {
+			setAlertMessage('Failed to update PPE requirements');
+			setSeverity('error');
+		}
+		setOpenSnackbar(true);
 	};
 
 	return (
@@ -172,7 +189,7 @@ const LabPage: React.FC = () => {
 										<IconButton
 											size="small"
 											onClick={() =>
-												console.log("Edit PPE")
+												setEditPPEOpen(true)
 											}
 											sx={{
 												ml: 1,
@@ -302,6 +319,14 @@ const LabPage: React.FC = () => {
 				onClose={() => setEditModalOpen(false)}
 				onSubmit={handleEditLab}
 				lab={lab}
+			/>
+
+			<EditPPEModal
+				open={editPPEOpen}
+				onClose={() => setEditPPEOpen(false)}
+				onSave={handleSavePPE}
+				currentPPEs={ppes}
+				allPPEs={allPPEs}
 			/>
 		</Box>
 	);
