@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { labService } from "../services/labService";
-import { User, useUser,  } from "../contexts/UserContext";
+import { User, useUser } from "../contexts/UserContext";
 
 const getLabs = async (user: User) => {
 	if (!user.id) return [];
@@ -17,7 +17,6 @@ const getLabs = async (user: User) => {
 	}
 };
 
-
 export const useLabsQuery = () => {
 	const { user } = useUser();
 
@@ -27,4 +26,25 @@ export const useLabsQuery = () => {
 		staleTime: 30 * 60 * 1000,
 		enabled: !!user?.id,
 	});
+};
+
+export const useLabUsers = (labId: number) => {
+	const instructorsQuery = useQuery({
+		queryKey: ["labInstructors", labId],
+		queryFn: () => labService.getInstructorsInLab(labId),
+		staleTime: 30 * 60 * 1000,
+	});
+
+	const studentsQuery = useQuery({
+		queryKey: ["labStudents", labId],
+		queryFn: () => labService.getStudentsInLab(labId),
+		staleTime: 30 * 60 * 1000,
+	});
+
+	return {
+		instructors: instructorsQuery.data || [],
+		students: studentsQuery.data || [],
+		isLoading: instructorsQuery.isLoading || studentsQuery.isLoading,
+		error: instructorsQuery.error || studentsQuery.error,
+	};
 };

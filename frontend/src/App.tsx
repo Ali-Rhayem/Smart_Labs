@@ -50,7 +50,7 @@ const App: React.FC = () => {
 									<LabsPage />
 								</ProtectedRoute>
 							}
-							/>
+						/>
 						<Route
 							path="/labs/:id"
 							element={
@@ -68,7 +68,10 @@ const App: React.FC = () => {
 					</Route>
 				</Routes>
 			</Router>
-			<ReactQueryDevtools initialIsOpen={false} />
+			<ReactQueryDevtools
+				buttonPosition="bottom-left"
+				initialIsOpen={false}
+			/>
 		</QueryClientProvider>
 	);
 };
