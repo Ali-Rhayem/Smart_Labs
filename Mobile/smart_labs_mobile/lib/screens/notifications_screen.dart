@@ -49,15 +49,16 @@ class NotificationsScreen extends ConsumerWidget {
                       Icon(
                         Icons.notifications_none,
                         size: 64,
-                        color: Colors.white.withOpacity(0.5),
+                        color: Colors.white.withValues(alpha: 0.5),
                       ),
                       const SizedBox(height: 16),
                       Text(
                         'No notifications',
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.7),
+                          color: Colors.white.withValues(alpha: 0.7),
                           fontSize: 16,
                         ),
+
                       ),
                     ],
                   ),
@@ -107,16 +108,18 @@ class NotificationsScreen extends ConsumerWidget {
                                 Text(
                                   notification['message'],
                                   style: TextStyle(
-                                    color: Colors.white.withOpacity(0.7),
+                                    color: Colors.white.withValues(alpha: 0.7),
                                   ),
+
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
                                   timeago.format(date),
                                   style: TextStyle(
-                                    color: Colors.white.withOpacity(0.5),
+                                    color: Colors.white.withValues(alpha: 0.5),
                                     fontSize: 12,
                                   ),
+
                                 ),
                               ],
                             ),
