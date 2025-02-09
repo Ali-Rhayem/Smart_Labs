@@ -17,6 +17,9 @@ export const labService = {
 	getInstructorsInLab: (id: number) =>
 		smart_labs.getAPI<User[]>(`/lab/${id}/instructors`),
 
+	editLabPPES: (id: number, ppe: number[]) =>
+		smart_labs.postAPI<void, number[]>(`/lab/${id}/ppe`, ppe),
+
 	createLab: (data: CreateLabDto) =>
 		smart_labs.postAPI<Lab, CreateLabDto>("/lab", data),
 
