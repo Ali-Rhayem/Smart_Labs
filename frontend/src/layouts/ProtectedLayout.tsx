@@ -9,7 +9,13 @@ interface ProtectedLayoutProps {
 
 const ProtectedLayout: React.FC<ProtectedLayoutProps> = ({ userRole }) => {
 	return (
-		<div style={{ display: "flex" , backgroundColor: "var(--color-background-secondary)", height: "100vh" }}>
+		<div
+			style={{
+				display: "flex",
+				backgroundColor: "var(--color-background-secondary)",
+				minHeight: "100vh",
+			}}
+		>
 			<SideBar userRole={userRole} />
 			<main style={{ flexGrow: 1, padding: "1rem" }}>
 				<Outlet />
