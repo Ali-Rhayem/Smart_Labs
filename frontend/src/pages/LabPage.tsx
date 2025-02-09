@@ -20,6 +20,8 @@ import { usePPE } from "../hooks/usePPE";
 import SafetyIcon from "@mui/icons-material/VerifiedUser";
 import { useAllPPEs } from "../hooks/usePPE";
 import EditPPEModal from "../components/EditPPEModal";
+import { labService } from "../services/labService";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface TabPanelProps {
 	children?: React.ReactNode;
@@ -42,21 +44,23 @@ const TabPanel: React.FC<TabPanelProps> = ({ children, value, index }) => (
 const LabPage: React.FC = () => {
 	const location = useLocation();
 	const navigate = useNavigate();
-	const lab = location.state?.lab;
 	const { user } = useUser();
+	const [lab, setLab] = useState(location.state?.lab);
 	const [tabValue, setTabValue] = useState(0);
 	const [openSnackbar, setOpenSnackbar] = useState(false);
 	const [alertMessage, setAlertMessage] = useState("");
 	const [severity, setSeverity] = useState<"error" | "success">("error");
 	const [editModalOpen, setEditModalOpen] = useState(false);
 	const [editPPEOpen, setEditPPEOpen] = useState(false);
+	const [selectedPPEs, setSelectedPPEs] = useState<number[]>(lab.ppe || []);
 	const {
 		instructors,
 		students,
 		isLoading: usersLoading,
 	} = useLabUsers(lab.id);
-	const { data: ppes = [], isLoading: ppesLoading } = usePPE(lab.ppe);
 	const { data: allPPEs = [] } = useAllPPEs();
+	const queryClient = useQueryClient();
+	const { data: ppes = [], isLoading: ppesLoading } = usePPE(lab.ppe);
 
 	const canManageLab =
 		user! && (user.role === "instructor" || user.role === "admin");
@@ -110,17 +114,36 @@ const LabPage: React.FC = () => {
 		}
 	};
 
-	const handleSavePPE = async (selectedPPEs: PPE[]) => {
+	const handleEditPPEOpen = () => {
+		setSelectedPPEs(lab.ppe || []);
+		setEditPPEOpen(true);
+	};
+
+	const handleEditPPEClose = () => {
+		setSelectedPPEs(lab.ppe || []);
+		setEditPPEOpen(false);
+	};
+
+	const handleSavePPE = async (selected: number[]) => {
 		try {
-			await labService.updateLabPPE(lab.id, selectedPPEs);
-			setAlertMessage('PPE requirements updated successfully');
-			setSeverity('success');
+			await labService.editLabPPES(lab.id, selected);
+			queryClient.invalidateQueries({
+				queryKey: ["labs", `${user?.role}`, user?.id],
+			});
+			setLab((prev: any) => ({
+				...prev,
+				ppe: selected,
+			}));
+			setSelectedPPEs(selected);
+			setAlertMessage("PPE requirements updated successfully");
+			setSeverity("success");
+			setOpenSnackbar(true);
 			setEditPPEOpen(false);
 		} catch (err) {
-			setAlertMessage('Failed to update PPE requirements');
-			setSeverity('error');
+			setAlertMessage("Failed to update PPE requirements");
+			setSeverity("error");
+			setOpenSnackbar(true);
 		}
-		setOpenSnackbar(true);
 	};
 
 	return (
@@ -188,9 +211,7 @@ const LabPage: React.FC = () => {
 									{canManageLab && (
 										<IconButton
 											size="small"
-											onClick={() =>
-												setEditPPEOpen(true)
-											}
+											onClick={handleEditPPEOpen}
 											sx={{
 												ml: 1,
 												p: 0.5,
@@ -239,21 +260,20 @@ const LabPage: React.FC = () => {
 					</Box>
 					<Box sx={{ display: "flex", gap: 1, alignItems: "start" }}>
 						<Chip
-							size="small"
 							color={lab.started ? "success" : "default"}
 							label={lab.started ? "In Progress" : "Not Started"}
 						/>
-						{lab.endLab && (
-							<Chip size="small" color="error" label="Ended" />
-						)}
+						{lab.endLab && <Chip color="error" label="Ended" />}
 						{canManageLab && (
 							<Button
 								variant="contained"
 								startIcon={<EditIcon />}
 								onClick={() => setEditModalOpen(true)}
+								size="small"
 								sx={{
 									bgcolor: "var(--color-primary)",
 									color: "var(--color-text-button)",
+									whiteSpace: "nowrap",
 								}}
 							>
 								Edit Lab
@@ -323,9 +343,9 @@ const LabPage: React.FC = () => {
 
 			<EditPPEModal
 				open={editPPEOpen}
-				onClose={() => setEditPPEOpen(false)}
+				onClose={handleEditPPEClose}
 				onSave={handleSavePPE}
-				currentPPEs={ppes}
+				currentPPEs={selectedPPEs}
 				allPPEs={allPPEs}
 			/>
 		</Box>
