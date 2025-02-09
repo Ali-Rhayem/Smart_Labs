@@ -1,19 +1,13 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
 	Dialog,
 	DialogTitle,
 	DialogContent,
 	DialogActions,
 	Button,
-	List,
-	ListItem,
-	ListItemIcon,
-	ListItemText,
-	Checkbox,
 	Grid,
 	Paper,
 	Typography,
-	Box,
 } from "@mui/material";
 import { PPE } from "../types/ppe";
 import SafetyIcon from "@mui/icons-material/VerifiedUser";
@@ -21,9 +15,10 @@ import SafetyIcon from "@mui/icons-material/VerifiedUser";
 interface EditPPEModalProps {
 	open: boolean;
 	onClose: () => void;
-	onSave: (selectedPPEs: PPE[]) => void;
-	currentPPEs: PPE[];
+	onSave: (selectedPPEs: number[]) => void;
+	currentPPEs: number[];
 	allPPEs: PPE[];
+	onExited?: () => void;
 }
 
 const EditPPEModal: React.FC<EditPPEModalProps> = ({
@@ -32,15 +27,25 @@ const EditPPEModal: React.FC<EditPPEModalProps> = ({
 	onSave,
 	currentPPEs,
 	allPPEs,
+	onExited,
 }) => {
-	const [selected, setSelected] = React.useState<PPE[]>(currentPPEs);
+	const [selected, setSelected] = useState<number[]>([]);
+
+	useEffect(() => {
+		setSelected(currentPPEs);
+	}, [currentPPEs, open]);
+
+	const handleClose = () => {
+		setSelected(currentPPEs);
+		onClose();
+	};
 
 	const handleToggle = (ppe: PPE) => {
-		const currentIndex = selected.findIndex((p) => p.id === ppe.id);
+		const currentIndex = selected.indexOf(ppe.id);
 		const newChecked = [...selected];
 
 		if (currentIndex === -1) {
-			newChecked.push(ppe);
+			newChecked.push(ppe.id);
 		} else {
 			newChecked.splice(currentIndex, 1);
 		}
@@ -51,7 +56,8 @@ const EditPPEModal: React.FC<EditPPEModalProps> = ({
 	return (
 		<Dialog
 			open={open}
-			onClose={onClose}
+			onClose={handleClose}
+			TransitionProps={{ onExited }}
 			maxWidth="md"
 			PaperProps={{
 				sx: {
@@ -64,7 +70,7 @@ const EditPPEModal: React.FC<EditPPEModalProps> = ({
 			<DialogContent>
 				<Grid container spacing={1.5} sx={{ mt: 0.5 }}>
 					{allPPEs.map((ppe) => {
-						const isChecked = selected.some((p) => p.id === ppe.id);
+						const isChecked = selected.includes(ppe.id);
 
 						return (
 							<Grid item xs="auto" key={ppe.id}>
@@ -125,7 +131,7 @@ const EditPPEModal: React.FC<EditPPEModalProps> = ({
 			<DialogActions
 				sx={{ p: 2.5, borderTop: 1, borderColor: "divider" }}
 			>
-				<Button onClick={onClose}>Cancel</Button>
+				<Button onClick={handleClose}>Cancel</Button>
 				<Button variant="contained" onClick={() => onSave(selected)}>
 					Save Changes
 				</Button>
