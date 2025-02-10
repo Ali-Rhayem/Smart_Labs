@@ -12,6 +12,7 @@ import ProtectedRoute from "./contexts/ProtectedRoute";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import LabPage from "./pages/LabPage";
+import SessionPage from "./pages/SessionPage";
 
 const queryClient = new QueryClient();
 
@@ -62,6 +63,20 @@ const App: React.FC = () => {
 									]}
 								>
 									<LabPage />
+								</ProtectedRoute>
+							}
+							/>
+						<Route
+							path="/labs/sessions/:sessionId"
+							element={
+								<ProtectedRoute
+									requiredRoles={[
+										"student",
+										"instructor",
+										"admin",
+									]}
+								>
+									<SessionPage />
 								</ProtectedRoute>
 							}
 						/>
