@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import 'package:smart_labs_mobile/models/lab_model.dart';
 import 'package:smart_labs_mobile/widgets/instructor/analytics_tab.dart';
+import 'package:smart_labs_mobile/widgets/instructor/announcements_tab.dart';
 import 'package:smart_labs_mobile/widgets/instructor/lab_header.dart';
 import 'package:smart_labs_mobile/widgets/instructor/people_tab.dart';
 import 'package:smart_labs_mobile/widgets/instructor/sessions_tab.dart';
@@ -16,7 +17,7 @@ class InstructorLabDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 3,
+      length: 4,
       child: Scaffold(
         appBar: AppBar(
           backgroundColor: const Color(0xFF121212),
@@ -64,6 +65,7 @@ class InstructorLabDetailScreen extends StatelessWidget {
                   Tab(text: 'Sessions'),
                   Tab(text: 'People'),
                   Tab(text: 'Analytics'),
+                  Tab(text: 'Announcements'),
                 ],
               ),
             ),
@@ -73,6 +75,7 @@ class InstructorLabDetailScreen extends StatelessWidget {
                   SessionsTab(lab: lab),
                   PeopleTab(lab: lab),
                   const AnalyticsTab(),
+                  AnnouncementsTab(lab: lab),
                 ],
               ),
             ),
