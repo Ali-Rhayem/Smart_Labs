@@ -48,3 +48,11 @@ export const useLabUsers = (labId: number) => {
 		error: instructorsQuery.error || studentsQuery.error,
 	};
 };
+
+export const useLabAnnouncements = (labId: number) => {
+	return useQuery({
+		queryKey: ["labAnnouncements", labId],
+		queryFn: () => labService.getAnnouncements(labId),
+		staleTime: 30 * 60 * 1000,
+	});
+};
