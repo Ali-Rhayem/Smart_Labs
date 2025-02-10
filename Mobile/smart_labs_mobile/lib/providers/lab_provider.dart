@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:smart_labs_mobile/models/lab_model.dart';
+import 'package:smart_labs_mobile/models/lab_schedule.dart';
 import 'package:smart_labs_mobile/services/api_service.dart';
 import 'package:smart_labs_mobile/utils/secure_storage.dart';
 
@@ -46,6 +47,8 @@ class LabNotifier extends StateNotifier<AsyncValue<List<Lab>>> {
           final instructorsList = lab['instructors'] as List<dynamic>? ?? [];
           final studentsList = lab['students'] as List<dynamic>? ?? [];
           final scheduleList = lab['schedule'] as List<dynamic>? ?? [];
+          final announcementsList =
+              lab['announcements'] as List<dynamic>? ?? [];
 
           String startTime = '';
           String endTime = '';
@@ -76,7 +79,6 @@ class LabNotifier extends StateNotifier<AsyncValue<List<Lab>>> {
             semesterId: lab['semesterID'].toString(),
             sessions: [], // or map your entire schedule if needed
             started: lab['started'],
-            // Possibly consider storing `endLab: lab['endLab']` if you need it
           );
         }).toList();
 
