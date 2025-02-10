@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:smart_labs_mobile/providers/announcement_provider.dart';
 import 'package:smart_labs_mobile/providers/lab_instructor_provider.dart';
 import 'package:smart_labs_mobile/providers/lab_student_provider.dart';
 import 'package:smart_labs_mobile/providers/notification_provider.dart';
@@ -30,7 +31,6 @@ void resetAllProviders(WidgetRef ref) {
   ref.invalidate(labStudentsProvider);
   ref.invalidate(labInstructorsProvider);
   ref.invalidate(labSessionsProvider);
-
-  // Clear notifications if you have any
+  ref.invalidate(labAnnouncementsProvider);
   ref.invalidate(notificationsProvider);
 }
