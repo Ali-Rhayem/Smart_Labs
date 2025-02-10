@@ -22,6 +22,7 @@ import { useAllPPEs } from "../hooks/usePPE";
 import EditPPEModal from "../components/EditPPEModal";
 import { labService } from "../services/labService";
 import { useQueryClient } from "@tanstack/react-query";
+import SessionsTab from "../components/SessionsTab";
 
 interface TabPanelProps {
 	children?: React.ReactNode;
@@ -308,7 +309,7 @@ const LabPage: React.FC = () => {
 
 			{/* Tab Panels */}
 			<TabPanel value={tabValue} index={0}>
-				Sessions
+				<SessionsTab labId={lab.id} />
 			</TabPanel>
 			<TabPanel value={tabValue} index={1}>
 				<PeopleTab
