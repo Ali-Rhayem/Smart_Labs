@@ -1,0 +1,130 @@
+from kafka import KafkaConsumer, KafkaProducer
+import json
+import base64
+import time
+import os
+from dotenv import load_dotenv
+import random
+import threading
+import sys
+
+load_dotenv()
+
+def images_to_base64(image_path):
+    if not os.path.exists(image_path):
+        raise FileNotFoundError(f"The image {image_path} does not exist.")
+    
+    if os.path.isfile(image_path) and image_path.lower().endswith(('png', 'jpg', 'jpeg', 'gif', 'bmp', 'webp')):
+        try:
+            with open(image_path, "rb") as image_file:
+                encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
+                return encoded_string
+        except Exception as e:
+            print(f"Could not process file {image_path}: {e}")
+
+def get_random_image():
+    folder_path = "./test_images"
+    image_extensions = {'.jpg', '.jpeg', '.png', '.gif', '.bmp', '.tiff', '.webp'}
+    images = [f for f in os.listdir(folder_path)
+              if os.path.splitext(f)[1].lower() in image_extensions]
+    
+    if not images:
+        raise ValueError("No image files found in the specified folder.")
+    
+    return os.path.join(folder_path, random.choice(images))
+
+# Create a KafkaProducer instance to be reused.
+producer = KafkaProducer(
+    bootstrap_servers="localhost:9092",
+    value_serializer=lambda v: json.dumps(v).encode('utf-8'),
+    max_request_size=10 * 1024 * 1024  # 10 MB
+)
+
+# An Event flag that indicates whether periodic production is active.
+producing_event = threading.Event()
+
+def produce_image(command_data):
+    """
+    Produce one image message to the "analyze" topic using a new random image.
+    """
+    image_path = get_random_image()
+    # Update the command data with the image encoding.
+    command_data["encoding"] = images_to_base64(image_path)
+    future = producer.send("analyze", value=command_data)
+    try:
+        # Wait for the send to complete.
+        future.get(timeout=10)
+        print("Image sent to analyze")
+    except Exception as e:
+        print("Failed to send image:", e)
+
+def periodic_producer(command_data):
+    """
+    Produce an image every 10 seconds while the producing_event flag is set.
+    The sleep is done in short intervals (1 sec) so that it can be terminated promptly.
+    """
+    while producing_event.is_set():
+        produce_image(command_data)
+        # Wait 10 seconds total, but check every second if the event is still set.
+        for _ in range(2):
+            if not producing_event.is_set():
+                break
+            time.sleep(1)
+
+# Set up the consumer.
+topic = "recording_se"
+ROOM = 'B-103'
+consumer = KafkaConsumer(
+    topic,
+    bootstrap_servers="localhost:9092",
+    group_id=ROOM,
+    auto_offset_reset='latest',
+    enable_auto_commit=True,
+    value_deserializer=lambda x: x.decode('utf-8'),
+)
+
+print("Consumer Started")
+periodic_thread = None
+
+try:
+    for msg in consumer:
+        print("Message received in camera")
+        data = json.loads(msg.value)
+        command = data.get("command")
+        
+        if command == "start":
+            if not producing_event.is_set():
+                print("Starting periodic production...")
+                producing_event.set()
+                # Pass a copy of the data to avoid unexpected modifications.
+                periodic_thread = threading.Thread(target=periodic_producer, args=(data.copy(),))
+                periodic_thread.start()
+            else:
+                print("Periodic production is already running.")
+        
+        elif command == "end":
+            print("Received 'end' command. Sending final image and terminating process.")
+            # Send one final image.
+            produce_image(data)
+            # Stop periodic production.
+            producing_event.clear()
+            if periodic_thread is not None:
+                periodic_thread.join()
+                periodic_thread = None
+            # Break out of the consumer loop to terminate the program.
+        
+        else:
+            print("Unknown command received:", command)
+
+except KeyboardInterrupt:
+    print("\nKeyboardInterrupt received. Terminating process.")
+    producing_event.clear()
+    if periodic_thread is not None:
+        periodic_thread.join()
+
+finally:
+    # Ensure that both the consumer and producer are closed properly.
+    consumer.close()
+    producer.close()
+    print("Consumer and Producer closed. Exiting.")
+    sys.exit(0)
