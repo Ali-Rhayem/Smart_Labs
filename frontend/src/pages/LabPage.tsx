@@ -23,6 +23,7 @@ import EditPPEModal from "../components/EditPPEModal";
 import { labService } from "../services/labService";
 import { useQueryClient } from "@tanstack/react-query";
 import SessionsTab from "../components/SessionsTab";
+import AnnouncementsTab from "../components/AnnouncementsTab";
 
 interface TabPanelProps {
 	children?: React.ReactNode;
@@ -325,7 +326,7 @@ const LabPage: React.FC = () => {
 				Analytics
 			</TabPanel>
 			<TabPanel value={tabValue} index={3}>
-				Announcements
+				<AnnouncementsTab labId={lab.id} />
 			</TabPanel>
 
 			<ErrorAlert
