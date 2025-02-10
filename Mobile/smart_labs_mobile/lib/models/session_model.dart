@@ -18,6 +18,19 @@ class Session {
     required this.output,
     required this.report,
   });
+
+  factory Session.fromJson(Map<String, dynamic> json) {
+    return Session(
+      id: json['id'].toString(),
+      labId: json['labId'].toString(),
+      date: DateTime.parse(json['date']),
+      startTime: json['startTime'] ?? '',
+      endTime: json['endTime'] ?? '',
+      description: json['description'] ?? '',
+      output: [],
+      report: json['report'] ?? '',
+    );
+  }
 }
 
 // student record example just for testing
