@@ -69,4 +69,21 @@ class LabAnnouncementsNotifier
       throw Exception('Failed to delete announcement: $e');
     }
   }
+
+  Future<void> addComment(String announcementId, String message) async {
+    try {
+      final response = await _apiService.post(
+        '/Lab/$labId/announcement/$announcementId/comment',
+        {'message': message},
+      );
+
+      if (response['success'] != false || response == null) {
+        await fetchAnnouncements();
+      } else {
+        throw Exception(response['message'] ?? 'Failed to add comment');
+      }
+    } catch (e) {
+      throw Exception('Failed to add comment: $e');
+    }
+  }
 }
