@@ -7,7 +7,7 @@ class Announcement {
   final String message;
   final List<String> files;
   final DateTime time;
-  final List<Comment> comments;
+  List<Comment> comments = [];
 
   Announcement({
     required this.id,
