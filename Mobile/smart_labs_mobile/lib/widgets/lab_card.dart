@@ -75,41 +75,25 @@ class LabCard extends StatelessWidget {
                       Text(
                         lab.description,
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.7),
+                          color: Colors.white.withValues(alpha: 0.7),
                           fontSize: 13,
                         ),
                       ),
                     ],
                   ),
                 ),
-                if (showManageButton)
-                  ElevatedButton(
-                    onPressed: () {
-                      // TODO: Implement manage lab functionality
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: kNeonAccent,
-                      foregroundColor: Colors.black,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 8,
+                IconButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (ctx) => LabDetailScreen(lab: lab),
                       ),
-                    ),
-                    child: const Text('Manage'),
-                  )
-                else
-                  IconButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (ctx) => LabDetailScreen(lab: lab),
-                        ),
-                      );
-                    },
-                    color: kNeonAccent,
-                    icon: const Icon(Icons.chevron_right, size: 30),
-                  ),
+                    );
+                  },
+                  color: kNeonAccent,
+                  icon: const Icon(Icons.chevron_right, size: 30),
+                ),
               ],
             ),
           ],
