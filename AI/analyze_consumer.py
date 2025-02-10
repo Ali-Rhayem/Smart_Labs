@@ -230,13 +230,13 @@ try:
                         if student_id in result: # Check if student is in this lab
                             if student_id not in students_in_frame: # Check if student appeard before in this image 
                                 students_in_frame.add(student_id)
-                                result[student_id]["attendance_percentage"] += round( 100 / images_count,2)
-                                total_attenadance += round(100 / images_count,2)
+                                result[student_id]["attendance_percentage"] += round( 100 / images_count)
+                                total_attenadance += round(100 / images_count)
                                 for ppe in required_ppe:
-                                    result[student_id]["ppe_compliance"][ppe] += round( person["ppe"][ppe] * 100 / images_count ,2)
-                                    total_ppe_compliance[ppe] += round(person["ppe"][ppe] * 100 / images_count ,2)
+                                    result[student_id]["ppe_compliance"][ppe] += round( person["ppe"][ppe] * 100 / images_count)
+                                    total_ppe_compliance[ppe] += round(person["ppe"][ppe] * 100 / images_count)
 
-                total_attenadance = round(total_attenadance / len(students_in_lab),2)
+                total_attenadance = round(total_attenadance / len(students_in_lab))
                 for ppe in required_ppe:
                     total_ppe_compliance[ppe] = total_ppe_compliance[ppe] / len(Total_people_attended)
 
