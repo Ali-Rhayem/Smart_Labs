@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:smart_labs_mobile/models/announcement_model.dart';
-import 'package:smart_labs_mobile/services/api_service.dart';
+import 'package:smart_labs_mobile/models/comment_model.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:smart_labs_mobile/providers/announcement_provider.dart';
 
 String formatDateTime(DateTime dateTime) {
   final hour = dateTime.hour > 12
@@ -18,7 +20,7 @@ String formatDateTime(DateTime dateTime) {
   return "$month/$day/$year, $hour:$minute $period";
 }
 
-class AnnouncementCommentsScreen extends StatefulWidget {
+class AnnouncementCommentsScreen extends ConsumerStatefulWidget {
   final Announcement announcement;
   final String labId;
 
@@ -29,39 +31,58 @@ class AnnouncementCommentsScreen extends StatefulWidget {
   });
 
   @override
-  State<AnnouncementCommentsScreen> createState() =>
+  ConsumerState<AnnouncementCommentsScreen> createState() =>
       _AnnouncementCommentsScreenState();
 }
 
 class _AnnouncementCommentsScreenState
-    extends State<AnnouncementCommentsScreen> {
+    extends ConsumerState<AnnouncementCommentsScreen> {
   static const Color kNeonAccent = Color(0xFFFFFF00);
   final TextEditingController _commentController = TextEditingController();
-  final ApiService _apiService = ApiService();
+  final ScrollController _scrollController = ScrollController();
 
   Future<void> _addComment() async {
     if (_commentController.text.trim().isEmpty) return;
 
     try {
-      final response = await _apiService.post(
-        '/Lab/${widget.labId}/announcement/${widget.announcement.id}/comment',
-        {'message': _commentController.text.trim()},
-      );
-
-      if (response['success'] != false) {
-        if (mounted) {
-          _commentController.clear();
-          Navigator.pop(
-              context, true); // Return true to indicate refresh needed
-        }
-      } else {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(response['message'] ?? 'Failed to add comment'),
-            ),
+      await ref
+          .read(labAnnouncementsProvider(widget.labId).notifier)
+          .addComment(
+            widget.announcement.id.toString(),
+            _commentController.text.trim(),
           );
-        }
+
+      if (mounted) {
+        // Create a new comment with local data since we got a 204
+        final newComment = Comment(
+          id: DateTime.now().millisecondsSinceEpoch,
+          user: widget.announcement.user,
+          message: _commentController.text.trim(),
+          time: DateTime.now(),
+        );
+
+        setState(() {
+          widget.announcement.comments.add(newComment);
+        });
+
+        // Clear the input field
+        _commentController.clear();
+
+        // Scroll to the bottom after the state has been updated
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (_scrollController.hasClients) {
+            _scrollController.animateTo(
+              _scrollController.position.maxScrollExtent,
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeOut,
+            );
+          }
+        });
+
+        // Show success message
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Comment added successfully')),
+        );
       }
     } catch (e) {
       if (mounted) {
@@ -93,7 +114,7 @@ class _AnnouncementCommentsScreenState
               borderRadius: BorderRadius.circular(12),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.2),
+                  color: Colors.black.withValues(alpha: 0.2),
                   blurRadius: 10,
                   offset: const Offset(0, 4),
                 ),
@@ -119,7 +140,7 @@ class _AnnouncementCommentsScreenState
                     Text(
                       formatDateTime(widget.announcement.time),
                       style: TextStyle(
-                        color: Colors.white.withOpacity(0.7),
+                        color: Colors.white.withValues(alpha: 0.7),
                         fontSize: 14,
                       ),
                     ),
@@ -131,6 +152,7 @@ class _AnnouncementCommentsScreenState
           // Comments list
           Expanded(
             child: ListView.builder(
+              controller: _scrollController,
               padding: const EdgeInsets.symmetric(horizontal: 16),
               itemCount: widget.announcement.comments.length,
               itemBuilder: (context, index) {
@@ -145,7 +167,7 @@ class _AnnouncementCommentsScreenState
                           Container(
                             width: 2,
                             height: 100,
-                            color: kNeonAccent.withOpacity(0.5),
+                            color: kNeonAccent.withValues(alpha: 0.5),
                             margin: const EdgeInsets.only(left: 11),
                           ),
                         ],
@@ -162,7 +184,7 @@ class _AnnouncementCommentsScreenState
                                 width: 12,
                                 height: 2,
                                 margin: const EdgeInsets.only(top: 20),
-                                color: kNeonAccent.withOpacity(0.5),
+                                color: kNeonAccent.withValues(alpha: 0.5),
                               ),
                               Expanded(
                                 child: Container(
@@ -223,7 +245,7 @@ class _AnnouncementCommentsScreenState
                                                 formatDateTime(comment.time),
                                                 style: TextStyle(
                                                   color: Colors.white
-                                                      .withOpacity(0.6),
+                                                      .withValues(alpha: 0.6),
                                                   fontSize: 12,
                                                 ),
                                               ),
@@ -252,7 +274,7 @@ class _AnnouncementCommentsScreenState
               color: const Color(0xFF2C2C2C),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.2),
+                  color: Colors.black.withValues(alpha: 0.2),
                   blurRadius: 10,
                   offset: const Offset(0, -4),
                 ),
@@ -268,7 +290,7 @@ class _AnnouncementCommentsScreenState
                     decoration: InputDecoration(
                       hintText: 'Write a comment...',
                       hintStyle: TextStyle(
-                        color: Colors.white.withOpacity(0.5),
+                        color: Colors.white.withValues(alpha: 0.5),
                       ),
                       filled: true,
                       fillColor: const Color(0xFF1C1C1C),
