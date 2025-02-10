@@ -100,11 +100,12 @@ class _AnnouncementsTabState extends ConsumerState<AnnouncementsTab> {
                   final announcement = announcements[index];
                   return Card(
                     color: const Color(0xFF1C1C1C),
-                    margin: const EdgeInsets.only(bottom: 8),
+                    margin: const EdgeInsets.only(bottom: 10),
                     child: Column(
                       children: [
                         Padding(
-                          padding: const EdgeInsets.all(16),
+                          padding: const EdgeInsets.only(
+                              top: 16, left: 16, right: 16, bottom: 8),
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -142,14 +143,6 @@ class _AnnouncementsTabState extends ConsumerState<AnnouncementsTab> {
                                         fontSize: 16,
                                       ),
                                     ),
-                                    const SizedBox(height: 8),
-                                    Text(
-                                      formatDateTime(announcement.time),
-                                      style: TextStyle(
-                                        color: Colors.white.withOpacity(0.5),
-                                        fontSize: 12,
-                                      ),
-                                    ),
                                   ],
                                 ),
                               ),
@@ -184,10 +177,20 @@ class _AnnouncementsTabState extends ConsumerState<AnnouncementsTab> {
                             }
                           },
                           child: Padding(
-                            padding: const EdgeInsets.all(8),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 20, vertical: 8),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
+                                const SizedBox(height: 8),
+                                Text(
+                                  formatDateTime(announcement.time),
+                                  style: TextStyle(
+                                    color: Colors.white.withOpacity(0.5),
+                                    fontSize: 12,
+                                  ),
+                                ),
+                                const Spacer(),
                                 const Icon(
                                   Icons.comment_outlined,
                                   size: 18,
