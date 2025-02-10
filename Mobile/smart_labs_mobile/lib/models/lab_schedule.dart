@@ -14,4 +14,12 @@ class LabSchedule {
         'startTime': startTime,
         'endTime': endTime,
       };
+
+  factory LabSchedule.fromJson(Map<String, dynamic> json) {
+    return LabSchedule(
+      dayOfWeek: json['dayOfWeek'],
+      startTime: json['startTime'],
+      endTime: json['endTime'],
+    );
+  }
 }
