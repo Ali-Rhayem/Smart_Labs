@@ -8,8 +8,8 @@ from torchvision import transforms
 import torch
 import matplotlib.pyplot as plt
 import random
-from dotenv import load_dotenv
 import os
+from dotenv import load_dotenv
 load_dotenv()
 
 from pymongo import MongoClient
@@ -18,7 +18,7 @@ db = client[os.getenv("MONGO_DB")]
 
 model = None
 usersProfiles = None
-model_path = './models/yolov8_ppe1.pt'
+model_path = './models/yolov8_ppe3.pt'
 
 def display_image(img_rgb):
     if img_rgb is None:
@@ -29,7 +29,7 @@ def display_image(img_rgb):
     plt.imshow(img_rgb)
     plt.axis('off')  # Hide the axes for better visualization
     plt.show()
-    
+
 def analyze_image(base64_str):
     global model
     if model is None:
@@ -49,24 +49,28 @@ def analyze_image(base64_str):
     
     return results, image
     
- 
 def facenet_embed(img_rgb: np.ndarray):
     try:
+        # Load the pretrained FaceNet model
         model = InceptionResnetV1(pretrained='vggface2').eval()
 
+        # Define a transform pipeline to preprocess the image
         preprocess = transforms.Compose([
-            transforms.Resize((160, 160)),       
-            transforms.ToTensor(),              
-            transforms.Normalize(               
+            transforms.Resize((160, 160)),       # Resize the image to 160x160 (required by FaceNet)
+            transforms.ToTensor(),              # Convert image to PyTorch tensor
+            transforms.Normalize(               # Normalize with FaceNet's required mean and std
                 mean=[0.5, 0.5, 0.5],
                 std=[0.5, 0.5, 0.5]
             )
         ])
 
+        # Convert NumPy array to PIL Image
         img_pil = Image.fromarray(img_rgb)
 
-        img_tensor = preprocess(img_pil).unsqueeze(0) 
+        # Apply preprocessing
+        img_tensor = preprocess(img_pil).unsqueeze(0)  # Add batch dimension
 
+        # Generate embeddings
         with torch.no_grad():
             embeddings = model(img_tensor).cpu().numpy()
 
@@ -74,14 +78,16 @@ def facenet_embed(img_rgb: np.ndarray):
     except Exception as e:
         print(f"Error generating embeddings: {e}")
         return None
-    
-def best_similarity(face_embedding, known_embeddings):
-    face_embedding = np.array(face_embedding) 
-    known_embeddings = np.array(known_embeddings) 
 
+def best_similarity(face_embedding, known_embeddings):
+    face_embedding = np.array(face_embedding)  # Ensure input is a NumPy array
+    known_embeddings = np.array(known_embeddings)  # Ensure known embeddings are NumPy arrays
+
+    # Normalize embeddings to unit vectors
     face_norm = face_embedding / np.linalg.norm(face_embedding)
     known_norms = known_embeddings / np.linalg.norm(known_embeddings, axis=1, keepdims=True)
 
+    # Compute cosine similarity
     similarity_scores = np.dot(known_norms, face_norm.T)
     return similarity_scores
 
@@ -90,8 +96,8 @@ def load_user_profiles():
     users_collection = db['Users'] 
     
     pipeline = [
-        {"$unwind": "$embeddings"},
-        {"$project": {"_id":1, "name": 1, "embeddings": 1}}
+        {"$unwind": "$face_identity_vector"},
+        {"$project": {"_id":1, "name": 1, "face_identity_vector": 1}}
     ]
 
     usersProfiles = list(users_collection.aggregate(pipeline))
@@ -100,7 +106,7 @@ def find_best_match(face_embedding):
     global usersProfiles
     if usersProfiles == None:
         load_user_profiles()
-    known_embeddings = [user["embeddings"] for user in usersProfiles]
+    known_embeddings = [user["face_identity_vector"] for user in usersProfiles]
     similarities = best_similarity(face_embedding, known_embeddings)
     best_match_index = np.argmax(similarities)
     best_match_name = usersProfiles[best_match_index]["name"]
@@ -148,7 +154,7 @@ def recognize_face(image, bounding_box):
         best_id = anonymous_id
         
     return best_id, best_name, score[0]
-
+  
 def overlap_percentage(bbox1, bbox2):
     x1_1, y1_1, x2_1, y2_1 = bbox1
     x1_2, y1_2, x2_2, y2_2 = bbox2
@@ -241,3 +247,4 @@ def draw_objects(image, all_persons):
     plt.show()
     
     return image_copy
+
