@@ -7,4 +7,13 @@ export default defineConfig({
 	css: {
 		postcss: "./postcss.config.mjs",
 	},
+	optimizeDeps: {
+		include: [
+			"@mui/material",
+			"@mui/icons-material",
+			"@mui/x-date-pickers",
+			"@mui/x-date-pickers/AdapterDateFns",
+		],
+		exclude: ["date-fns"],
+	},
 });
