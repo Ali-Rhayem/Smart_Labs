@@ -10,6 +10,7 @@ import {
 } from "@mui/material";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import { useLabSessions } from "../hooks/useSessions";
+import { useNavigate } from 'react-router-dom';
 
 import { isWithinInterval, parseISO } from "date-fns";
 
@@ -20,6 +21,7 @@ const SessionsTab: React.FC<{ labId: number }> = ({ labId }) => {
 	const [startDate, setStartDate] = React.useState<Date | null>(null);
 	const [endDate, setEndDate] = React.useState<Date | null>(null);
 	const [dateError, setDateError] = React.useState<string>("");
+	const navigate = useNavigate();
 
 	const handleStartDateChange = (date: Date | null) => {
 		setStartDate(date);
@@ -78,6 +80,10 @@ const SessionsTab: React.FC<{ labId: number }> = ({ labId }) => {
 		const values = Object.values(compliance);
 		if (values.length === 0) return 0;
 		return values.reduce((a, b) => a + b, 0) / values.length;
+	};
+
+	const handleViewSession = (session: any) => {
+		navigate(`/labs/sessions/${session.id}`, { state: { session } });
 	};
 
 	return (
@@ -271,6 +277,7 @@ const SessionsTab: React.FC<{ labId: number }> = ({ labId }) => {
 
 									<Button
 										variant="contained"
+										onClick={() => handleViewSession(session)}
 										startIcon={<VisibilityIcon />}
 										fullWidth
 										sx={{
