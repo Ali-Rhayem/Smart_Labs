@@ -106,4 +106,62 @@ class LabNotifier extends StateNotifier<AsyncValue<List<Lab>>> {
       state = AsyncValue.data([...labs, lab]);
     });
   }
+
+  Future<Map<String, dynamic>> fetchLabById(String labId) async {
+    try {
+      final response = await _apiService.get('/Lab/$labId');
+
+      if (response['success']) {
+        final labData = response['data'];
+
+        // Convert schedules from JSON
+        final scheduleList = (labData['schedule'] as List<dynamic>? ?? [])
+            .map((schedule) => LabSchedule(
+                  dayOfWeek: schedule['dayOfWeek'],
+                  startTime: schedule['startTime'],
+                  endTime: schedule['endTime'],
+                ))
+            .toList();
+
+        // Create updated lab object
+        final updatedLab = Lab(
+          labId: labData['id'].toString(),
+          labCode: labData['labCode'],
+          labName: labData['labName'],
+          description: labData['description'],
+          ppe: (labData['ppe'] as List<dynamic>? ?? []).join(', '),
+          instructors: (labData['instructors'] as List<dynamic>? ?? [])
+              .map((s) => s.toString())
+              .toList(),
+          students: (labData['students'] as List<dynamic>? ?? [])
+              .map((s) => s.toString())
+              .toList(),
+          schedule: scheduleList,
+          report: labData['report'] ?? 'N/A',
+          semesterId: labData['semesterID'].toString(),
+          sessions: [],
+          started: labData['started'],
+        );
+
+        // Update state with the new lab data
+        state.whenData((labs) {
+          final index = labs.indexWhere((lab) => lab.labId == labId);
+          if (index != -1) {
+            final updatedLabs = List<Lab>.from(labs);
+            updatedLabs[index] = updatedLab;
+            state = AsyncValue.data(updatedLabs);
+          }
+        });
+
+        return response;
+      } else {
+        return response;
+      }
+    } catch (e) {
+      return {
+        'success': false,
+        'message': e.toString(),
+      };
+    }
+  }
 }
