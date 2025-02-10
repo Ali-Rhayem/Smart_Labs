@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:smart_labs_mobile/models/lab_model.dart';
+import 'package:smart_labs_mobile/models/lab_schedule.dart';
 
 class LabSchedulesList extends StatelessWidget {
   final List<LabSchedule> schedules;
