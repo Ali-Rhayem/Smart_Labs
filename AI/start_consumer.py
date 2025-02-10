@@ -1,6 +1,7 @@
 from kafka import KafkaConsumer, KafkaProducer
 import json
 import base64
+import datetime
 import time
 import os
 from dotenv import load_dotenv
@@ -50,6 +51,7 @@ def produce_image(command_data):
     image_path = get_random_image()
     # Update the command data with the image encoding.
     command_data["encoding"] = images_to_base64(image_path)
+    command_data["time"] = datatime.datetime.utcnow().strftime("%H:%M:%S")
     future = producer.send("analyze", value=command_data)
     try:
         # Wait for the send to complete.
