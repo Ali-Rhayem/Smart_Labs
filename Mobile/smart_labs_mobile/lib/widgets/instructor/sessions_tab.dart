@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:smart_labs_mobile/models/lab_model.dart';
+import 'package:smart_labs_mobile/providers/lab_provider.dart';
 import 'package:smart_labs_mobile/providers/session_provider.dart';
 import 'package:smart_labs_mobile/widgets/session_card.dart';
 
@@ -13,6 +14,9 @@ class SessionsTab extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final sessionsAsync = ref.watch(labSessionsProvider(lab.labId));
+    final updatedLab = ref.watch(labsProvider).whenData(
+          (labs) => labs.firstWhere((l) => l.labId == lab.labId),
+        );
 
     return Column(
       children: [
@@ -21,7 +25,7 @@ class SessionsTab extends ConsumerWidget {
           child: ElevatedButton(
             onPressed: () async {
               try {
-                if (!lab.started) {
+                if (!updatedLab.value!.started) {
                   await ref
                       .read(labSessionsProvider(lab.labId).notifier)
                       .startSession();
@@ -39,12 +43,15 @@ class SessionsTab extends ConsumerWidget {
               }
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: lab.started ? Colors.red : kNeonAccent,
+              backgroundColor:
+                  updatedLab.value?.started ?? false ? Colors.red : kNeonAccent,
               foregroundColor: Colors.black,
               minimumSize: const Size(double.infinity, 48),
             ),
             child: Text(
-              lab.started ? 'End Session' : 'Start Session',
+              updatedLab.value?.started ?? false
+                  ? 'End Session'
+                  : 'Start Session',
               style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
@@ -56,9 +63,18 @@ class SessionsTab extends ConsumerWidget {
           child: RefreshIndicator(
             color: kNeonAccent,
             onRefresh: () async {
+              // Fetch sessions
               await ref
                   .read(labSessionsProvider(lab.labId).notifier)
                   .fetchSessions();
+
+              // Fetch lab data
+              final response =
+                  await ref.read(labsProvider.notifier).fetchLabById(lab.labId);
+              if (!response['success']) {
+                throw Exception(
+                    response['message'] ?? 'Failed to refresh lab data');
+              }
             },
             child: sessionsAsync.when(
               loading: () => const Center(
