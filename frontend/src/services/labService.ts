@@ -1,6 +1,7 @@
 import { smart_labs } from "../utils/axios";
 import { Lab, CreateLabDto } from "../types/lab";
 import { User } from "../types/user";
+import { AnnouncementDTO } from "../types/announcements";
 
 export const labService = {
 	getLabs: () => smart_labs.getAPI<Lab[]>("/lab"),
@@ -19,6 +20,9 @@ export const labService = {
 
 	editLabPPES: (id: number, ppe: number[]) =>
 		smart_labs.postAPI<void, number[]>(`/lab/${id}/ppe`, ppe),
+
+	getAnnouncements: (id: number) =>
+		smart_labs.getAPI<AnnouncementDTO[]>(`/lab/${id}/announcements`),
 
 	createLab: (data: CreateLabDto) =>
 		smart_labs.postAPI<Lab, CreateLabDto>("/lab", data),
