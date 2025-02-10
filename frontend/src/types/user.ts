@@ -18,3 +18,5 @@ export interface CreateUserDto extends Omit<User, "id" | "fcm_token"> {
 
 export interface UpdateUserDto
 	extends Partial<Omit<User, "id" | "role" | "fcm_token">> {}
+
+export interface UserDTO extends Omit<User, "role" | "fcm_token"> {}
