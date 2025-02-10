@@ -1,16 +1,16 @@
-import React from 'react';
-import { Box, Button, Typography } from '@mui/material';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { LocalizationProvider } from '@mui/x-date-pickers';
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFnsV3';
+import React from "react";
+import { Box, Button, Typography } from "@mui/material";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { LocalizationProvider } from "@mui/x-date-pickers";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFnsV3";
 
 interface DateRangeFilterProps {
-  startDate: Date | null;
-  endDate: Date | null;
-  onStartDateChange: (date: Date | null) => void;
-  onEndDateChange: (date: Date | null) => void;
-  onClear: () => void;
-  dateError: string;
+	startDate: Date | null;
+	endDate: Date | null;
+	onStartDateChange: (date: Date | null) => void;
+	onEndDateChange: (date: Date | null) => void;
+	onClear: () => void;
+	dateError: string;
 }
 
 const pickerStyles = {
@@ -23,10 +23,10 @@ const pickerStyles = {
 		"&:hover fieldset": {
 			borderColor: "var(--color-primary)",
 		},
-    },
-    "& .MuiIconButton-root": {
-        color: "var(--color-text)",
-    },
+	},
+	"& .MuiIconButton-root": {
+		color: "var(--color-text)",
+	},
 	"& .MuiInputLabel-root": {
 		color: "var(--color-text)",
 	},
@@ -80,56 +80,61 @@ const pickerStyles = {
 };
 
 const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
-  startDate,
-  endDate,
-  onStartDateChange,
-  onEndDateChange,
-  onClear,
-  dateError
+	startDate,
+	endDate,
+	onStartDateChange,
+	onEndDateChange,
+	onClear,
+	dateError,
 }) => {
-  const maxDate = new Date();
+	const maxDate = new Date();
 
-  return (
-    <LocalizationProvider dateAdapter={AdapterDateFns}>
-      <Box sx={{ 
-        display: "flex", 
-        justifyContent: "flex-end",
-        alignItems: "center",
-        gap: 2
-      }}>
-        <DatePicker
-          label="Start Date"
-          value={startDate}
-          onChange={onStartDateChange}
-          maxDate={maxDate}
-          sx={pickerStyles}
-        />
-        <DatePicker
-          label="End Date"
-          value={endDate}
-          onChange={onEndDateChange}
-          minDate={startDate || undefined}
-          maxDate={maxDate}
-          disabled={!startDate}
-          sx={pickerStyles}
-        />
-        {dateError && (
-          <Typography color="error" variant="caption">
-            {dateError}
-          </Typography>
-        )}
-        {(startDate || endDate) && (
-          <Button
-            variant="outlined"
-            size="small"
-            onClick={onClear}
-          >
-            Clear
-          </Button>
-        )}
-      </Box>
-    </LocalizationProvider>
-  );
+	return (
+		<LocalizationProvider dateAdapter={AdapterDateFns}>
+			<Box
+				sx={{
+					display: "flex",
+					justifyContent: "flex-end",
+					alignItems: "center",
+					gap: 2,
+				}}
+			>
+				<DatePicker
+					label="Start Date"
+					value={startDate}
+					onChange={onStartDateChange}
+					maxDate={maxDate}
+					sx={pickerStyles}
+				/>
+				<DatePicker
+					label="End Date"
+					value={endDate}
+					onChange={onEndDateChange}
+					minDate={startDate || undefined}
+					maxDate={maxDate}
+					disabled={!startDate}
+					sx={pickerStyles}
+				/>
+				{dateError && (
+					<Typography color="error" variant="caption">
+						{dateError}
+					</Typography>
+				)}
+				{(startDate || endDate) && (
+					<Button
+						variant="outlined"
+						sx={{
+							color: "var(--color-primary)",
+							borderColor: "var(--color-primary)",
+						}}
+						onClick={onClear}
+					>
+						Clear
+					</Button>
+				)}
+			</Box>
+		</LocalizationProvider>
+	);
 };
 
 export default DateRangeFilter;
