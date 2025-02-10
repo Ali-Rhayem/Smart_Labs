@@ -1,3 +1,4 @@
+import 'package:smart_labs_mobile/models/lab_schedule.dart';
 import 'package:smart_labs_mobile/models/session_model.dart';
 
 class Lab {
@@ -28,22 +29,4 @@ class Lab {
     required this.sessions,
     required this.started,
   });
-}
-
-class LabSchedule {
-  String dayOfWeek;
-  String startTime;
-  String endTime;
-
-  LabSchedule({
-    required this.dayOfWeek,
-    required this.startTime,
-    required this.endTime,
-  });
-
-  Map<String, dynamic> toJson() => {
-        'dayOfWeek': dayOfWeek,
-        'startTime': startTime,
-        'endTime': endTime,
-      };
 }
