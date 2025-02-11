@@ -3,10 +3,10 @@ import 'package:logger/logger.dart';
 import 'package:smart_labs_mobile/models/lab_model.dart';
 import 'package:smart_labs_mobile/providers/lab_provider.dart';
 import 'package:smart_labs_mobile/widgets/instructor/analytics_tab.dart';
-import 'package:smart_labs_mobile/widgets/instructor/announcements_tab.dart';
+import 'package:smart_labs_mobile/widgets/instructor/announcement/announcements_tab.dart';
 import 'package:smart_labs_mobile/widgets/instructor/lab_header.dart';
 import 'package:smart_labs_mobile/widgets/instructor/people_tab.dart';
-import 'package:smart_labs_mobile/widgets/instructor/sessions_tab.dart';
+import 'package:smart_labs_mobile/widgets/instructor/session/sessions_tab.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 var logger = Logger();
