@@ -1,14 +1,18 @@
+import 'package:smart_labs_mobile/models/user_model.dart';
+
 class StudentSessionData {
   final int id;
   final String name;
   final int attendancePercentage;
   final Map<String, int> ppeCompliance;
+  final User user;
 
   StudentSessionData({
     required this.id,
     required this.name,
     required this.attendancePercentage,
     required this.ppeCompliance,
+    required this.user,
   });
 
   factory StudentSessionData.fromJson(Map<String, dynamic> json) {
@@ -17,6 +21,7 @@ class StudentSessionData {
       name: json['name'],
       attendancePercentage: json['attendance_percentage'] ?? 0,
       ppeCompliance: Map<String, int>.from(json['ppE_compliance'] ?? {}),
+      user: User.fromJson(json['user']),
     );
   }
 }
