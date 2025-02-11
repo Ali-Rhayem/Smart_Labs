@@ -1,6 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:logger/logger.dart';
-import 'package:smart_labs_mobile/main.dart';
 import 'package:smart_labs_mobile/models/notification_state.dart';
 import 'package:smart_labs_mobile/providers/user_provider.dart';
 import 'package:smart_labs_mobile/services/auth_service.dart';
