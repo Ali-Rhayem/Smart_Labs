@@ -1,9 +1,11 @@
 class StudentSessionData {
+  final int id;
   final String name;
   final int attendancePercentage;
   final Map<String, int> ppeCompliance;
 
   StudentSessionData({
+    required this.id,
     required this.name,
     required this.attendancePercentage,
     required this.ppeCompliance,
@@ -11,6 +13,7 @@ class StudentSessionData {
 
   factory StudentSessionData.fromJson(Map<String, dynamic> json) {
     return StudentSessionData(
+      id: json['id'],
       name: json['name'],
       attendancePercentage: json['attendance_percentage'] ?? 0,
       ppeCompliance: Map<String, int>.from(json['ppE_compliance'] ?? {}),
@@ -23,9 +26,9 @@ class Session {
   final String labId;
   final DateTime date;
   final String? report;
-  final Map<String, StudentSessionData> result;
+  final List<StudentSessionData> result;
   final int totalAttendance;
-  final Map<String, int> totalPPECompliance;
+  final Map<String, num> totalPPECompliance;
 
   Session({
     required this.id,
@@ -38,22 +41,21 @@ class Session {
   });
 
   factory Session.fromJson(Map<String, dynamic> json) {
-    final resultMap = (json['result'] as Map<String, dynamic>? ?? {}).map(
-      (key, value) => MapEntry(
-        key,
-        StudentSessionData.fromJson(value as Map<String, dynamic>),
-      ),
-    );
+    final resultList = (json['result'] as List<dynamic>? ?? [])
+        .map(
+          (value) => StudentSessionData.fromJson(value as Map<String, dynamic>),
+        )
+        .toList();
 
     return Session(
       id: json['id'].toString(),
       labId: json['labId'].toString(),
       date: DateTime.parse(json['date']),
       report: json['report'],
-      result: resultMap,
+      result: resultList,
       totalAttendance: json['totalAttendance'] ?? 0,
       totalPPECompliance:
-          Map<String, int>.from(json['totalPPECompliance'] ?? {}),
+          Map<String, num>.from(json['totalPPECompliance'] ?? {}),
     );
   }
 }
