@@ -220,7 +220,9 @@ try:
                 images = session["outputs"]
                 images_count = len(images)
                 
-                Total_people_attended = set()
+                images_per_student = {str(student_id): 0 for student_id in students_in_lab}
+                
+                total_people_attended = set()
 
                 for image in images:
                     students_in_frame = set()
