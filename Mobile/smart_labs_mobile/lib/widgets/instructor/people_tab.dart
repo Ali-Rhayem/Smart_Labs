@@ -7,6 +7,7 @@ import 'package:smart_labs_mobile/providers/lab_provider.dart';
 import 'package:smart_labs_mobile/providers/lab_student_provider.dart';
 import 'package:smart_labs_mobile/utils/secure_storage.dart';
 import 'package:smart_labs_mobile/widgets/instructor/row_details.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class PeopleTab extends ConsumerWidget {
   final Lab lab;
@@ -108,16 +109,23 @@ class PeopleTab extends ConsumerWidget {
                   return Card(
                     color: const Color(0xFF1C1C1C),
                     child: ExpansionTile(
-                      leading: CircleAvatar(
-                        backgroundColor: kNeonAccent,
-                        child: Text(
-                          student.name[0].toUpperCase(),
-                          style: const TextStyle(
-                            color: Colors.black,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
+                      leading: student.imageUrl != null &&
+                              student.imageUrl!.isNotEmpty
+                          ? CircleAvatar(
+                              backgroundImage: NetworkImage(
+                                '${dotenv.env['IMAGE_BASE_URL']}/${student.imageUrl}',
+                              ),
+                            )
+                          : CircleAvatar(
+                              backgroundColor: kNeonAccent,
+                              child: Text(
+                                student.name[0].toUpperCase(),
+                                style: const TextStyle(
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
                       title: Text(
                         student.name,
                         style: const TextStyle(color: Colors.white),
@@ -211,16 +219,22 @@ class PeopleTab extends ConsumerWidget {
                   return Card(
                     color: const Color(0xFF1C1C1C),
                     child: ExpansionTile(
-                      leading: CircleAvatar(
-                        backgroundColor: kNeonAccent,
-                        child: Text(
-                          instructor.name[0].toUpperCase(),
-                          style: const TextStyle(
-                            color: Colors.black,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
+                      leading: instructor.imageUrl != null
+                          ? CircleAvatar(
+                              backgroundImage: NetworkImage(
+                                '${dotenv.env['IMAGE_BASE_URL']}/${instructor.imageUrl}',
+                              ),
+                            )
+                          : CircleAvatar(
+                              backgroundColor: kNeonAccent,
+                              child: Text(
+                                instructor.name[0].toUpperCase(),
+                                style: const TextStyle(
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
                       title: Text(
                         instructor.name,
                         style: const TextStyle(color: Colors.white),
