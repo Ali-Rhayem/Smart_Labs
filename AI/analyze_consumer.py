@@ -223,6 +223,13 @@ try:
                 
                 total_people_attended = set()
 
+                analysis_per_x_images = 10
+                counter = 0
+                ppe_compliance_bytime = {ppe: [] for ppe in required_ppe}
+                temp_ppe_compliance_bytime = {ppe: 0 for ppe in required_ppe}
+                temp_ppe_compliance_per_image = {ppe: 0 for ppe in required_ppe}
+                total_ppe_compliance_bytime = []
+                
                 for image in images:
                     students_in_frame = set()
                     for person in image["people"]:
