@@ -11,20 +11,26 @@ class SessionDetailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
+        title: const Text(
           'Session Details',
-          style: const TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 24,
+            letterSpacing: 0.5,
+          ),
         ),
-        backgroundColor: const Color(0xFF121212),
+        elevation: 0,
+        backgroundColor: const Color(0xFF1E1E1E),
       ),
       backgroundColor: const Color(0xFF121212),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
+        physics: const BouncingScrollPhysics(),
+        padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 24.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildOverallStats(),
-            const SizedBox(height: 24),
+            const SizedBox(height: 32),
             _buildStudentsList(),
           ],
         ),
@@ -33,28 +39,66 @@ class SessionDetailScreen extends StatelessWidget {
   }
 
   Widget _buildOverallStats() {
-    return Card(
-      color: const Color(0xFF1C1C1C),
+    return Container(
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF2C2C2C), Color(0xFF1C1C1C)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.2),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Overall Statistics',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: kNeonAccent.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    Icons.analytics_rounded,
+                    color: kNeonAccent,
+                    size: 24,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                const Text(
+                  'Overall Statistics',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 24),
             _buildStatRow('Total Attendance', '${session.totalAttendance}%'),
-            const SizedBox(height: 8),
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 12),
+              child: Divider(color: Colors.white12),
+            ),
             ...session.totalPPECompliance.entries.map(
-              (entry) => _buildStatRow(
-                '${entry.key.toUpperCase()} Compliance',
-                '${entry.value}%',
+              (entry) => Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: _buildStatRow(
+                  '${entry.key.toUpperCase()} Compliance',
+                  '${entry.value}%',
+                ),
               ),
             ),
           ],
@@ -67,48 +111,111 @@ class SessionDetailScreen extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Student Details',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 16),
-        ...session.result.entries.map((entry) {
-          final studentId = entry.key;
-          final data = entry.value;
-          return Card(
-            color: const Color(0xFF1C1C1C),
-            margin: const EdgeInsets.only(bottom: 8),
-            child: ExpansionTile(
-              title: Text(
-                data.name,
-                style: const TextStyle(color: Colors.white),
+        Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: kNeonAccent.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
               ),
-              subtitle: Text(
-                'Attendance: ${data.attendancePercentage}%',
-                style: TextStyle(
-                  color: Colors.white.withOpacity(0.7),
-                ),
+              child: Icon(
+                Icons.people_alt_rounded,
+                color: kNeonAccent,
+                size: 24,
               ),
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    children: [
-                      ...data.ppeCompliance.entries.map(
-                        (ppe) => _buildStatRow(
-                          '${ppe.key.toUpperCase()} Compliance',
-                          '${ppe.value}%',
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
             ),
+            const SizedBox(width: 12),
+            const Text(
+              'Student Details',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 0.5,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 20),
+        ...session.result.entries.map((entry) {
+          final data = entry.value;
+          return StatefulBuilder(
+            builder: (context, setState) {
+              return Container(
+                margin: const EdgeInsets.only(bottom: 12),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF2C2C2C), Color(0xFF1C1C1C)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: kNeonAccent.withValues(alpha: 0), // Start with transparent
+                    width: 2,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.2),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: ExpansionTile(
+                  onExpansionChanged: (expanded) {
+                    setState(() {}); // Trigger rebuild when expanded/collapsed
+                  },
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  collapsedShape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  tilePadding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                  title: Text(
+                    data.name,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  subtitle: Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Text(
+                      'Attendance: ${data.attendancePercentage}%',
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.7),
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(20.0),
+                      child: Column(
+                        children: [
+                          const Divider(color: Colors.white12),
+                          const SizedBox(height: 12),
+                          ...data.ppeCompliance.entries.map(
+                            (ppe) => Padding(
+                              padding: const EdgeInsets.only(bottom: 12),
+                              child: _buildStatRow(
+                                '${ppe.key.toUpperCase()} Compliance',
+                                '${ppe.value}%',
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
           );
         }).toList(),
       ],
@@ -116,20 +223,66 @@ class SessionDetailScreen extends StatelessWidget {
   }
 
   Widget _buildStatRow(String label, String value) {
+    // Extract percentage value and convert to double
+    final percentage = double.tryParse(value.replaceAll('%', '')) ?? 0.0;
+
+    // Calculate color based on percentage
+    Color percentageColor;
+    if (percentage >= 90) {
+      percentageColor = Colors.green[400]!;
+    } else if (percentage >= 70) {
+      percentageColor = Colors.yellow[600]!;
+    } else if (percentage >= 50) {
+      percentageColor = Colors.orange;
+    } else {
+      percentageColor = Colors.red[400]!;
+    }
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
           label,
           style: TextStyle(
-            color: Colors.white.withOpacity(0.7),
+            color: Colors.white.withValues(alpha: 0.8),
+            fontSize: 15,
+            letterSpacing: 0.3,
           ),
         ),
-        Text(
-          value,
-          style: const TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          decoration: BoxDecoration(
+            color: percentageColor.withValues(alpha: 0.15),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: percentageColor.withValues(alpha: 0.5),
+              width: 1,
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                value,
+                style: TextStyle(
+                  color: percentageColor,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 15,
+                ),
+              ),
+              const SizedBox(width: 4),
+              Icon(
+                percentage >= 90
+                    ? Icons.check_circle
+                    : percentage >= 70
+                        ? Icons.info
+                        : percentage >= 50
+                            ? Icons.warning
+                            : Icons.error,
+                size: 16,
+                color: percentageColor,
+              ),
+            ],
           ),
         ),
       ],
