@@ -291,6 +291,25 @@ try:
                 print("Total students in lab", students_in_lab)
                 
                 results_arr = [{"_id": int(key), **value} for key, value in result.items()]
+                
+                report = f"""
+                Lab Report - {date}
+                Lab ID: {lab_id}
+
+                Total Attendance: {total_attendance}%
+
+                Individual Compliance:
+                """
+
+                for person in results_arr:
+                    report += f"""
+                Name: {person['name']}
+                Attendance: {person['attendance_percentage']}%
+                PPE Compliance:
+                """
+                    for ppe, compliance in person["ppe_compliance"].items():
+                        report += f"\t- {ppe}: {compliance}%\n"
+        
                 sessions.update_one(
                     {"_id": session_id},
                     {"$set": {"result": results_arr, "total_attendance": total_attendance, "total_ppe_compliance": total_ppe_compliance,"ppe_compliance_bytime":ppe_compliance_bytime ,"total_ppe_compliance_bytime": total_ppe_compliance_bytime, "report":report}}
