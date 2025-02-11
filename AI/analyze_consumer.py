@@ -293,8 +293,10 @@ try:
                 results_arr = [{"_id": int(key), **value} for key, value in result.items()]
                 sessions.update_one(
                     {"_id": session_id},
-                    {"$set": {"result": results_arr, "total_attenadance": total_attenadance, "total_ppe_compliance": total_ppe_compliance,"ppe_compliance_bytime":ppe_compliance_bytime ,"total_ppe_compliance_bytime": total_ppe_compliance_bytime}}
+                    {"$set": {"result": results_arr, "total_attendance": total_attendance, "total_ppe_compliance": total_ppe_compliance,"ppe_compliance_bytime":ppe_compliance_bytime ,"total_ppe_compliance_bytime": total_ppe_compliance_bytime, "report":report}}
                 )
+                
+                
 
         except Exception as e:
             print(f"Error processing message: {e}")
