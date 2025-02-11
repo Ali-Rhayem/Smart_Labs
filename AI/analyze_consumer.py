@@ -233,6 +233,7 @@ try:
                             total_people_attended.add(student_id)
                         
                             if student_id not in students_in_frame: # Check if student appeard before in this image 
+                                students_in_frame.add(student_id)
                                 images_per_student[student_id] += 1
                                 students_in_frame.add(student_id)
                                 result[student_id]["attendance_percentage"] += round( 100 / images_count)
@@ -252,17 +253,16 @@ try:
                     total_ppe_compliance[ppe] /= len(total_people_attended)
               
                 total_attenadance = round(total_attenadance / len(students_in_lab))
-                # for ppe in required_ppe:
-                #     total_ppe_compliance[ppe] = round(total_ppe_compliance[ppe] / len(total_people_attended))
-
                 print("result", result)
                 print("total_attenadance", total_attenadance)
                 print("total_ppe_compliance", total_ppe_compliance)
                 print("total_people_attended", total_people_attended)
                 print("Total students in lab", students_in_lab)
+                
+                reuslts_arr = [{"id": key, **value} for key, value in result.items()]
                 sessions.update_one(
                     {"_id": session_id},
-                    {"$set": {"result": result, "total_attenadance": total_attenadance, "total_ppe_compliance": total_ppe_compliance}}
+                    {"$set": {"result": results_arr, "total_attenadance": total_attenadance, "total_ppe_compliance": total_ppe_compliance}}
                 )
 
         except Exception as e:
