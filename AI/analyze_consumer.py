@@ -252,13 +252,13 @@ try:
                     total_ppe_compliance[ppe] /= len(total_people_attended)
               
                 total_attenadance = round(total_attenadance / len(students_in_lab))
-                for ppe in required_ppe:
-                    total_ppe_compliance[ppe] = total_ppe_compliance[ppe] / len(Total_people_attended)
+                # for ppe in required_ppe:
+                #     total_ppe_compliance[ppe] = round(total_ppe_compliance[ppe] / len(total_people_attended))
 
                 print("result", result)
                 print("total_attenadance", total_attenadance)
                 print("total_ppe_compliance", total_ppe_compliance)
-                print("Total_people_attended", Total_people_attended)
+                print("total_people_attended", total_people_attended)
                 print("Total students in lab", students_in_lab)
                 sessions.update_one(
                     {"_id": session_id},
