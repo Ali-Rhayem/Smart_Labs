@@ -239,9 +239,18 @@ try:
                                 total_attenadance += round(100 / images_count)
                                 
                                 for ppe in required_ppe:
-                                    result[student_id]["ppe_compliance"][ppe] += round( person["ppe"][ppe] * 100 / images_count)
-                                    total_ppe_compliance[ppe] += round(person["ppe"][ppe] * 100 / images_count)
+                                    result[student_id]["ppe_compliance"][ppe] += person["ppe"][ppe]
 
+                for ppe in required_ppe:
+                    total_ppe_compliance[ppe] = 0
+                    for student_id in result:
+                        if images_per_student[student_id] == 0:
+                            result[student_id]["ppe_compliance"][ppe] = 0
+                        else:
+                            result[student_id]["ppe_compliance"][ppe] = round(result[student_id]["ppe_compliance"][ppe] * 100 / images_per_student[student_id])
+                            total_ppe_compliance[ppe] += round(result[student_id]["ppe_compliance"][ppe])
+                    total_ppe_compliance[ppe] /= len(total_people_attended)
+              
                 total_attenadance = round(total_attenadance / len(students_in_lab))
                 for ppe in required_ppe:
                     total_ppe_compliance[ppe] = total_ppe_compliance[ppe] / len(Total_people_attended)
