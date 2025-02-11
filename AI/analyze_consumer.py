@@ -247,7 +247,25 @@ try:
                                 
                                 for ppe in required_ppe:
                                     result[student_id]["ppe_compliance"][ppe] += person["ppe"][ppe]
+                                    temp_ppe_compliance_per_image[ppe]+= person["ppe"][ppe] 
+                    
+                    # Calculate Avg PPE Compliance in each image and add it to temp_ppe_complaince
+                    if (len(students_in_frame) != 0):
+                        temp_ppe_compliance_bytime = {ppe : value + temp_ppe_compliance_per_image[ppe]/len(students_in_frame) for ppe, value in temp_ppe_compliance_bytime.items()}
+                        temp_ppe_compliance_per_image = {ppe: 0 for ppe in required_ppe}
+                    
+                    # Calculate Avg PPE Compliance by x images
+                    if (counter % analysis_per_x_images == 0 and counter != 0) or counter == len(images) - 1:
+                        total_ppe_compliance_bytime_temp = 0
+                        for ppe in required_ppe:
+                            ppe_compliance_bytime[ppe].append(temp_ppe_compliance_bytime[ppe] * 100 / analysis_per_x_images) # Calculate Avg PPE Compliance by x images
+                            total_ppe_compliance_bytime_temp += temp_ppe_compliance_bytime[ppe] * 100 / analysis_per_x_images # Calculate Total PPE Compliance for each ppe
+                        
+                        total_ppe_compliance_bytime.append(total_ppe_compliance_bytime_temp / len(required_ppe))
+                        temp_ppe_compliance_bytime = {ppe: 0 for ppe in required_ppe}  
 
+                    counter += 1
+                    
                 for ppe in required_ppe:
                     total_ppe_compliance[ppe] = 0
                     for student_id in result:
@@ -256,8 +274,11 @@ try:
                         else:
                             result[student_id]["ppe_compliance"][ppe] = round(result[student_id]["ppe_compliance"][ppe] * 100 / images_per_student[student_id])
                             total_ppe_compliance[ppe] += round(result[student_id]["ppe_compliance"][ppe])
+                            
                     total_ppe_compliance[ppe] /= len(total_people_attended)
-              
+
+                
+                
                 total_attenadance = round(total_attenadance / len(students_in_lab))
                 print("result", result)
                 print("total_attenadance", total_attenadance)
