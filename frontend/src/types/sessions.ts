@@ -1,16 +1,20 @@
+import { UserDTO } from "./user";
+
 export interface Session {
 	id: number;
 	lab_id: number;
 	date: string;
 	outputs: Output[];
-	result: { [key: number]: ObjectResult };
+	result: ObjectResult[];
 	report: string | null;
 	totalAttendance: number;
 	totalPPECompliance: { [key: string]: number };
 }
 
 interface ObjectResult {
+	id: number;
 	name: string;
+	user: UserDTO;
 	attendance_percentage: number;
 	ppe_compliance: { [key: string]: number };
 }
