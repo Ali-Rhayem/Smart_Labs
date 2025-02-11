@@ -228,12 +228,16 @@ try:
                     students_in_frame = set()
                     for person in image["people"]:
                         student_id = str(person["id"])
-                        Total_people_attended.add(student_id)
+    
                         if student_id in result: # Check if student is in this lab
+                            total_people_attended.add(student_id)
+                        
                             if student_id not in students_in_frame: # Check if student appeard before in this image 
+                                images_per_student[student_id] += 1
                                 students_in_frame.add(student_id)
                                 result[student_id]["attendance_percentage"] += round( 100 / images_count)
                                 total_attenadance += round(100 / images_count)
+                                
                                 for ppe in required_ppe:
                                     result[student_id]["ppe_compliance"][ppe] += round( person["ppe"][ppe] * 100 / images_count)
                                     total_ppe_compliance[ppe] += round(person["ppe"][ppe] * 100 / images_count)
