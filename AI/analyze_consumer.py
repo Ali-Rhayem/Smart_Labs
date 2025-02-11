@@ -194,14 +194,13 @@ try:
                 {"$push": {"outputs": session_entry}}
             )
 
-            if data["command"] == "end":
-
+            if data["command"] == "end":                
                 total_attenadance = 0
                 total_ppe_compliance = {ppe:0 for ppe in required_ppe}
 
                 users = db["Users"]
-
                 lab = db["Labs"].find_one({"_id": lab_id})
+                
                 students_in_lab = lab["Students"]
 
                 result = {
@@ -217,9 +216,9 @@ try:
                 }
 
                 session = sessions.find_one({"_id": session_id})
+                
                 images = session["outputs"]
                 images_count = len(images)
-                
                 images_per_student = {str(student_id): 0 for student_id in students_in_lab}
                 
                 total_people_attended = set()
