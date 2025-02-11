@@ -9,6 +9,7 @@ import time
 import os
 from consumer_utils import *
 from dotenv import load_dotenv
+import datetime
 load_dotenv()
 
 topic = "analyze"
@@ -35,7 +36,7 @@ try:
             # Assuming db is already defined/imported from consumer_utils or elsewhere.
             sessions = db['Sessions']
             session_id = data["session_id"]
-            lab_id = data["lab_id"]
+            date = datetime.date.today().strftime("%Y-%m-%d")
             date = data["date"]
             time_data = data["time"]
 
