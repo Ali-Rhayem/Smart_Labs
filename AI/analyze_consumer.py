@@ -262,10 +262,10 @@ try:
                     if (counter % analysis_per_x_images == 0 and counter != 0) or counter == len(images) - 1:
                         total_ppe_compliance_bytime_temp = 0
                         for ppe in required_ppe:
-                            ppe_compliance_bytime[ppe].append(temp_ppe_compliance_bytime[ppe] * 100 / analysis_per_x_images) # Calculate Avg PPE Compliance by x images
+                            ppe_compliance_bytime[ppe].append(round(temp_ppe_compliance_bytime[ppe] * 100 / analysis_per_x_images)) # Calculate Avg PPE Compliance by x images
                             total_ppe_compliance_bytime_temp += temp_ppe_compliance_bytime[ppe] * 100 / analysis_per_x_images # Calculate Total PPE Compliance for each ppe
                         
-                        total_ppe_compliance_bytime.append(total_ppe_compliance_bytime_temp / len(required_ppe))
+                        total_ppe_compliance_bytime.append(round(total_ppe_compliance_bytime_temp / len(required_ppe)))
                         temp_ppe_compliance_bytime = {ppe: 0 for ppe in required_ppe}  
 
                     counter += 1
