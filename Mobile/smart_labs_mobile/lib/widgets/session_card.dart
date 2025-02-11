@@ -62,13 +62,6 @@ class SessionCard extends StatelessWidget {
                   color: theme.colorScheme.primary,
                   size: 16,
                 ),
-                const SizedBox(width: 4),
-                Text(
-                  '${session.startTime} - ${session.endTime}',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
-                  ),
-                ),
               ],
             ),
           ],
