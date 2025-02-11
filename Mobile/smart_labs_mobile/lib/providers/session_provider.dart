@@ -21,19 +21,7 @@ class LabSessionsNotifier extends StateNotifier<AsyncValue<List<Session>>> {
       final response = await _apiService.get('/Sessions/lab/$labId');
       if (response['success'] != false) {
         final List<dynamic> data = response['data'] as List<dynamic>;
-        final sessions = data
-            .map((json) => Session(
-                  id: json['id'].toString(),
-                  labId: json['labId'].toString(),
-                  date: DateTime.parse(json['date']),
-                  startTime: '', // Add these if available in your API
-                  endTime: '', // Add these if available in your API
-                  description: '',
-                  output: [],
-                  report: json['report'] ?? '',
-                ))
-            .toList();
-
+        final sessions = data.map((json) => Session.fromJson(json)).toList();
         state = AsyncValue.data(sessions);
       } else {
         state = AsyncValue.error(
