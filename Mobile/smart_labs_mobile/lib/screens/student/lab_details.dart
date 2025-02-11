@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:smart_labs_mobile/models/lab_model.dart';
-import '../../widgets/session_card.dart';
+import 'package:smart_labs_mobile/widgets/instructor/session/session_card.dart';
 
 class LabDetailScreen extends StatelessWidget {
   final Lab lab;
