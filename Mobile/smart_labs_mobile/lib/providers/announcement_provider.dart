@@ -77,7 +77,7 @@ class LabAnnouncementsNotifier
         {'message': message},
       );
 
-      if (response['success'] != false || response == null) {
+      if (response['success'] != false) {
         await fetchAnnouncements();
       } else {
         throw Exception(response['message'] ?? 'Failed to add comment');
