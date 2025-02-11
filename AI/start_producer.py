@@ -17,11 +17,11 @@ data = {
             "command": "end",
             # "encoding": images_to_base64(image_path),
             "ppe_arr": ["gloves", "goggles"],
-            "session_id": 3,
-            "lab_id": 6,
+            "session_id": 1,
+            "lab_id": 1,
             "room": "B-103",
-            "date": datetime.date.today().strftime("%Y-%m-%d"),
-            "time": datetime.datetime.now(datetime.UTC).strftime("%H:%M:%S")
+            # "date": datetime.date.today().strftime("%Y-%m-%d"),
+            # "time": datetime.datetime.now(datetime.UTC).strftime("%H:%M:%S")
         }
 
 future = producer.send(topic, value=data)
