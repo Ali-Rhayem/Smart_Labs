@@ -286,10 +286,10 @@ try:
                 print("total_people_attended", total_people_attended)
                 print("Total students in lab", students_in_lab)
                 
-                reuslts_arr = [{"id": key, **value} for key, value in result.items()]
+                results_arr = [{"_id": int(key), **value} for key, value in result.items()]
                 sessions.update_one(
                     {"_id": session_id},
-                    {"$set": {"result": results_arr, "total_attenadance": total_attenadance, "total_ppe_compliance": total_ppe_compliance}}
+                    {"$set": {"result": results_arr, "total_attenadance": total_attenadance, "total_ppe_compliance": total_ppe_compliance,"ppe_compliance_bytime":ppe_compliance_bytime ,"total_ppe_compliance_bytime": total_ppe_compliance_bytime}}
                 )
 
         except Exception as e:
