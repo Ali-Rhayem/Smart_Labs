@@ -242,9 +242,12 @@ try:
                                 students_in_frame.add(student_id)
                                 images_per_student[student_id] += 1
                                 students_in_frame.add(student_id)
+                                
+                                # Calculate Attendance Percentage
                                 result[student_id]["attendance_percentage"] += round( 100 / images_count)
                                 total_attenadance += round(100 / images_count)
                                 
+                                # Calculate PPE Compliance per student and by time 
                                 for ppe in required_ppe:
                                     result[student_id]["ppe_compliance"][ppe] += person["ppe"][ppe]
                                     temp_ppe_compliance_per_image[ppe]+= person["ppe"][ppe] 
