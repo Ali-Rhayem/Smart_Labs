@@ -36,8 +36,8 @@ try:
             # Assuming db is already defined/imported from consumer_utils or elsewhere.
             sessions = db['Sessions']
             session_id = data["session_id"]
+            lab_id = data["lab_id"]
             date = datetime.date.today().strftime("%Y-%m-%d")
-            date = data["date"]
             time_data = data["time"]
 
             results, image = analyze_image(image_base64)
@@ -191,12 +191,12 @@ try:
             }
 
             sessions.update_one(
-                {"_id": session_id, "lab_id": lab_id, "date": date},
+                {"_id": session_id},
                 {"$push": {"outputs": session_entry}}
             )
 
             if data["command"] == "end":                
-                total_attenadance = 0
+                total_attendance = 0
                 total_ppe_compliance = {ppe:0 for ppe in required_ppe}
 
                 users = db["Users"]
@@ -246,7 +246,7 @@ try:
                                 
                                 # Calculate Attendance Percentage
                                 result[student_id]["attendance_percentage"] += round( 100 / images_count)
-                                total_attenadance += round(100 / images_count)
+                                total_attendance += round(100 / images_count)
                                 
                                 # Calculate PPE Compliance per student and by time 
                                 for ppe in required_ppe:
@@ -283,9 +283,9 @@ try:
 
                 
                 
-                total_attenadance = round(total_attenadance / len(students_in_lab))
+                total_attendance = round(total_attendance / len(students_in_lab))
                 print("result", result)
-                print("total_attenadance", total_attenadance)
+                print("total_attendance", total_attendance)
                 print("total_ppe_compliance", total_ppe_compliance)
                 print("total_people_attended", total_people_attended)
                 print("Total students in lab", students_in_lab)
