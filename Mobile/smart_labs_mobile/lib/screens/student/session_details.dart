@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:smart_labs_mobile/models/session_model.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class SessionDetailScreen extends StatelessWidget {
   final Session session;
@@ -119,7 +120,7 @@ class SessionDetailScreen extends StatelessWidget {
                 color: kNeonAccent.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Icon(
+              child: const Icon(
                 Icons.people_alt_rounded,
                 color: kNeonAccent,
                 size: 24,
@@ -138,8 +139,7 @@ class SessionDetailScreen extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 20),
-        ...session.result.entries.map((entry) {
-          final data = entry.value;
+        ...session.result.map((data) {
           return StatefulBuilder(
             builder: (context, setState) {
               return Container(
@@ -152,7 +152,8 @@ class SessionDetailScreen extends StatelessWidget {
                   ),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: kNeonAccent.withValues(alpha: 0), // Start with transparent
+                    color: kNeonAccent.withValues(
+                        alpha: 0), // Start with transparent
                     width: 2,
                   ),
                   boxShadow: [
@@ -175,8 +176,24 @@ class SessionDetailScreen extends StatelessWidget {
                   ),
                   tilePadding:
                       const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                  leading: data.user.imageUrl != null && data.user.imageUrl!.isNotEmpty
+                      ? CircleAvatar(
+                          backgroundImage: NetworkImage(
+                            '${dotenv.env['IMAGE_BASE_URL']}/${data.user.imageUrl}',
+                          ),
+                        )
+                      : CircleAvatar(
+                          backgroundColor: kNeonAccent,
+                          child: Text(
+                            data.name[0].toUpperCase(),
+                            style: const TextStyle(
+                              color: Colors.black,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
                   title: Text(
-                    data.name,
+                    data.user.name,
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 16,
@@ -217,7 +234,7 @@ class SessionDetailScreen extends StatelessWidget {
               );
             },
           );
-        }).toList(),
+        }),
       ],
     );
   }
