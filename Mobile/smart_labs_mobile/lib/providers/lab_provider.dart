@@ -46,18 +46,6 @@ class LabNotifier extends StateNotifier<AsyncValue<List<Lab>>> {
           final ppeList = lab['ppe'] as List<dynamic>? ?? [];
           final instructorsList = lab['instructors'] as List<dynamic>? ?? [];
           final studentsList = lab['students'] as List<dynamic>? ?? [];
-          final scheduleList = lab['schedule'] as List<dynamic>? ?? [];
-          final announcementsList =
-              lab['announcements'] as List<dynamic>? ?? [];
-
-          String startTime = '';
-          String endTime = '';
-
-          if (scheduleList.isNotEmpty) {
-            final firstSchedule = scheduleList.first;
-            startTime = firstSchedule['startTime'] ?? '';
-            endTime = firstSchedule['endTime'] ?? '';
-          }
 
           // Build the Lab model
           return Lab(
