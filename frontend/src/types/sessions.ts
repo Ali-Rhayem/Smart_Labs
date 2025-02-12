@@ -11,12 +11,12 @@ export interface Session {
 	totalPPECompliance: { [key: string]: number };
 }
 
-interface ObjectResult {
+export interface ObjectResult {
 	id: number;
 	name: string;
 	user: UserDTO;
 	attendance_percentage: number;
-	ppe_compliance: { [key: string]: number };
+	ppE_compliance: { [key: string]: number };
 }
 
 interface Output {
