@@ -5,6 +5,10 @@
 :root {
 	--color-secondary: #1c1c1c;
 	--color-therd: #252525;
+	--color-success: #28a745;
+	--color-danger: #f44336;
+	--color-warning: #ff9800;
+	--color-info: #17a2b8;
 
 	--color-dark-primary: #ffff00;
 	--color-background-light: #ffffff;

@@ -4,8 +4,6 @@ import {
 	Typography,
 	Tabs,
 	Tab,
-	Chip,
-	Paper,
 	CircularProgress,
 	Tooltip,
 } from "@mui/material";
@@ -14,6 +12,7 @@ import PeopleIcon from "@mui/icons-material/People";
 import AnalyticsIcon from "@mui/icons-material/Analytics";
 import { format } from "date-fns";
 import { Session } from "../types/sessions";
+import PeopleSection from "../components/PeopleSection";
 
 interface TabPanelProps {
 	children?: React.ReactNode;
@@ -126,7 +125,7 @@ const SessionPage: React.FC = () => {
 					{format(new Date(session.date), "EEEE, MMMM d, yyyy")}
 				</Typography>
 
-				<Box sx={{ mt: 3, display: "flex", gap: 2 }}>
+				<Box sx={{ mt: 3, display: "flex", gap: 2, flexWrap: "wrap" }}>
 					<ProgressDisplay
 						value={session.totalAttendance}
 						label="Attendance"
@@ -138,13 +137,25 @@ const SessionPage: React.FC = () => {
 								session.totalPPECompliance
 							)
 						)}
-						label="PPE Compliance"
+						label="Overall PPE"
 						color={getStatusColor(
 							calculateAverageCompliance(
 								session.totalPPECompliance
 							)
 						)}
 					/>
+					{Object.entries(session.totalPPECompliance).map(
+						([item, value]) => (
+							<ProgressDisplay
+								key={item}
+								value={Math.round(value)}
+								label={
+									item.charAt(0).toUpperCase() + item.slice(1)
+								}
+								color={getStatusColor(value)}
+							/>
+						)
+					)}
 				</Box>
 			</Box>
 
@@ -171,7 +182,7 @@ const SessionPage: React.FC = () => {
 			</Tabs>
 
 			<TabPanel value={tabValue} index={0}>
-				{/* People Tab Content - Will create separately */}
+				<PeopleSection results={session.result} />
 			</TabPanel>
 
 			<TabPanel value={tabValue} index={1}>
