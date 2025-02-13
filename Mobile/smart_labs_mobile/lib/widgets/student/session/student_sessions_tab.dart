@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:smart_labs_mobile/models/lab_model.dart';
 import 'package:smart_labs_mobile/providers/lab_provider.dart';
 import 'package:smart_labs_mobile/providers/session_provider.dart';
-import 'package:smart_labs_mobile/widgets/instructor/session/session_card.dart';
+import 'package:smart_labs_mobile/widgets/student/session/session_card.dart';
 
 class SessionsTab extends ConsumerWidget {
   final Lab lab;
@@ -13,13 +13,15 @@ class SessionsTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final sessionsAsync = ref.watch(labSessionsProvider(lab.labId));
 
     return Column(
       children: [
         Expanded(
           child: RefreshIndicator(
-            color: kNeonAccent,
+            color: isDark ? kNeonAccent : theme.colorScheme.primary,
             onRefresh: () async {
               // Fetch sessions
               await ref
@@ -35,13 +37,17 @@ class SessionsTab extends ConsumerWidget {
               }
             },
             child: sessionsAsync.when(
-              loading: () => const Center(
-                child: CircularProgressIndicator(color: kNeonAccent),
+              loading: () => Center(
+                child: CircularProgressIndicator(
+                  color: isDark ? kNeonAccent : theme.colorScheme.primary,
+                ),
               ),
               error: (error, stack) => Center(
                 child: Text(
                   'Error: $error',
-                  style: const TextStyle(color: Colors.white70),
+                  style: TextStyle(
+                    color: theme.colorScheme.onBackground.withOpacity(0.7),
+                  ),
                 ),
               ),
               data: (sessions) {
@@ -53,7 +59,8 @@ class SessionsTab extends ConsumerWidget {
                         child: Text(
                           'No sessions available.',
                           style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.7),
+                            color:
+                                theme.colorScheme.onBackground.withOpacity(0.7),
                             fontSize: 16,
                           ),
                         ),
