@@ -83,7 +83,7 @@ class _StudentLabsScreenState extends ConsumerState<StudentLabsScreen> {
                         'No labs found',
                         style: TextStyle(
                           color: (isDarkMode ? Colors.white : Colors.black87)
-                              .withOpacity(0.7),
+                              .withValues(alpha: 0.7),
                           fontSize: 16,
                         ),
                       ),
