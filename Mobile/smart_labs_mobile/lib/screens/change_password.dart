@@ -65,11 +65,19 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: const Color(0xFF121212),
+      backgroundColor: isDark ? const Color(0xFF121212) : theme.colorScheme.background,
       appBar: AppBar(
-        title: const Text('Change Password'),
-        backgroundColor: const Color(0xFF1C1C1C),
+        title: Text(
+          'Change Password',
+          style: TextStyle(color: theme.colorScheme.onSurface),
+        ),
+        backgroundColor:
+            isDark ? const Color(0xFF1C1C1C) : theme.colorScheme.surface,
+        iconTheme: IconThemeData(color: theme.colorScheme.onSurface),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -123,25 +131,32 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
               ElevatedButton(
                 onPressed: _isLoading ? null : _changePassword,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFFFEB00),
+                  backgroundColor: isDark
+                      ? const Color(0xFFFFEB00)
+                      : theme.colorScheme.primary,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
+                  disabledBackgroundColor: isDark
+                      ? const Color(0xFFFFEB00).withOpacity(0.5)
+                      : theme.colorScheme.primary.withOpacity(0.5),
                 ),
                 child: _isLoading
-                    ? const SizedBox(
+                    ? SizedBox(
                         height: 20,
                         width: 20,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            isDark ? Colors.black : Colors.white,
+                          ),
                         ),
                       )
-                    : const Text(
+                    : Text(
                         'Change Password',
                         style: TextStyle(
-                          color: Colors.black,
+                          color: isDark ? Colors.black : Colors.white,
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
@@ -161,31 +176,44 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
     required VoidCallback onToggleVisibility,
     String? Function(String?)? validator,
   }) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return TextFormField(
       controller: controller,
       obscureText: obscure,
-      style: const TextStyle(color: Colors.white),
+      style: TextStyle(color: theme.colorScheme.onSurface),
       decoration: InputDecoration(
         labelText: label,
-        labelStyle: const TextStyle(color: Colors.white70),
+        labelStyle: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.7)),
         filled: true,
-        fillColor: const Color(0xFF1C1C1C),
+        fillColor: isDark ? const Color(0xFF1C1C1C) : theme.colorScheme.surface,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: Colors.white24),
+          borderSide: BorderSide(
+            color: isDark
+                ? Colors.white24
+                : theme.colorScheme.onSurface.withOpacity(0.2),
+          ),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: Colors.white24),
+          borderSide: BorderSide(
+            color: isDark
+                ? Colors.white24
+                : theme.colorScheme.onSurface.withOpacity(0.2),
+          ),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: Color(0xFFFFEB00)),
+          borderSide: BorderSide(
+            color: isDark ? const Color(0xFFFFEB00) : theme.colorScheme.primary,
+          ),
         ),
         suffixIcon: IconButton(
           icon: Icon(
             obscure ? Icons.visibility_off : Icons.visibility,
-            color: const Color(0xFFFFEB00),
+            color: isDark ? const Color(0xFFFFEB00) : theme.colorScheme.primary,
           ),
           onPressed: onToggleVisibility,
         ),
