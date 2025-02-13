@@ -18,33 +18,45 @@ class ProfileScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(userProvider);
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     if (user == null) {
-      return const Center(child: CircularProgressIndicator());
+      return Center(
+        child: CircularProgressIndicator(
+          color: isDark ? kNeonYellow : theme.colorScheme.primary,
+        ),
+      );
     }
 
     return Scaffold(
-      // Remove or customize the AppBar if you want a different style
       appBar: AppBar(
-        title: const Text('Profile'),
-        backgroundColor: const Color(0xFF1C1C1C),
+        title: Text(
+          'Profile',
+          style: TextStyle(
+            color: theme.colorScheme.onSurface,
+          ),
+        ),
+        backgroundColor: theme.colorScheme.surface,
         elevation: 0,
+        iconTheme: IconThemeData(color: theme.colorScheme.onSurface),
         actions: [
           IconButton(
-            icon: const Icon(Icons.settings),
+            icon: Icon(
+              Icons.settings,
+              color: theme.colorScheme.onSurface,
+            ),
             onPressed: () {
               // TODO: Handle settings button tap
             },
           ),
         ],
       ),
-      backgroundColor: const Color(0xFF1C1C1C), // Dark background
-
+      backgroundColor: theme.colorScheme.surface,
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
         child: Column(
           children: [
-            // User avatar at the top
             Center(
               child: CircleAvatar(
                 radius: 50,
@@ -57,34 +69,29 @@ class ProfileScreen extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: 16),
-
-            // User name
             Text(
               user.name,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
-                color: Colors.white,
+                color: theme.colorScheme.onBackground,
               ),
             ),
             const SizedBox(height: 4),
-
-            // User email
             Text(
               user.email,
               style: TextStyle(
                 fontSize: 14,
-                color: Colors.white.withValues(alpha: 0.7),
+                color: theme.colorScheme.onBackground.withOpacity(0.7),
               ),
             ),
             const SizedBox(height: 24),
-
-            // "Edit Profile" button
             ElevatedButton.icon(
-              icon: const Icon(Icons.edit, color: Colors.black),
-              label: const Text(
+              icon:
+                  Icon(Icons.edit, color: isDark ? Colors.black : Colors.white),
+              label: Text(
                 'Edit Profile',
-                style: TextStyle(color: Colors.black),
+                style: TextStyle(color: isDark ? Colors.black : Colors.white),
               ),
               onPressed: () {
                 Navigator.push(
@@ -95,7 +102,8 @@ class ProfileScreen extends ConsumerWidget {
                 );
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: kNeonYellow,
+                backgroundColor:
+                    isDark ? kNeonYellow : theme.colorScheme.primary,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(24),
                 ),
@@ -104,9 +112,8 @@ class ProfileScreen extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: 32),
-
-            // List of other items/sections:
             _buildProfileOption(
+              context: context,
               icon: Icons.settings,
               title: 'Settings',
               onTap: () {
@@ -114,6 +121,7 @@ class ProfileScreen extends ConsumerWidget {
               },
             ),
             _buildProfileOption(
+              context: context,
               icon: Icons.lock_outline,
               title: 'Change Password',
               onTap: () {
@@ -126,6 +134,7 @@ class ProfileScreen extends ConsumerWidget {
               },
             ),
             _buildProfileOption(
+              context: context,
               icon: Icons.account_balance_wallet_outlined,
               title: 'Billing Details',
               onTap: () {
@@ -133,6 +142,7 @@ class ProfileScreen extends ConsumerWidget {
               },
             ),
             _buildProfileOption(
+              context: context,
               icon: Icons.group_outlined,
               title: 'User Management',
               onTap: () {
@@ -140,6 +150,7 @@ class ProfileScreen extends ConsumerWidget {
               },
             ),
             _buildProfileOption(
+              context: context,
               icon: Icons.brightness_6,
               title: 'Theme',
               trailing: Consumer(
@@ -150,23 +161,17 @@ class ProfileScreen extends ConsumerWidget {
                     onChanged: (value) {
                       ref.read(themeProvider.notifier).toggleTheme();
                     },
-                    activeColor: kNeonYellow,
-                    activeTrackColor: kNeonYellow.withValues(alpha: 0.3),
+                    activeColor:
+                        isDark ? kNeonYellow : theme.colorScheme.primary,
+                    activeTrackColor:
+                        (isDark ? kNeonYellow : theme.colorScheme.primary)
+                            .withOpacity(0.3),
                   );
                 },
               ),
               onTap: () {},
             ),
-            _buildProfileOption(
-              icon: Icons.settings,
-              title: 'Settings',
-              onTap: () {
-                // TODO: Navigate to settings
-              },
-            ),
             const SizedBox(height: 16),
-
-            // Logout option in red
             ListTile(
               leading: Icon(Icons.logout, color: Colors.red.shade400),
               title: const Text(
@@ -178,14 +183,12 @@ class ProfileScreen extends ConsumerWidget {
                 final firebaseMessaging = FirebaseMessaging.instance;
 
                 await firebaseMessaging.deleteToken();
-
                 await secureStorage.clearAll();
 
                 if (!context.mounted) return;
 
                 resetAllProviders(ref);
 
-                // Navigate to login screen and remove all previous routes
                 Navigator.of(context).pushNamedAndRemoveUntil(
                   '/login',
                   (route) => false,
@@ -198,21 +201,32 @@ class ProfileScreen extends ConsumerWidget {
     );
   }
 
-  // Helper widget to build each item in the list
   Widget _buildProfileOption({
+    required BuildContext context,
     required IconData icon,
     required String title,
     required VoidCallback onTap,
     Widget? trailing,
   }) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return ListTile(
-      leading: Icon(icon, color: kNeonYellow),
+      leading: Icon(
+        icon,
+        color: isDark ? kNeonYellow : theme.colorScheme.primary,
+      ),
       title: Text(
         title,
-        style: const TextStyle(color: Colors.white),
+        style: TextStyle(
+          color: theme.colorScheme.onSurface,
+        ),
       ),
-      trailing:
-          trailing ?? const Icon(Icons.chevron_right, color: Colors.white),
+      trailing: trailing ??
+          Icon(
+            Icons.chevron_right,
+            color: theme.colorScheme.onSurface,
+          ),
       onTap: onTap,
     );
   }
