@@ -69,6 +69,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
         major: _selectedMajor ?? widget.user.major,
         faculty: _selectedFaculty ?? widget.user.faculty,
         faceIdentityVector: widget.user.faceIdentityVector,
+        isFirstLogin: widget.user.isFirstLogin,
       );
 
       if (_imageFile != null) {
