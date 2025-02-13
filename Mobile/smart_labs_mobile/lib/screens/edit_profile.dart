@@ -109,11 +109,24 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: const Color(0xFF1C1C1C),
+      backgroundColor:
+          isDark ? const Color(0xFF1C1C1C) : theme.colorScheme.background,
       appBar: AppBar(
-        title: const Text('Edit Profile'),
-        backgroundColor: const Color(0xFF1C1C1C),
+        title: Text(
+          'Edit Profile',
+          style: TextStyle(
+            color: theme.colorScheme.onSurface,
+          ),
+        ),
+        backgroundColor:
+            isDark ? const Color(0xFF1C1C1C) : theme.colorScheme.surface,
+        iconTheme: IconThemeData(
+          color: theme.colorScheme.onSurface,
+        ),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -131,15 +144,12 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                       (file) => setState(() => _imageFile = file),
                       (base64) => _base64Image = base64,
                     );
-                  } catch (e, stackTrace) {
-                    debugPrint('Error in EditProfileScreen: $e');
-                    debugPrint('Stack trace: $stackTrace');
+                  } catch (e) {
                     if (mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: Text('Error: ${e.toString()}'),
+                          content: Text(e.toString()),
                           backgroundColor: Colors.red,
-                          duration: const Duration(seconds: 5),
                         ),
                       );
                     }
@@ -184,15 +194,14 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                       userFaculty: widget.user.faculty,
                       userMajor: widget.user.major,
                     ),
-                    loading: () => const Center(
-                      child:
-                          CircularProgressIndicator(color: Color(0xFFFFFF00)),
+                    loading: () => CircularProgressIndicator(
+                      color: isDark
+                          ? const Color(0xFFFFFF00)
+                          : theme.colorScheme.primary,
                     ),
-                    error: (error, stack) => Center(
-                      child: Text(
-                        'Error loading faculties: $error',
-                        style: const TextStyle(color: Colors.red),
-                      ),
+                    error: (error, stack) => Text(
+                      'Error loading faculties: $error',
+                      style: TextStyle(color: theme.colorScheme.error),
                     ),
                   ),
               const SizedBox(height: 30),
@@ -201,15 +210,22 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                 child: ElevatedButton(
                   onPressed: _isLoading ? null : _saveChanges,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFFFEB00),
+                    backgroundColor: isDark
+                        ? const Color(0xFFFFEB00)
+                        : theme.colorScheme.primary,
                     padding: const EdgeInsets.symmetric(vertical: 15),
+                    disabledBackgroundColor: isDark
+                        ? const Color(0xFFFFEB00).withOpacity(0.5)
+                        : theme.colorScheme.primary.withOpacity(0.5),
                   ),
                   child: _isLoading
-                      ? const CircularProgressIndicator()
-                      : const Text(
+                      ? CircularProgressIndicator(
+                          color: isDark ? Colors.black : Colors.white,
+                        )
+                      : Text(
                           'Save Changes',
                           style: TextStyle(
-                            color: Colors.black,
+                            color: isDark ? Colors.black : Colors.white,
                             fontSize: 16,
                           ),
                         ),
