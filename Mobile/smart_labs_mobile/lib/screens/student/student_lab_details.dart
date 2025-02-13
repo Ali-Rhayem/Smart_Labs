@@ -15,55 +15,69 @@ class LabDetailScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     final updatedLab = ref.watch(labsProvider).whenData(
           (labs) => labs.firstWhere((l) => l.labId == lab.labId),
         );
 
     return updatedLab.when(
-      loading: () => const Center(
-        child: CircularProgressIndicator(color: kNeonAccent),
+      loading: () => Center(
+        child: CircularProgressIndicator(
+          color: isDark ? kNeonAccent : theme.colorScheme.primary,
+        ),
       ),
       error: (error, stack) => Center(
-        child: Text('Error: $error',
-            style: const TextStyle(color: Colors.white70)),
+        child: Text(
+          'Error: $error',
+          style:
+              TextStyle(color: theme.colorScheme.onBackground.withOpacity(0.7)),
+        ),
       ),
       data: (currentLab) => DefaultTabController(
-        length: 4, // We have 3 tabs
+        length: 4,
         child: Scaffold(
           appBar: AppBar(
-            backgroundColor: const Color(0xFF121212),
-            iconTheme: const IconThemeData(
-              color: Colors.white, // back icon color
+            backgroundColor:
+                isDark ? const Color(0xFF121212) : theme.colorScheme.surface,
+            iconTheme: IconThemeData(
+              color: theme.colorScheme.onSurface,
             ),
-            title: const Text(
+            title: Text(
               'Lab Details',
               style: TextStyle(
-                color: Colors.white,
+                color: theme.colorScheme.onSurface,
                 fontWeight: FontWeight.bold,
               ),
             ),
           ),
-          backgroundColor: const Color(0xFF121212),
+          backgroundColor:
+              isDark ? const Color(0xFF121212) : theme.colorScheme.background,
           body: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               LabHeader(lab: currentLab),
               Container(
-                decoration: const BoxDecoration(
-                  color: Color(0xFF1C1C1C),
-                  borderRadius: BorderRadius.only(
+                decoration: BoxDecoration(
+                  color: isDark
+                      ? const Color(0xFF1C1C1C)
+                      : theme.colorScheme.surface,
+                  borderRadius: const BorderRadius.only(
                     topLeft: Radius.circular(25),
                     topRight: Radius.circular(25),
                   ),
                 ),
                 child: TabBar(
                   splashFactory: NoSplash.splashFactory,
-                  overlayColor: WidgetStateProperty.all(Colors.transparent),
-                  labelColor: kNeonAccent,
-                  unselectedLabelColor: Colors.white.withValues(alpha: 0.7),
+                  overlayColor: MaterialStateProperty.all(Colors.transparent),
+                  labelColor: isDark ? kNeonAccent : theme.colorScheme.primary,
+                  unselectedLabelColor:
+                      theme.colorScheme.onSurface.withOpacity(0.7),
                   indicatorSize: TabBarIndicatorSize.tab,
-                  indicatorColor: kNeonAccent,
-                  dividerColor: Colors.grey,
+                  indicatorColor:
+                      isDark ? kNeonAccent : theme.colorScheme.primary,
+                  dividerColor: theme.dividerColor,
                   tabs: const [
                     Tab(text: 'Sessions'),
                     Tab(text: 'People'),
