@@ -7,6 +7,7 @@ import 'package:smart_labs_mobile/providers/user_provider.dart';
 import 'package:smart_labs_mobile/screens/edit_profile.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:smart_labs_mobile/utils/secure_storage.dart';
+import 'package:smart_labs_mobile/screens/change_password.dart';
 
 // Example accent color (the bright yellow)
 const Color kNeonYellow = Color(0xFFFFEB00);
@@ -110,6 +111,18 @@ class ProfileScreen extends ConsumerWidget {
               title: 'Settings',
               onTap: () {
                 // TODO: Navigate to settings
+              },
+            ),
+            _buildProfileOption(
+              icon: Icons.lock_outline,
+              title: 'Change Password',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ChangePasswordScreen(),
+                  ),
+                );
               },
             ),
             _buildProfileOption(
