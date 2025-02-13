@@ -14,6 +14,8 @@ class PeopleTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final studentsAsync = ref.watch(labStudentsProvider(lab.labId));
     final instructorsAsync = ref.watch(labInstructorsProvider(lab.labId));
 
@@ -21,14 +23,14 @@ class PeopleTab extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 10),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10),
             child: Row(
               children: [
                 Text(
                   'Students',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: theme.colorScheme.onBackground,
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
@@ -37,13 +39,17 @@ class PeopleTab extends ConsumerWidget {
             ),
           ),
           studentsAsync.when(
-            loading: () => const Center(
-              child: CircularProgressIndicator(color: kNeonAccent),
+            loading: () => Center(
+              child: CircularProgressIndicator(
+                color: isDark ? kNeonAccent : theme.colorScheme.primary,
+              ),
             ),
             error: (error, stack) => Center(
               child: Text(
                 'Error: $error',
-                style: const TextStyle(color: Colors.white70),
+                style: TextStyle(
+                  color: theme.colorScheme.onBackground.withOpacity(0.7),
+                ),
               ),
             ),
             data: (students) {
@@ -52,7 +58,7 @@ class PeopleTab extends ConsumerWidget {
                   child: Text(
                     'No students enrolled',
                     style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.7),
+                      color: theme.colorScheme.onBackground.withOpacity(0.7),
                       fontSize: 16,
                     ),
                   ),
@@ -67,7 +73,9 @@ class PeopleTab extends ConsumerWidget {
                 itemBuilder: (context, index) {
                   final student = students[index];
                   return Card(
-                    color: const Color(0xFF1C1C1C),
+                    color: isDark
+                        ? const Color(0xFF1C1C1C)
+                        : theme.colorScheme.surface,
                     child: ExpansionTile(
                       leading: student.imageUrl != null &&
                               student.imageUrl!.isNotEmpty
@@ -77,23 +85,25 @@ class PeopleTab extends ConsumerWidget {
                               ),
                             )
                           : CircleAvatar(
-                              backgroundColor: kNeonAccent,
+                              backgroundColor: isDark
+                                  ? kNeonAccent
+                                  : theme.colorScheme.primary,
                               child: Text(
                                 student.name[0].toUpperCase(),
-                                style: const TextStyle(
-                                  color: Colors.black,
+                                style: TextStyle(
+                                  color: isDark ? Colors.black : Colors.white,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
                             ),
                       title: Text(
                         student.name,
-                        style: const TextStyle(color: Colors.white),
+                        style: TextStyle(color: theme.colorScheme.onSurface),
                       ),
                       subtitle: Text(
                         student.email,
                         style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.7),
+                          color: theme.colorScheme.onSurface.withOpacity(0.7),
                         ),
                       ),
                       children: [
@@ -119,14 +129,15 @@ class PeopleTab extends ConsumerWidget {
               );
             },
           ),
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+          Padding(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
             child: Row(
               children: [
                 Text(
                   'Instructors',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: theme.colorScheme.onBackground,
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
@@ -135,13 +146,17 @@ class PeopleTab extends ConsumerWidget {
             ),
           ),
           instructorsAsync.when(
-            loading: () => const Center(
-              child: CircularProgressIndicator(color: kNeonAccent),
+            loading: () => Center(
+              child: CircularProgressIndicator(
+                color: isDark ? kNeonAccent : theme.colorScheme.primary,
+              ),
             ),
             error: (error, stack) => Center(
               child: Text(
                 'Error: $error',
-                style: const TextStyle(color: Colors.white70),
+                style: TextStyle(
+                  color: theme.colorScheme.onBackground.withOpacity(0.7),
+                ),
               ),
             ),
             data: (instructors) {
@@ -150,7 +165,7 @@ class PeopleTab extends ConsumerWidget {
                   child: Text(
                     'No instructors enrolled',
                     style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.7),
+                      color: theme.colorScheme.onBackground.withOpacity(0.7),
                       fontSize: 16,
                     ),
                   ),
@@ -165,7 +180,9 @@ class PeopleTab extends ConsumerWidget {
                 itemBuilder: (context, index) {
                   final instructor = instructors[index];
                   return Card(
-                    color: const Color(0xFF1C1C1C),
+                    color: isDark
+                        ? const Color(0xFF1C1C1C)
+                        : theme.colorScheme.surface,
                     child: ExpansionTile(
                       leading: instructor.imageUrl != null
                           ? CircleAvatar(
@@ -174,23 +191,25 @@ class PeopleTab extends ConsumerWidget {
                               ),
                             )
                           : CircleAvatar(
-                              backgroundColor: kNeonAccent,
+                              backgroundColor: isDark
+                                  ? kNeonAccent
+                                  : theme.colorScheme.primary,
                               child: Text(
                                 instructor.name[0].toUpperCase(),
-                                style: const TextStyle(
-                                  color: Colors.black,
+                                style: TextStyle(
+                                  color: isDark ? Colors.black : Colors.white,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
                             ),
                       title: Text(
                         instructor.name,
-                        style: const TextStyle(color: Colors.white),
+                        style: TextStyle(color: theme.colorScheme.onSurface),
                       ),
                       subtitle: Text(
                         instructor.email,
                         style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.7),
+                          color: theme.colorScheme.onSurface.withOpacity(0.7),
                         ),
                       ),
                       children: [
