@@ -11,25 +11,35 @@ class NotificationsScreen extends ConsumerWidget {
     final notificationsState = ref.watch(notificationsProvider);
     final notifications = notificationsState.notifications;
     final isLoading = notificationsState.isLoading;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF121212),
+      backgroundColor: isDark ? const Color(0xFF121212) : Colors.grey[50],
       appBar: AppBar(
-        backgroundColor: const Color(0xFF1C1C1C),
-        title: const Text(
+        backgroundColor: isDark ? const Color(0xFF1C1C1C) : Colors.white,
+        title: Text(
           'Notifications',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(
+            color: isDark ? Colors.white : Colors.black87,
+          ),
         ),
         actions: [
           if (notifications.isNotEmpty) ...[
             IconButton(
-              icon: const Icon(Icons.done_all, color: Color(0xFFFFFF00)),
+              icon: Icon(
+                Icons.done_all,
+                color: isDark ? const Color(0xFFFFFF00) : Colors.blue,
+              ),
               onPressed: () =>
                   ref.read(notificationsProvider.notifier).markAllAsRead(),
               tooltip: 'Mark all as read',
             ),
             IconButton(
-              icon: const Icon(Icons.delete_sweep, color: Color(0xFFFFFF00)),
+              icon: Icon(
+                Icons.delete_sweep,
+                color: isDark ? const Color(0xFFFFFF00) : Colors.blue,
+              ),
               onPressed: () =>
                   ref.read(notificationsProvider.notifier).markAllAsDeleted(),
               tooltip: 'Clear all',
@@ -38,8 +48,10 @@ class NotificationsScreen extends ConsumerWidget {
         ],
       ),
       body: isLoading
-          ? const Center(
-              child: CircularProgressIndicator(color: Color(0xFFFFFF00)),
+          ? Center(
+              child: CircularProgressIndicator(
+                color: isDark ? const Color(0xFFFFFF00) : Colors.blue,
+              ),
             )
           : notifications.isEmpty
               ? Center(
@@ -49,22 +61,23 @@ class NotificationsScreen extends ConsumerWidget {
                       Icon(
                         Icons.notifications_none,
                         size: 64,
-                        color: Colors.white.withValues(alpha: 0.5),
+                        color: (isDark ? Colors.white : Colors.black)
+                            .withOpacity(0.5),
                       ),
                       const SizedBox(height: 16),
                       Text(
                         'No notifications',
                         style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.7),
+                          color: (isDark ? Colors.white : Colors.black)
+                              .withOpacity(0.7),
                           fontSize: 16,
                         ),
-
                       ),
                     ],
                   ),
                 )
               : RefreshIndicator(
-                  color: const Color(0xFFFFFF00),
+                  color: isDark ? const Color(0xFFFFFF00) : Colors.blue,
                   onRefresh: () => ref
                       .read(notificationsProvider.notifier)
                       .refreshNotifications(),
@@ -90,15 +103,19 @@ class NotificationsScreen extends ConsumerWidget {
                         },
                         child: Card(
                           color: notification['isRead']
-                              ? const Color(0xFF1C1C1C)
-                              : const Color(0xFF2C2C2C),
+                              ? (isDark
+                                  ? const Color(0xFF1C1C1C)
+                                  : Colors.white)
+                              : (isDark
+                                  ? const Color(0xFF2C2C2C)
+                                  : Colors.blue.shade50),
                           margin: const EdgeInsets.symmetric(
                               horizontal: 8, vertical: 4),
                           child: ListTile(
                             title: Text(
                               notification['title'],
-                              style: const TextStyle(
-                                color: Colors.white,
+                              style: TextStyle(
+                                color: isDark ? Colors.white : Colors.black87,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -108,26 +125,30 @@ class NotificationsScreen extends ConsumerWidget {
                                 Text(
                                   notification['message'],
                                   style: TextStyle(
-                                    color: Colors.white.withValues(alpha: 0.7),
+                                    color:
+                                        (isDark ? Colors.white : Colors.black)
+                                            .withOpacity(0.7),
                                   ),
-
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
                                   timeago.format(date),
                                   style: TextStyle(
-                                    color: Colors.white.withValues(alpha: 0.5),
+                                    color:
+                                        (isDark ? Colors.white : Colors.black)
+                                            .withOpacity(0.5),
                                     fontSize: 12,
                                   ),
-
                                 ),
                               ],
                             ),
                             trailing: !notification['isRead']
                                 ? IconButton(
-                                    icon: const Icon(
+                                    icon: Icon(
                                       Icons.mark_email_read,
-                                      color: Color(0xFFFFFF00),
+                                      color: isDark
+                                          ? const Color(0xFFFFFF00)
+                                          : Colors.blue,
                                     ),
                                     onPressed: () => ref
                                         .read(notificationsProvider.notifier)
