@@ -5,7 +5,7 @@ import 'package:smart_labs_mobile/providers/user_provider.dart';
 import 'package:smart_labs_mobile/services/auth_service.dart';
 import 'package:smart_labs_mobile/utils/secure_storage.dart';
 import 'package:smart_labs_mobile/providers/lab_provider.dart';
-import 'package:smart_labs_mobile/providers/session_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
@@ -225,18 +225,20 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     setState(() => _isLoading = true);
 
     final result = await _authService.login(_email, _password);
-    
-    // Check if widget is still mounted before proceeding
+
     if (!mounted) return;
 
     if (result['success']) {
+      // Clear the last screen when logging in
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('lastScreen');
+
       final userData = result['data'];
       final String? role = await _secureStorage.readRole();
       final String? id = await _secureStorage.readId();
 
       final userResult = await _authService.getUserById(id!);
 
-      // Check mounted again after second async operation
       if (!mounted) return;
 
       if (userResult['success']) {
@@ -251,22 +253,21 @@ class _LoginPageState extends ConsumerState<LoginPage> {
           imageUrl: userDetails['image'],
           role: role!,
           faceIdentityVector: userDetails['faceIdentityVector'],
+          isFirstLogin: true,
         );
 
         ref.read(userProvider.notifier).setUser(user);
         await ref.read(labsProvider.notifier).fetchLabs();
 
-        final labs = ref.read(labsProvider).value ?? [];
-        for (final lab in labs) {
-          await ref
-              .read(labSessionsProvider(lab.labId).notifier)
-              .fetchSessions();
-        }
-
-        if (userData['role'] == 'instructor' || userData['role'] == 'admin') {
-          Navigator.pushReplacementNamed(context, '/instructorMain');
+        if (user.isFirstLogin) {
+          Navigator.pushReplacementNamed(context, '/firstLogin');
         } else {
-          Navigator.pushReplacementNamed(context, '/studentMain');
+          await prefs.setBool('isFirstLogin', false);
+          if (userData['role'] == 'instructor' || userData['role'] == 'admin') {
+            Navigator.pushReplacementNamed(context, '/instructorMain');
+          } else {
+            Navigator.pushReplacementNamed(context, '/studentMain');
+          }
         }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
