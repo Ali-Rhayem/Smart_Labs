@@ -83,17 +83,54 @@ const InputField: React.FC<InputFieldProps> = ({
 				}}
 				sx={{
 					"& .MuiInputBase-input": {
+						color: disabled
+							? "var(--color-text-secondary)"
+							: "var(--color-text)",
+						WebkitTextFillColor: disabled
+							? "var(--color-text-secondary)"
+							: "var(--color-text)",
+						transition: "color 0.2s",
+						"&.Mui-disabled": {
+							color: "var(--color-text-secondary)",
+							WebkitTextFillColor: "var(--color-text-secondary)",
+							opacity: 0.7,
+							cursor: "not-allowed",
+						},
 						"&:-webkit-autofill": {
 							WebkitBoxShadow:
 								"0 0 0 100px var(--color-background) inset",
-							WebkitTextFillColor: "var(--color-text)",
+							WebkitTextFillColor: disabled
+								? "var(--color-text-secondary)"
+								: "var(--color-text)",
 							caretColor: "var(--color-text)",
 							borderColor: "var(--color-background)",
 						},
 					},
+					"& .MuiInputLabel-root": {
+						WebkitTextFillColor: disabled
+							? "var(--color-text-secondary)"
+							: "var(--color-text)",
+						"&.Mui-focused": {
+							color: "var(--color-primary)",
+						},
+					},
 					"& .MuiOutlinedInput-root": {
+						transition: "border-color 0.2s",
+						"& fieldset": {
+							borderColor: "var(--color-border)",
+						},
+						"&:hover fieldset": {
+							borderColor: !disabled
+								? "var(--color-primary)"
+								: "var(--color-border)",
+						},
 						"&.Mui-focused fieldset": {
-							borderColor: "var(--color-background)",
+							borderColor: "var(--color-primary) !important",
+						},
+						"&.Mui-disabled": {
+							"& fieldset": {
+								borderColor: "var(--color-text-secondary)",
+							},
 						},
 					},
 				}}
