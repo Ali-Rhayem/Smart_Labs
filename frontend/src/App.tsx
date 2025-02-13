@@ -14,6 +14,7 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import LabPage from "./pages/LabPage";
 import SessionPage from "./pages/SessionPage";
 import ProfilePage from "./pages/ProfilePage";
+import NotificationsPage from "./pages/NotificationsPage";
 
 const queryClient = new QueryClient();
 
@@ -78,6 +79,20 @@ const App: React.FC = () => {
 									]}
 								>
 									<SessionPage />
+								</ProtectedRoute>
+							}
+						/>
+						<Route
+							path="/notifications"
+							element={
+								<ProtectedRoute
+									requiredRoles={[
+										"student",
+										"instructor",
+										"admin",
+									]}
+								>
+									<NotificationsPage />
 								</ProtectedRoute>
 							}
 						/>
