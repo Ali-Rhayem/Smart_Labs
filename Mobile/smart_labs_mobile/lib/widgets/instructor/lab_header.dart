@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:smart_labs_mobile/models/lab_model.dart';
 
 class LabHeader extends StatelessWidget {
