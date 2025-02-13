@@ -32,6 +32,7 @@ class LabStudentsNotifier extends StateNotifier<AsyncValue<List<User>>> {
                   faculty: json['faculty'],
                   imageUrl: json['image'],
                   faceIdentityVector: json['faceIdentityVector'],
+                  isFirstLogin: json['isFirstLogin'],
                 ))
             .toList();
 
