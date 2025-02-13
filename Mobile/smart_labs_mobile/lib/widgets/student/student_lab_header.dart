@@ -7,21 +7,28 @@ class LabHeader extends StatelessWidget {
 
   @override
   Widget build(context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.all(16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF1C1C1C),
+        color: isDark ? const Color(0xFF1C1C1C) : theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: isDark ? Colors.white12 : Colors.black12,
+          width: 1,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             lab.labName,
-            style: const TextStyle(
-              color: Colors.white,
+            style: TextStyle(
+              color: theme.colorScheme.onSurface,
               fontSize: 20,
               fontWeight: FontWeight.bold,
             ),
@@ -30,29 +37,33 @@ class LabHeader extends StatelessWidget {
           Text(
             lab.description,
             style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.7),
+              color: theme.colorScheme.onSurface.withOpacity(0.7),
               fontSize: 16,
             ),
           ),
           const SizedBox(height: 16),
           Row(
             children: [
-              const Icon(Icons.code, color: Colors.white, size: 18),
+              Icon(
+                Icons.code,
+                color: theme.colorScheme.onSurface,
+                size: 18,
+              ),
               const SizedBox(width: 8),
               Text(
                 'Lab Code: ${lab.labCode}',
                 style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.7),
+                  color: theme.colorScheme.onSurface.withOpacity(0.7),
                   fontSize: 14,
                 ),
               ),
             ],
           ),
           const SizedBox(height: 16),
-          const Text(
+          Text(
             'Schedule',
             style: TextStyle(
-              color: Colors.white,
+              color: theme.colorScheme.onSurface,
               fontSize: 16,
               fontWeight: FontWeight.bold,
             ),
@@ -64,13 +75,16 @@ class LabHeader extends StatelessWidget {
               padding: const EdgeInsets.only(bottom: 8),
               child: Row(
                 children: [
-                  const Icon(Icons.calendar_today,
-                      color: Colors.white, size: 18),
+                  Icon(
+                    Icons.calendar_today,
+                    color: theme.colorScheme.onSurface,
+                    size: 18,
+                  ),
                   const SizedBox(width: 8),
                   Text(
                     '$dayName:',
-                    style: const TextStyle(
-                      color: Colors.white,
+                    style: TextStyle(
+                      color: theme.colorScheme.onSurface,
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
                     ),
@@ -79,7 +93,7 @@ class LabHeader extends StatelessWidget {
                   Text(
                     '${schedule.startTime} - ${schedule.endTime}',
                     style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.7),
+                      color: theme.colorScheme.onSurface.withOpacity(0.7),
                       fontSize: 14,
                     ),
                   ),
