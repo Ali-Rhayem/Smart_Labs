@@ -27,7 +27,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   String? _selectedFaculty;
   String? _selectedMajor;
   List<String> _availableMajors = [];
-  
+
   final _controller = EditProfileController();
 
   @override
@@ -86,7 +86,8 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       Navigator.pop(context);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(response['message'] ?? 'Failed to update profile')),
+        SnackBar(
+            content: Text(response['message'] ?? 'Failed to update profile')),
       );
     }
 
@@ -124,10 +125,26 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
               ProfileImageWidget(
                 imageFile: _imageFile,
                 userImageUrl: widget.user.imageUrl,
-                onImagePick: () => _controller.pickImage(
-                  (file) => setState(() => _imageFile = file),
-                  (base64) => _base64Image = base64,
-                ),
+                onImagePick: () async {
+                  try {
+                    await _controller.pickImage(
+                      (file) => setState(() => _imageFile = file),
+                      (base64) => _base64Image = base64,
+                    );
+                  } catch (e, stackTrace) {
+                    debugPrint('Error in EditProfileScreen: $e');
+                    debugPrint('Stack trace: $stackTrace');
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Error: ${e.toString()}'),
+                          backgroundColor: Colors.red,
+                          duration: const Duration(seconds: 5),
+                        ),
+                      );
+                    }
+                  }
+                },
               ),
               CustomTextField(
                 controller: _nameController,
@@ -159,14 +176,17 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                       selectedFaculty: _selectedFaculty,
                       selectedMajor: _selectedMajor,
                       availableMajors: _availableMajors,
-                      onFacultyChanged: (value) => _updateFaculty(value, faculties),
-                      onMajorChanged: (value) => setState(() => _selectedMajor = value),
+                      onFacultyChanged: (value) =>
+                          _updateFaculty(value, faculties),
+                      onMajorChanged: (value) =>
+                          setState(() => _selectedMajor = value),
                       faculties: faculties,
                       userFaculty: widget.user.faculty,
                       userMajor: widget.user.major,
                     ),
                     loading: () => const Center(
-                      child: CircularProgressIndicator(color: Color(0xFFFFFF00)),
+                      child:
+                          CircularProgressIndicator(color: Color(0xFFFFFF00)),
                     ),
                     error: (error, stack) => Center(
                       child: Text(
