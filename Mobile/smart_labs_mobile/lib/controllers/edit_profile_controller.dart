@@ -1,25 +1,34 @@
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'dart:convert';
 import '../../../models/user_model.dart';
 import '../../../services/api_service.dart';
 import '../../../utils/secure_storage.dart';
+import 'package:file_picker/file_picker.dart';
 
 class EditProfileController {
   final SecureStorage _secureStorage = SecureStorage();
   final ApiService _apiService = ApiService();
-  final ImagePicker _picker = ImagePicker();
-  
-  Future<void> pickImage(Function(File) onImagePicked, Function(String) onBase64Generated) async {
-    final XFile? pickedFile = await _picker.pickImage(source: ImageSource.gallery);
-    
-    if (pickedFile != null) {
-      final imageFile = File(pickedFile.path);
-      onImagePicked(imageFile);
-      
-      final bytes = await imageFile.readAsBytes();
-      onBase64Generated(base64Encode(bytes));
+
+  Future<void> pickImage(
+      Function(File) onImagePicked, Function(String) onBase64Generated) async {
+    try {
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+        type: FileType.image,
+        allowCompression: true,
+      );
+
+      if (result != null) {
+        final file = File(result.files.single.path!);
+        if (await file.exists()) {
+          onImagePicked(file);
+          final bytes = await file.readAsBytes();
+          onBase64Generated(base64Encode(bytes));
+        }
+      }
+    } catch (e) {
+      debugPrint('Error picking image: $e');
+      throw Exception('Failed to pick image: ${e.toString()}');
     }
   }
 
