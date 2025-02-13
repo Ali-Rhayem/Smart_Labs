@@ -17,6 +17,9 @@ class ProfileImageWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Column(
       children: [
         Stack(
@@ -35,12 +38,17 @@ class ProfileImageWidget extends StatelessWidget {
               bottom: 0,
               right: 0,
               child: Container(
-                decoration: const BoxDecoration(
-                  color: Color(0xFFFFEB00),
+                decoration: BoxDecoration(
+                  color: isDark
+                      ? const Color(0xFFFFEB00)
+                      : theme.colorScheme.primary,
                   shape: BoxShape.circle,
                 ),
                 child: IconButton(
-                  icon: const Icon(Icons.camera_alt, color: Colors.black),
+                  icon: Icon(
+                    Icons.camera_alt,
+                    color: isDark ? Colors.black : Colors.white,
+                  ),
                   onPressed: onImagePick,
                 ),
               ),
@@ -67,12 +75,34 @@ class CustomTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return TextFormField(
       controller: controller,
-      style: const TextStyle(color: Colors.white),
+      style: TextStyle(color: theme.colorScheme.onSurface),
       decoration: InputDecoration(
         labelText: labelText,
-        border: const OutlineInputBorder(),
+        labelStyle:
+            TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.7)),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide:
+              BorderSide(color: theme.colorScheme.onSurface.withOpacity(0.2)),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide:
+              BorderSide(color: theme.colorScheme.onSurface.withOpacity(0.2)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isDark ? const Color(0xFFFFEB00) : theme.colorScheme.primary,
+          ),
+        ),
+        filled: true,
+        fillColor: isDark ? const Color(0xFF1C1C1C) : theme.colorScheme.surface,
       ),
       validator: validator,
     );
@@ -103,26 +133,46 @@ class FacultyMajorDropdowns extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    final dropdownDecoration = BoxDecoration(
+      color: isDark ? const Color(0xFF1C1C1C) : theme.colorScheme.surface,
+      borderRadius: BorderRadius.circular(8),
+      border: Border.all(
+        color: isDark
+            ? Colors.white24
+            : theme.colorScheme.onSurface.withOpacity(0.2),
+      ),
+    );
+
+    final inputDecoration = InputDecoration(
+      labelStyle: TextStyle(
+        color: theme.colorScheme.onSurface.withOpacity(0.7),
+      ),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      border: InputBorder.none,
+    );
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
-          decoration: BoxDecoration(
-            color: const Color(0xFF1C1C1C),
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: Colors.white24),
-          ),
+          decoration: dropdownDecoration,
           child: DropdownButtonFormField<String>(
             value: selectedFaculty,
-            icon: const Icon(Icons.arrow_drop_down, color: Color(0xFFFFFF00)),
-            style: const TextStyle(color: Colors.white, fontSize: 16),
-            dropdownColor: const Color(0xFF1C1C1C),
-            decoration: const InputDecoration(
-              labelText: 'Faculty',
-              labelStyle: TextStyle(color: Colors.white70),
-              contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              border: InputBorder.none,
+            icon: Icon(
+              Icons.arrow_drop_down,
+              color:
+                  isDark ? const Color(0xFFFFFF00) : theme.colorScheme.primary,
             ),
+            style: TextStyle(
+              color: theme.colorScheme.onSurface,
+              fontSize: 16,
+            ),
+            dropdownColor:
+                isDark ? const Color(0xFF1C1C1C) : theme.colorScheme.surface,
+            decoration: inputDecoration.copyWith(labelText: 'Faculty'),
             items: [
               if (userFaculty != null &&
                   !faculties.any((f) => f.faculty == userFaculty))
@@ -142,22 +192,21 @@ class FacultyMajorDropdowns extends StatelessWidget {
         ),
         const SizedBox(height: 20),
         Container(
-          decoration: BoxDecoration(
-            color: const Color(0xFF1C1C1C),
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: Colors.white24),
-          ),
+          decoration: dropdownDecoration,
           child: DropdownButtonFormField<String>(
             value: selectedMajor,
-            icon: const Icon(Icons.arrow_drop_down, color: Color(0xFFFFFF00)),
-            style: const TextStyle(color: Colors.white, fontSize: 16),
-            dropdownColor: const Color(0xFF1C1C1C),
-            decoration: const InputDecoration(
-              labelText: 'Major',
-              labelStyle: TextStyle(color: Colors.white70),
-              contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              border: InputBorder.none,
+            icon: Icon(
+              Icons.arrow_drop_down,
+              color:
+                  isDark ? const Color(0xFFFFFF00) : theme.colorScheme.primary,
             ),
+            style: TextStyle(
+              color: theme.colorScheme.onSurface,
+              fontSize: 16,
+            ),
+            dropdownColor:
+                isDark ? const Color(0xFF1C1C1C) : theme.colorScheme.surface,
+            decoration: inputDecoration.copyWith(labelText: 'Major'),
             items: [
               if (userMajor != null &&
                   !availableMajors.contains(userMajor) &&
@@ -167,11 +216,15 @@ class FacultyMajorDropdowns extends StatelessWidget {
                   child: Text(userMajor!),
                 ),
               if (availableMajors.isEmpty)
-                const DropdownMenuItem(
+                DropdownMenuItem(
                   value: 'no_majors',
                   enabled: false,
-                  child: Text('No majors available',
-                      style: TextStyle(color: Colors.grey)),
+                  child: Text(
+                    'No majors available',
+                    style: TextStyle(
+                      color: theme.colorScheme.onSurface.withOpacity(0.5),
+                    ),
+                  ),
                 )
               else
                 ...availableMajors.map((major) {
