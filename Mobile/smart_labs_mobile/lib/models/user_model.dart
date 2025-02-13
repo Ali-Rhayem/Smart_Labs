@@ -8,6 +8,7 @@ class User {
   final String? imageUrl;
   final String role;
   final List<dynamic>? faceIdentityVector;
+  final bool isFirstLogin;
 
   User({
     required this.id,
@@ -19,9 +20,10 @@ class User {
     this.imageUrl,
     required this.role,
     this.faceIdentityVector,
+    required this.isFirstLogin,
   });
 
-    factory User.fromJson(Map<String, dynamic> json) {
+  factory User.fromJson(Map<String, dynamic> json) {
     return User(
       id: json['id'],
       name: json['name'],
@@ -29,7 +31,30 @@ class User {
       major: json['major'],
       faculty: json['faculty'],
       imageUrl: json['image'],
-      role: json['role'] ?? '', // Since role isn't in the response, providing a default
+      role: json['role'] ??
+          '',
+      isFirstLogin: json['isFirstLogin'] ?? false,
+    );
+  }
+
+  User copyWith({
+    String? name,
+    String? email,
+    String? major,
+    String? faculty,
+    String? imageUrl,
+    bool? isFirstLogin,
+  }) {
+    return User(
+      id: id,
+      name: name ?? this.name,
+      email: email ?? this.email,
+      role: role,
+      major: major ?? this.major,
+      faculty: faculty ?? this.faculty,
+      imageUrl: imageUrl ?? this.imageUrl,
+      isFirstLogin: isFirstLogin ?? this.isFirstLogin,
+      faceIdentityVector: faceIdentityVector,
     );
   }
 }
