@@ -22,10 +22,10 @@ class _StudentMainWrapperState extends ConsumerState<StudentMainWrapper> {
   // A list of pages in the same order as the BottomNavigationBar items.
   // We now have 4 items: Labs, Analytics, Messages, Profile.
   late final List<Widget> _pages = [
-    const StudentLabsScreen(), // index 0
-    const StudentDashboardScreen(), // index 1
+    const StudentLabsScreen(),
+    const StudentDashboardScreen(),
     const NotificationsScreen(),
-    const ProfileScreen(), // index 3
+    const ProfileScreen(),
   ];
 
   void _onItemTapped(int index) {
