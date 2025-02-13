@@ -1,0 +1,19 @@
+import { smart_labs } from "../utils/axios";
+import { Notification } from "../types/notification";
+
+export const notificationService = {
+	getNotifications: (id: number) =>
+		smart_labs.getAPI<Notification[]>(`/notification/user/${id}`),
+
+	readNotification: (id: number) =>
+		smart_labs.putAPI(`/notification/mark-as-read/${id}`, {}),
+
+	readAllNotifications: () =>
+		smart_labs.putAPI(`/notification/mark-all-as-read`, {}),
+
+	deleteNotification: (id: number) =>
+		smart_labs.putAPI(`/notification/mark-as-deleted/${id}`, {}),
+
+	deleteAllNotifications: (id: number) =>
+		smart_labs.putAPI(`/notification/mark-all-as-deleted`, {}),
+};
