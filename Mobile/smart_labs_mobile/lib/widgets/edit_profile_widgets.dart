@@ -26,10 +26,10 @@ class ProfileImageWidget extends StatelessWidget {
               backgroundImage: imageFile != null
                   ? FileImage(imageFile!)
                   : (userImageUrl != null
-                      ? NetworkImage(
-                          '${dotenv.env['IMAGE_BASE_URL']}/$userImageUrl')
-                      : const NetworkImage(
-                          'https://picsum.photos/200')) as ImageProvider<Object>,
+                          ? NetworkImage(
+                              '${dotenv.env['IMAGE_BASE_URL']}/$userImageUrl')
+                          : const NetworkImage('https://picsum.photos/200'))
+                      as ImageProvider<Object>,
             ),
             Positioned(
               bottom: 0,
