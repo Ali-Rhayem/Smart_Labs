@@ -34,6 +34,8 @@ class _StudentAnnouncementsTabState extends ConsumerState<StudentAnnouncementsTa
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final announcementsAsync =
         ref.watch(labAnnouncementsProvider(widget.lab.labId));
 
@@ -41,13 +43,24 @@ class _StudentAnnouncementsTabState extends ConsumerState<StudentAnnouncementsTa
       children: [
         Expanded(
           child: RefreshIndicator(
-            color: kNeonAccent,
+            color: isDark ? kNeonAccent : theme.colorScheme.primary,
             onRefresh: () => ref
                 .read(labAnnouncementsProvider(widget.lab.labId).notifier)
                 .fetchAnnouncements(),
             child: announcementsAsync.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (error, stack) => Center(child: Text('Error: $error')),
+              loading: () => Center(
+                child: CircularProgressIndicator(
+                  color: isDark ? kNeonAccent : theme.colorScheme.primary,
+                ),
+              ),
+              error: (error, stack) => Center(
+                child: Text(
+                  'Error: $error',
+                  style: TextStyle(
+                    color: theme.colorScheme.onBackground.withOpacity(0.7),
+                  ),
+                ),
+              ),
               data: (announcements) => ListView.builder(
                 itemCount: announcements.length,
                 padding:
@@ -55,7 +68,9 @@ class _StudentAnnouncementsTabState extends ConsumerState<StudentAnnouncementsTa
                 itemBuilder: (context, index) {
                   final announcement = announcements[index];
                   return Card(
-                    color: const Color(0xFF1C1C1C),
+                    color: isDark
+                        ? const Color(0xFF1C1C1C)
+                        : theme.colorScheme.surface,
                     margin: const EdgeInsets.only(bottom: 10),
                     child: Column(
                       children: [
@@ -65,7 +80,6 @@ class _StudentAnnouncementsTabState extends ConsumerState<StudentAnnouncementsTa
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              // User Avatar
                               CircleAvatar(
                                 radius: 20,
                                 backgroundImage: announcement.user.imageUrl !=
@@ -74,28 +88,28 @@ class _StudentAnnouncementsTabState extends ConsumerState<StudentAnnouncementsTa
                                         '${dotenv.env['IMAGE_BASE_URL']}/${announcement.user.imageUrl}')
                                     : const NetworkImage(
                                         'https://picsum.photos/200'),
-                                backgroundColor: Colors.grey[800],
+                                backgroundColor: isDark
+                                    ? Colors.grey[800]
+                                    : Colors.grey[200],
                               ),
                               const SizedBox(width: 12),
                               Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    // User Name
                                     Text(
                                       announcement.user.name,
-                                      style: const TextStyle(
-                                        color: Colors.white,
+                                      style: TextStyle(
+                                        color: theme.colorScheme.onSurface,
                                         fontSize: 14,
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
                                     const SizedBox(height: 4),
-                                    // Announcement Message
                                     Text(
                                       announcement.message,
-                                      style: const TextStyle(
-                                        color: Colors.white,
+                                      style: TextStyle(
+                                        color: theme.colorScheme.onSurface,
                                         fontSize: 16,
                                       ),
                                     ),
@@ -136,21 +150,26 @@ class _StudentAnnouncementsTabState extends ConsumerState<StudentAnnouncementsTa
                                 Text(
                                   formatDateTime(announcement.time),
                                   style: TextStyle(
-                                    color: Colors.white.withValues(alpha: 0.5),
+                                    color: theme.colorScheme.onSurface
+                                        .withOpacity(0.5),
                                     fontSize: 12,
                                   ),
                                 ),
                                 const Spacer(),
-                                const Icon(
+                                Icon(
                                   Icons.comment_outlined,
                                   size: 18,
-                                  color: kNeonAccent,
+                                  color: isDark
+                                      ? kNeonAccent
+                                      : theme.colorScheme.primary,
                                 ),
                                 const SizedBox(width: 8),
                                 Text(
                                   '${announcement.comments.length} Comments',
-                                  style: const TextStyle(
-                                    color: kNeonAccent,
+                                  style: TextStyle(
+                                    color: isDark
+                                        ? kNeonAccent
+                                        : theme.colorScheme.primary,
                                   ),
                                 ),
                               ],
