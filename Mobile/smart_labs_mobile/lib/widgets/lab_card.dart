@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:smart_labs_mobile/models/lab_model.dart';
 import 'package:smart_labs_mobile/screens/instructor/instructor_lab_details.dart';
-import 'package:smart_labs_mobile/screens/student/lab_details.dart';
+import 'package:smart_labs_mobile/screens/student/student_lab_details.dart';
 import 'package:smart_labs_mobile/utils/secure_storage.dart';
 
 class LabCard extends StatelessWidget {
