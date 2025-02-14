@@ -67,6 +67,7 @@ class LabNotifier extends StateNotifier<AsyncValue<List<Lab>>> {
             semesterId: lab['semesterID'].toString(),
             sessions: [], // or map your entire schedule if needed
             started: lab['started'],
+            room: lab['room'],
           );
         }).toList();
 
@@ -129,6 +130,7 @@ class LabNotifier extends StateNotifier<AsyncValue<List<Lab>>> {
           semesterId: labData['semesterID'].toString(),
           sessions: [],
           started: labData['started'],
+          room: labData['room'],
         );
 
         // Update state with the new lab data
