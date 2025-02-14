@@ -12,6 +12,6 @@ public class Comment
     public required string Message { get; set; }
 
     [BsonElement("Time")]
-    public DateTime Time { get; set; }
+    public DateTime Time { get; set; } = DateTime.UtcNow;
 
 }
