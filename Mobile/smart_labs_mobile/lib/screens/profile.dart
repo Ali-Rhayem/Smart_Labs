@@ -156,16 +156,133 @@ class ProfileScreen extends ConsumerWidget {
               trailing: Consumer(
                 builder: (context, ref, child) {
                   final isDark = ref.watch(themeProvider) == ThemeMode.dark;
-                  return Switch(
-                    value: isDark,
-                    onChanged: (value) {
-                      ref.read(themeProvider.notifier).toggleTheme();
-                    },
-                    activeColor:
-                        isDark ? kNeonYellow : theme.colorScheme.primary,
-                    activeTrackColor:
-                        (isDark ? kNeonYellow : theme.colorScheme.primary)
-                            .withOpacity(0.3),
+                  return GestureDetector(
+                    onTap: () => ref.read(themeProvider.notifier).toggleTheme(),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 300),
+                      width: 70,
+                      height: 35,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(25),
+                        color: isDark
+                            ? const Color(0xFF3C3C3C)
+                            : const Color(0xFFE0ECF8),
+                        boxShadow: [
+                          BoxShadow(
+                            color: isDark
+                                ? const Color(0xFF000000).withOpacity(0.3)
+                                : const Color(0xFF4A6FA5).withOpacity(0.2),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Stack(
+                        children: [
+                          // Background stars (only visible in dark mode)
+                          if (isDark) ...[
+                            Positioned(
+                              top: 7,
+                              left: 42,
+                              child: Container(
+                                width: 2,
+                                height: 2,
+                                decoration: const BoxDecoration(
+                                  color: Colors.white,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                            ),
+                            Positioned(
+                              top: 15,
+                              left: 48,
+                              child: Container(
+                                width: 3,
+                                height: 3,
+                                decoration: const BoxDecoration(
+                                  color: Colors.white,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                            ),
+                          ],
+                          AnimatedPositioned(
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.easeInOut,
+                            left: isDark ? 35 : 3,
+                            top: 3,
+                            child: Container(
+                              width: 29,
+                              height: 29,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: isDark
+                                    ? kNeonYellow
+                                    : const Color(0xFFFFB156),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: isDark
+                                        ? kNeonYellow.withOpacity(0.4)
+                                        : const Color(0xFFFFB156)
+                                            .withOpacity(0.4),
+                                    blurRadius: 8,
+                                    spreadRadius: 2,
+                                  ),
+                                ],
+                              ),
+                              child: isDark
+                                  ? Stack(
+                                      children: [
+                                        // Moon crater details
+                                        Positioned(
+                                          top: 8,
+                                          left: 6,
+                                          child: Container(
+                                            width: 4,
+                                            height: 4,
+                                            decoration: BoxDecoration(
+                                              color: const Color(0xFF3C3C3C),
+                                              shape: BoxShape.circle,
+                                            ),
+                                          ),
+                                        ),
+                                        Positioned(
+                                          bottom: 10,
+                                          right: 8,
+                                          child: Container(
+                                            width: 6,
+                                            height: 6,
+                                            decoration: BoxDecoration(
+                                              color: const Color(0xFF3C3C3C),
+                                              shape: BoxShape.circle,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    )
+                                  : Center(
+                                      child: Container(
+                                        width: 20,
+                                        height: 20,
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: const Color(0xFFFFB156),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: const Color(0xFFFFB156)
+                                                  .withOpacity(0.3),
+                                              blurRadius: 4,
+                                              spreadRadius: 2,
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   );
                 },
               ),
