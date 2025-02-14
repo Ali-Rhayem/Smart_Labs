@@ -141,4 +141,33 @@ public class UserService
         var result = await _users.UpdateOneAsync(u => u.Id == id, update);
         return result.IsAcknowledged && result.ModifiedCount > 0;
     }
+
+    public async Task<User?> FirstLoginAsync(FirstLogin firstLogin)
+    {
+        var user = await GetUserById(firstLogin.Id);
+        var newUser = new User
+        {
+            Id = firstLogin.Id,
+            Email = user.Email,
+            Name = firstLogin.Name,
+            Password = firstLogin.Password,
+            Major = firstLogin.Major,
+            Faculty = firstLogin.Faculty,
+            Image = firstLogin.Image,
+            Role = user.Role,
+            First_login = false
+        };
+
+        // update the user
+        var builder = Builders<User>.Update;
+        var update = builder.Set(u => u.First_login, false)
+            .Set(u => u.Name, firstLogin.Name)
+            .Set(u => u.Password, firstLogin.Password)
+            .Set(u => u.Major, firstLogin.Major)
+            .Set(u => u.Faculty, firstLogin.Faculty)
+            .Set(u => u.Image, firstLogin.Image);
+
+        var result = await _users.UpdateOneAsync(u => u.Id == firstLogin.Id, update);
+        return result.IsAcknowledged ? newUser : null;
+    }
 }
