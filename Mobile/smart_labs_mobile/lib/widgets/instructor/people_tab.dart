@@ -9,16 +9,24 @@ import 'package:smart_labs_mobile/utils/secure_storage.dart';
 import 'package:smart_labs_mobile/widgets/instructor/row_details.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-class PeopleTab extends ConsumerWidget {
+class PeopleTab extends ConsumerStatefulWidget {
   final Lab lab;
   static const Color kNeonAccent = Color(0xFFFFFF00);
 
   const PeopleTab({super.key, required this.lab});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final studentsAsync = ref.watch(labStudentsProvider(lab.labId));
-    final instructorsAsync = ref.watch(labInstructorsProvider(lab.labId));
+  ConsumerState<PeopleTab> createState() => _PeopleTabState();
+}
+
+class _PeopleTabState extends ConsumerState<PeopleTab> {
+  bool _isEditMode = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final studentsAsync = ref.watch(labStudentsProvider(widget.lab.labId));
+    final instructorsAsync =
+        ref.watch(labInstructorsProvider(widget.lab.labId));
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
@@ -71,12 +79,24 @@ class PeopleTab extends ConsumerWidget {
                 ),
                 const Spacer(),
                 IconButton(
-                  onPressed: () => _showAddStudentsDialog(context, ref),
+                  onPressed: () {
+                    setState(() {
+                      _isEditMode = !_isEditMode;
+                    });
+                  },
                   icon: Icon(
-                    Icons.person_add,
+                    _isEditMode ? Icons.edit_off : Icons.edit,
                     color: theme.colorScheme.onBackground,
                   ),
                 ),
+                if (_isEditMode)
+                  IconButton(
+                    onPressed: () => _showAddStudentsDialog(context, ref),
+                    icon: Icon(
+                      Icons.person_add,
+                      color: theme.colorScheme.onBackground,
+                    ),
+                  ),
               ],
             ),
           ),
@@ -84,7 +104,7 @@ class PeopleTab extends ConsumerWidget {
           studentsAsync.when(
             loading: () => Center(
               child: CircularProgressIndicator(
-                color: isDark ? kNeonAccent : theme.colorScheme.primary,
+                color: theme.colorScheme.primary,
               ),
             ),
             error: (error, stack) => Center(
@@ -139,9 +159,7 @@ class PeopleTab extends ConsumerWidget {
                                     ),
                                   )
                                 : CircleAvatar(
-                                    backgroundColor: isDark
-                                        ? kNeonAccent
-                                        : theme.colorScheme.primary,
+                                    backgroundColor: theme.colorScheme.primary,
                                     child: Text(
                                       student.name[0].toUpperCase(),
                                       style: TextStyle(
@@ -166,12 +184,15 @@ class PeopleTab extends ConsumerWidget {
                                     .withOpacity(0.7),
                               ),
                             ),
-                            trailing: IconButton(
-                              icon: const Icon(Icons.remove_circle_outline,
-                                  color: Colors.red),
-                              onPressed: () => _showRemoveStudentDialog(
-                                  context, ref, student),
-                            ),
+                            trailing: _isEditMode
+                                ? IconButton(
+                                    icon: const Icon(
+                                        Icons.remove_circle_outline,
+                                        color: Colors.red),
+                                    onPressed: () => _showRemoveStudentDialog(
+                                        context, ref, student),
+                                  )
+                                : null,
                           )
                         : Theme(
                             data: Theme.of(context).copyWith(
@@ -186,9 +207,8 @@ class PeopleTab extends ConsumerWidget {
                                       ),
                                     )
                                   : CircleAvatar(
-                                      backgroundColor: isDark
-                                          ? kNeonAccent
-                                          : theme.colorScheme.primary,
+                                      backgroundColor:
+                                          theme.colorScheme.primary,
                                       child: Text(
                                         student.name[0].toUpperCase(),
                                         style: TextStyle(
@@ -211,12 +231,15 @@ class PeopleTab extends ConsumerWidget {
                                       .withOpacity(0.7),
                                 ),
                               ),
-                              trailing: IconButton(
-                                icon: const Icon(Icons.remove_circle_outline,
-                                    color: Colors.red),
-                                onPressed: () => _showRemoveStudentDialog(
-                                    context, ref, student),
-                              ),
+                              trailing: _isEditMode
+                                  ? IconButton(
+                                      icon: const Icon(
+                                          Icons.remove_circle_outline,
+                                          color: Colors.red),
+                                      onPressed: () => _showRemoveStudentDialog(
+                                          context, ref, student),
+                                    )
+                                  : null,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                                 side: BorderSide(
@@ -272,20 +295,21 @@ class PeopleTab extends ConsumerWidget {
                   ),
                 ),
                 const Spacer(),
-                IconButton(
-                  onPressed: () => _showAddInstructorsDialog(context, ref),
-                  icon: Icon(
-                    Icons.person_add,
-                    color: theme.colorScheme.onBackground,
+                if (_isEditMode)
+                  IconButton(
+                    onPressed: () => _showAddInstructorsDialog(context, ref),
+                    icon: Icon(
+                      Icons.person_add,
+                      color: theme.colorScheme.onBackground,
+                    ),
                   ),
-                ),
               ],
             ),
           ),
           instructorsAsync.when(
             loading: () => Center(
               child: CircularProgressIndicator(
-                color: isDark ? kNeonAccent : theme.colorScheme.primary,
+                color: theme.colorScheme.primary,
               ),
             ),
             error: (error, stack) => Center(
@@ -340,9 +364,7 @@ class PeopleTab extends ConsumerWidget {
                                     ),
                                   )
                                 : CircleAvatar(
-                                    backgroundColor: isDark
-                                        ? kNeonAccent
-                                        : theme.colorScheme.primary,
+                                    backgroundColor: theme.colorScheme.primary,
                                     child: Text(
                                       instructor.name[0].toUpperCase(),
                                       style: TextStyle(
@@ -367,12 +389,16 @@ class PeopleTab extends ConsumerWidget {
                                     .withOpacity(0.7),
                               ),
                             ),
-                            trailing: IconButton(
-                              icon: const Icon(Icons.remove_circle_outline,
-                                  color: Colors.red),
-                              onPressed: () => _showRemoveInstructorDialog(
-                                  context, ref, instructor),
-                            ),
+                            trailing: _isEditMode
+                                ? IconButton(
+                                    icon: const Icon(
+                                        Icons.remove_circle_outline,
+                                        color: Colors.red),
+                                    onPressed: () =>
+                                        _showRemoveInstructorDialog(
+                                            context, ref, instructor),
+                                  )
+                                : null,
                           )
                         : Theme(
                             data: Theme.of(context).copyWith(
@@ -386,9 +412,8 @@ class PeopleTab extends ConsumerWidget {
                                       ),
                                     )
                                   : CircleAvatar(
-                                      backgroundColor: isDark
-                                          ? kNeonAccent
-                                          : theme.colorScheme.primary,
+                                      backgroundColor:
+                                          theme.colorScheme.primary,
                                       child: Text(
                                         instructor.name[0].toUpperCase(),
                                         style: TextStyle(
@@ -411,12 +436,16 @@ class PeopleTab extends ConsumerWidget {
                                       .withOpacity(0.7),
                                 ),
                               ),
-                              trailing: IconButton(
-                                icon: const Icon(Icons.remove_circle_outline,
-                                    color: Colors.red),
-                                onPressed: () => _showRemoveInstructorDialog(
-                                    context, ref, instructor),
-                              ),
+                              trailing: _isEditMode
+                                  ? IconButton(
+                                      icon: const Icon(
+                                          Icons.remove_circle_outline,
+                                          color: Colors.red),
+                                      onPressed: () =>
+                                          _showRemoveInstructorDialog(
+                                              context, ref, instructor),
+                                    )
+                                  : null,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                                 side: BorderSide(
@@ -504,7 +533,7 @@ class PeopleTab extends ConsumerWidget {
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderSide: BorderSide(
-                    color: isDark ? kNeonAccent : theme.colorScheme.primary,
+                    color: theme.colorScheme.primary,
                   ),
                 ),
               ),
@@ -533,7 +562,7 @@ class PeopleTab extends ConsumerWidget {
 
               try {
                 await ref
-                    .read(labStudentsProvider(lab.labId).notifier)
+                    .read(labStudentsProvider(widget.lab.labId).notifier)
                     .addStudents(emails);
                 if (dialogContext.mounted) {
                   Navigator.pop(dialogContext);
@@ -549,7 +578,7 @@ class PeopleTab extends ConsumerWidget {
             child: Text(
               'Add',
               style: TextStyle(
-                color: isDark ? kNeonAccent : theme.colorScheme.primary,
+                color: theme.colorScheme.primary,
               ),
             ),
           ),
@@ -589,7 +618,7 @@ class PeopleTab extends ConsumerWidget {
             onPressed: () async {
               try {
                 await ref
-                    .read(labStudentsProvider(lab.labId).notifier)
+                    .read(labStudentsProvider(widget.lab.labId).notifier)
                     .removeStudent(student.id.toString());
                 if (dialogContext.mounted) {
                   Navigator.pop(dialogContext);
@@ -650,7 +679,7 @@ class PeopleTab extends ConsumerWidget {
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderSide: BorderSide(
-                    color: isDark ? kNeonAccent : theme.colorScheme.primary,
+                    color: theme.colorScheme.primary,
                   ),
                 ),
                 filled: true,
@@ -688,7 +717,7 @@ class PeopleTab extends ConsumerWidget {
 
               try {
                 await ref
-                    .read(labInstructorsProvider(lab.labId).notifier)
+                    .read(labInstructorsProvider(widget.lab.labId).notifier)
                     .addInstructors(emails);
                 if (dialogContext.mounted) {
                   Navigator.pop(dialogContext);
@@ -711,7 +740,7 @@ class PeopleTab extends ConsumerWidget {
               }
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: isDark ? kNeonAccent : theme.colorScheme.primary,
+              backgroundColor: theme.colorScheme.primary,
               foregroundColor:
                   isDark ? Colors.black : theme.colorScheme.onPrimary,
             ),
@@ -755,7 +784,7 @@ class PeopleTab extends ConsumerWidget {
             onPressed: () async {
               try {
                 await ref
-                    .read(labInstructorsProvider(lab.labId).notifier)
+                    .read(labInstructorsProvider(widget.lab.labId).notifier)
                     .removeInstructor(instructor.id.toString());
 
                 if (!dialogContext.mounted) return;
