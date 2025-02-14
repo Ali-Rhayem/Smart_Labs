@@ -6,7 +6,7 @@ import 'package:smart_labs_mobile/utils/secure_storage.dart';
 
 class LabCard extends StatelessWidget {
   const LabCard({
-    super.key, 
+    super.key,
     required this.lab,
     this.showManageButton = false,
   });
@@ -78,7 +78,7 @@ class LabCard extends StatelessWidget {
                     children: [
                       Text(
                         lab.labName,
-                        // Use theme’s text style, or copyWith to override
+                        // Use theme's text style, or copyWith to override
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -96,15 +96,7 @@ class LabCard extends StatelessWidget {
 
                 // The arrow icon
                 IconButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (ctx) => LabDetailScreen(lab: lab),
-                      ),
-                    );
-                  },
-                  // Keep it neon if you want. Otherwise, colorScheme.primary
+                  onPressed: () => _navigateToDetails(context),
                   color: colorScheme.primary,
                   icon: const Icon(Icons.chevron_right, size: 30),
                 ),
