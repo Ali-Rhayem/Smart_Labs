@@ -41,7 +41,9 @@ public class LabHelper
 
         var password = GenerateTempPassword();
         // send email to student with temp password
-        bool send_email = SendEmail(student_email, password);
+        var subject = "Your Temporary Password";
+        var message = "Dear Student,\n\nYour temporary password is: " + password + "\n\nPlease log in and change your password immediately.\n\nBest regards,\nUniversity Team";
+        bool send_email = SendEmail(student_email, message, subject);
         if (!send_email)
         {
             return false;
@@ -67,7 +69,7 @@ public class LabHelper
 
     }
 
-    private string GenerateTempPassword()
+    public string GenerateTempPassword()
     {
         var chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$%^&*()_-+=}{:;/?.>,<0123456789abcdefghijklmnopqrstuvwxyz";
         var stringChars = new char[10];
@@ -82,7 +84,7 @@ public class LabHelper
     }
 
 
-    private bool SendEmail(string student_email, string password)
+    public bool SendEmail(string student_email, string send_message, string subject)
     {
         string[] Scopes = { GmailService.Scope.GmailSend };
         string ApplicationName = "smart_lab";
@@ -122,10 +124,10 @@ public class LabHelper
         var email = new MimeMessage();
         email.From.Add(new MailboxAddress("Smart Labs", EmailSettings["Email"]));
         email.To.Add(new MailboxAddress(student_email.Split("@")[0], student_email));
-        email.Subject = "Your Temporary Password";
+        email.Subject = subject;
         email.Body = new TextPart("plain")
         {
-            Text = $"Dear Student,\n\nYour temporary password is: {password}\n\nPlease log in and change your password immediately.\n\nBest regards,\nUniversity Team"
+            Text = send_message
         };
 
         // Convert the email to raw format
