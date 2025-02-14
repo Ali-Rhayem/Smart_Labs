@@ -24,13 +24,16 @@ class TimeSelectors extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
-          style: const TextStyle(
-            color: Colors.white,
+          style: TextStyle(
+            color: theme.colorScheme.onSurface,
             fontSize: 16,
             fontWeight: FontWeight.bold,
           ),
@@ -48,22 +51,31 @@ class TimeSelectors extends StatelessWidget {
                     vertical: 16,
                   ),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF1C1C1C),
+                    color: isDark
+                        ? const Color(0xFF1C1C1C)
+                        : theme.colorScheme.surface,
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.white24),
+                    border: Border.all(
+                      color: isDark
+                          ? Colors.white24
+                          : theme.colorScheme.onSurface.withOpacity(0.2),
+                    ),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
+                      Text(
                         'Start Time',
-                        style: TextStyle(color: Colors.white70, fontSize: 12),
+                        style: TextStyle(
+                          color: theme.colorScheme.onSurface.withOpacity(0.7),
+                          fontSize: 12,
+                        ),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         startTime.format(context),
-                        style: const TextStyle(
-                          color: Colors.white,
+                        style: TextStyle(
+                          color: theme.colorScheme.onSurface,
                           fontSize: 16,
                           fontWeight: FontWeight.w500,
                         ),
@@ -85,22 +97,31 @@ class TimeSelectors extends StatelessWidget {
                     vertical: 16,
                   ),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF1C1C1C),
+                    color: isDark
+                        ? const Color(0xFF1C1C1C)
+                        : theme.colorScheme.surface,
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.white24),
+                    border: Border.all(
+                      color: isDark
+                          ? Colors.white24
+                          : theme.colorScheme.onSurface.withOpacity(0.2),
+                    ),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
+                      Text(
                         'End Time',
-                        style: TextStyle(color: Colors.white70, fontSize: 12),
+                        style: TextStyle(
+                          color: theme.colorScheme.onSurface.withOpacity(0.7),
+                          fontSize: 12,
+                        ),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         endTime.format(context),
-                        style: const TextStyle(
-                          color: Colors.white,
+                        style: TextStyle(
+                          color: theme.colorScheme.onSurface,
                           fontSize: 16,
                           fontWeight: FontWeight.w500,
                         ),
