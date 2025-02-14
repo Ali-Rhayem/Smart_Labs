@@ -206,6 +206,7 @@ const AnnouncementsTab: React.FC<AnnouncementsTabProps> = ({ labId }) => {
 										"& .MuiBadge-badge": {
 											bgcolor: "var(--color-primary)",
 											color: "var(--color-text-button)",
+											zIndex: 1,
 										},
 									}}
 								>
@@ -356,6 +357,7 @@ const AnnouncementsTab: React.FC<AnnouncementsTabProps> = ({ labId }) => {
 				<Paper
 					elevation={3}
 					sx={{
+						zIndex: 2,
 						p: 2,
 						position: "sticky",
 						bottom: 0,
