@@ -48,9 +48,11 @@ const LabsPage: React.FC = () => {
 			setOpenSnackbar(true);
 		},
 		onError: (error: any) => {
-			setAlertMessage(
-				error.response?.data?.errors || "Failed to create lab"
-			);
+			console.log(error);
+			let message = "Failed to create lab";
+			if (typeof error.response?.data?.errors === "string")
+				message = error.response?.data?.errors;
+			setAlertMessage(message);
 			setSeverity("error");
 			setOpenSnackbar(true);
 		},
@@ -94,7 +96,7 @@ const LabsPage: React.FC = () => {
 	}
 
 	return (
-		<div style={{ maxHeight: "100vh" }}>
+		<div style={{ minHeight: "100vh" }}>
 			<Box sx={{ p: 3 }}>
 				<Box
 					display="flex"
