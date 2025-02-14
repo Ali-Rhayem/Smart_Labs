@@ -1,10 +1,17 @@
-import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
+import {
+	FormControl,
+	InputLabel,
+	MenuItem,
+	Select,
+	FormHelperText,
+} from "@mui/material";
 
 interface DropdownProps {
 	label: string;
 	value: string;
 	options: { value: string; label: string }[];
 	onChange: (value: string) => void;
+	error?: string[] | null;
 	disabled?: boolean;
 }
 
@@ -13,10 +20,11 @@ const Dropdown: React.FC<DropdownProps> = ({
 	value,
 	options,
 	onChange,
+	error = null,
 	disabled = false,
 }) => {
 	return (
-		<FormControl fullWidth margin="normal">
+		<FormControl fullWidth margin="normal" error={Boolean(error?.length)}>
 			<InputLabel
 				sx={{
 					color: disabled
@@ -71,7 +79,7 @@ const Dropdown: React.FC<DropdownProps> = ({
 					color: "var(--color-text)",
 					transition: "border-color 0.2s",
 					"& .MuiOutlinedInput-notchedOutline": {
-						borderColor: "var(--color-border)",
+						borderColor: "var(--color-text-secondary)",
 					},
 					"& .MuiSelect-select": {
 						color: disabled
@@ -91,7 +99,7 @@ const Dropdown: React.FC<DropdownProps> = ({
 					"&:hover .MuiOutlinedInput-notchedOutline": {
 						borderColor: !disabled
 							? "var(--color-primary)"
-							: "var(--color-border)",
+							: "var(--color-text-secondary)",
 					},
 					"&.Mui-focused .MuiOutlinedInput-notchedOutline": {
 						borderColor: "var(--color-primary) !important",
@@ -150,6 +158,11 @@ const Dropdown: React.FC<DropdownProps> = ({
 					</MenuItem>
 				))}
 			</Select>
+			{error && error.length > 0 && (
+				<FormHelperText sx={{ color: "var(--color-danger)" }}>
+					{error.join(", ")}
+				</FormHelperText>
+			)}
 		</FormControl>
 	);
 };
