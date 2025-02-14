@@ -26,8 +26,8 @@ namespace backend.Controllers
             return Ok(ppe);
         }
 
-        // GET: api/PPE/list
-        [HttpGet("list")]
+        // POST: api/PPE/list
+        [HttpPost("list")]
         [Authorize]
         public async Task<ActionResult<List<PPE>>> GetListOfPPEs([FromBody] List<int> ids)
         {
