@@ -41,68 +41,22 @@ class _AnnouncementCommentsScreenState
   final TextEditingController _commentController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
 
-  Future<void> _addComment() async {
-    if (_commentController.text.trim().isEmpty) return;
-
-    try {
-      await ref
-          .read(labAnnouncementsProvider(widget.labId).notifier)
-          .addComment(
-            widget.announcement.id.toString(),
-            _commentController.text.trim(),
-          );
-
-      if (mounted) {
-        // Create a new comment with local data since we got a 204
-        final newComment = Comment(
-          id: DateTime.now().millisecondsSinceEpoch,
-          user: widget.announcement.user,
-          message: _commentController.text.trim(),
-          time: DateTime.now(),
-        );
-
-        setState(() {
-          widget.announcement.comments.add(newComment);
-        });
-
-        // Clear the input field
-        _commentController.clear();
-
-        // Scroll to the bottom after the state has been updated
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (_scrollController.hasClients) {
-            _scrollController.animateTo(
-              _scrollController.position.maxScrollExtent,
-              duration: const Duration(milliseconds: 300),
-              curve: Curves.easeOut,
-            );
-          }
-        });
-
-        // Show success message
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Comment added successfully')),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final accentColor = isDark ? kNeonAccent : theme.colorScheme.primary;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Comments',
             style: TextStyle(fontWeight: FontWeight.bold)),
-        backgroundColor: const Color(0xFF1C1C1C),
+        backgroundColor:
+            isDark ? const Color(0xFF1C1C1C) : theme.colorScheme.surface,
         elevation: 0,
       ),
-      backgroundColor: const Color(0xFF121212),
+      backgroundColor:
+          isDark ? const Color(0xFF121212) : theme.colorScheme.background,
       body: Column(
         children: [
           // Announcement card
@@ -110,11 +64,12 @@ class _AnnouncementCommentsScreenState
             margin: const EdgeInsets.all(16),
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: const Color(0xFF2C2C2C),
+              color:
+                  isDark ? const Color(0xFF2C2C2C) : theme.colorScheme.surface,
               borderRadius: BorderRadius.circular(12),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.2),
+                  color: Colors.black.withOpacity(0.2),
                   blurRadius: 10,
                   offset: const Offset(0, 4),
                 ),
@@ -125,8 +80,8 @@ class _AnnouncementCommentsScreenState
               children: [
                 Text(
                   widget.announcement.message,
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: theme.colorScheme.onSurface,
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                     height: 1.3,
@@ -135,12 +90,12 @@ class _AnnouncementCommentsScreenState
                 const SizedBox(height: 12),
                 Row(
                   children: [
-                    const Icon(Icons.access_time, size: 16, color: kNeonAccent),
+                    Icon(Icons.access_time, size: 16, color: accentColor),
                     const SizedBox(width: 4),
                     Text(
                       formatDateTime(widget.announcement.time),
                       style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.7),
+                        color: theme.colorScheme.onSurface.withOpacity(0.7),
                         fontSize: 14,
                       ),
                     ),
@@ -167,7 +122,7 @@ class _AnnouncementCommentsScreenState
                           Container(
                             width: 2,
                             height: 100,
-                            color: kNeonAccent.withValues(alpha: 0.5),
+                            color: accentColor.withOpacity(0.5),
                             margin: const EdgeInsets.only(left: 11),
                           ),
                         ],
@@ -184,13 +139,15 @@ class _AnnouncementCommentsScreenState
                                 width: 12,
                                 height: 2,
                                 margin: const EdgeInsets.only(top: 20),
-                                color: kNeonAccent.withValues(alpha: 0.5),
+                                color: accentColor.withOpacity(0.5),
                               ),
                               Expanded(
                                 child: Container(
                                   margin: const EdgeInsets.only(bottom: 12),
                                   child: Card(
-                                    color: const Color(0xFF2C2C2C),
+                                    color: isDark
+                                        ? const Color(0xFF2C2C2C)
+                                        : theme.colorScheme.surface,
                                     elevation: 4,
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(12),
@@ -218,8 +175,9 @@ class _AnnouncementCommentsScreenState
                                               const SizedBox(width: 8),
                                               Text(
                                                 comment.user.name,
-                                                style: const TextStyle(
-                                                  color: Colors.white,
+                                                style: TextStyle(
+                                                  color: theme
+                                                      .colorScheme.onSurface,
                                                   fontSize: 14,
                                                   fontWeight: FontWeight.bold,
                                                 ),
@@ -229,8 +187,9 @@ class _AnnouncementCommentsScreenState
                                           const SizedBox(height: 8),
                                           Text(
                                             comment.message,
-                                            style: const TextStyle(
-                                              color: Colors.white,
+                                            style: TextStyle(
+                                              color:
+                                                  theme.colorScheme.onSurface,
                                               fontSize: 16,
                                               height: 1.3,
                                             ),
@@ -238,14 +197,15 @@ class _AnnouncementCommentsScreenState
                                           const SizedBox(height: 8),
                                           Row(
                                             children: [
-                                              const Icon(Icons.access_time,
-                                                  size: 14, color: kNeonAccent),
+                                              Icon(Icons.access_time,
+                                                  size: 14, color: accentColor),
                                               const SizedBox(width: 4),
                                               Text(
                                                 formatDateTime(comment.time),
                                                 style: TextStyle(
-                                                  color: Colors.white
-                                                      .withValues(alpha: 0.6),
+                                                  color: theme
+                                                      .colorScheme.onSurface
+                                                      .withOpacity(0.6),
                                                   fontSize: 12,
                                                 ),
                                               ),
@@ -271,10 +231,11 @@ class _AnnouncementCommentsScreenState
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: const Color(0xFF2C2C2C),
+              color:
+                  isDark ? const Color(0xFF2C2C2C) : theme.colorScheme.surface,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.2),
+                  color: Colors.black.withOpacity(0.2),
                   blurRadius: 10,
                   offset: const Offset(0, -4),
                 ),
@@ -285,15 +246,18 @@ class _AnnouncementCommentsScreenState
                 Expanded(
                   child: TextField(
                     controller: _commentController,
-                    style: const TextStyle(color: Colors.white, fontSize: 16),
+                    style: TextStyle(
+                        color: theme.colorScheme.onSurface, fontSize: 16),
                     maxLines: null,
                     decoration: InputDecoration(
                       hintText: 'Write a comment...',
                       hintStyle: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.5),
+                        color: theme.colorScheme.onSurface.withOpacity(0.5),
                       ),
                       filled: true,
-                      fillColor: const Color(0xFF1C1C1C),
+                      fillColor: isDark
+                          ? const Color(0xFF1C1C1C)
+                          : theme.colorScheme.surface.darken(),
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 16,
                         vertical: 12,
@@ -307,12 +271,13 @@ class _AnnouncementCommentsScreenState
                 ),
                 const SizedBox(width: 12),
                 Container(
-                  decoration: const BoxDecoration(
+                  decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: kNeonAccent,
+                    color: accentColor,
                   ),
                   child: IconButton(
-                    icon: const Icon(Icons.send, color: Color(0xFF1C1C1C)),
+                    icon: Icon(Icons.send,
+                        color: isDark ? const Color(0xFF1C1C1C) : Colors.white),
                     onPressed: _addComment,
                   ),
                 ),
@@ -322,5 +287,62 @@ class _AnnouncementCommentsScreenState
         ],
       ),
     );
+  }
+
+  Future<void> _addComment() async {
+    if (_commentController.text.trim().isEmpty) return;
+
+    try {
+      await ref
+          .read(labAnnouncementsProvider(widget.labId).notifier)
+          .addComment(
+            widget.announcement.id.toString(),
+            _commentController.text.trim(),
+          );
+
+      if (mounted) {
+        final newComment = Comment(
+          id: DateTime.now().millisecondsSinceEpoch,
+          user: widget.announcement.user,
+          message: _commentController.text.trim(),
+          time: DateTime.now(),
+        );
+
+        setState(() {
+          widget.announcement.comments.add(newComment);
+        });
+
+        _commentController.clear();
+
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (_scrollController.hasClients) {
+            _scrollController.animateTo(
+              _scrollController.position.maxScrollExtent,
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeOut,
+            );
+          }
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Comment added successfully')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $e')),
+        );
+      }
+    }
+  }
+}
+
+extension ColorExtension on Color {
+  Color darken([double amount = 0.1]) {
+    assert(amount >= 0 && amount <= 1);
+    final hsl = HSLColor.fromColor(this);
+    final hslDark = hsl.withLightness((hsl.lightness - amount).clamp(0.0, 1.0));
+    return hslDark.toColor();
   }
 }
