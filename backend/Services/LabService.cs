@@ -214,7 +214,7 @@ public class LabService
         var updateDefinition = new List<UpdateDefinition<Lab>>();
         var builder = Builders<Lab>.Update;
 
-        var restrictedFields = new HashSet<string> { "Id", "PPE", "Instructors", "Students" };
+        var restrictedFields = new HashSet<string> { "Id", "PPE", "Instructors", "Students", "EndLab", "Announcements", "Started", "Report" };
 
         foreach (var prop in updatedLab.GetType().GetProperties())
         {
@@ -261,9 +261,9 @@ public class LabService
         return result.ModifiedCount > 0;
     }
 
-    public async Task<Boolean> AddInstructorToLabAsync(int labId, int instructorId)
+    public async Task<Boolean> AddInstructorToLabAsync(int labId, int[] instructorIds)
     {
-        var updateDefinition = Builders<Lab>.Update.Push(lab => lab.Instructors, instructorId);
+        var updateDefinition = Builders<Lab>.Update.PushEach(lab => lab.Instructors, instructorIds);
         var result = await _labs.UpdateOneAsync(lab => lab.Id == labId, updateDefinition);
 
         return result.ModifiedCount > 0;
@@ -316,6 +316,7 @@ public class LabService
         }
         var last_announcement = lab.Announcements.OrderByDescending(a => a.Id).FirstOrDefault();
         announcement.Id = last_announcement == null ? 1 : last_announcement.Id + 1;
+        announcement.Time = DateTime.UtcNow;
         var updateDefinition = Builders<Lab>.Update.Push(lab => lab.Announcements, announcement);
         var result = await _labs.UpdateOneAsync(lab => lab.Id == id, updateDefinition);
 
@@ -340,10 +341,11 @@ public class LabService
         }
         var last_comment = announcement.Comments.OrderByDescending(c => c.Id).FirstOrDefault();
         comment.Id = last_comment == null ? 1 : last_comment.Id + 1;
+        comment.Time = DateTime.UtcNow;
         var updateDefinition = Builders<Lab>.Update.Push("Announcements.$[a].Comments", comment);
         var arrayFilters = new List<ArrayFilterDefinition>
         {
-            new BsonDocumentArrayFilterDefinition<BsonDocument>(new BsonDocument("a.Id", announcementId))
+            new BsonDocumentArrayFilterDefinition<BsonDocument>(new BsonDocument("a._id", announcementId))
         };
         var result = await _labs.UpdateOneAsync(lab => lab.Id == lab_id, updateDefinition, new UpdateOptions { ArrayFilters = arrayFilters });
 
@@ -367,11 +369,43 @@ public class LabService
         var updateDefinition = Builders<Lab>.Update.PullFilter("Announcements.$[a].Comments", Builders<Comment>.Filter.Eq(comment => comment.Id, commentId));
         var arrayFilters = new List<ArrayFilterDefinition>
         {
-            new BsonDocumentArrayFilterDefinition<BsonDocument>(new BsonDocument("a.Id", announcementId))
+            new BsonDocumentArrayFilterDefinition<BsonDocument>(new BsonDocument("a._id", announcementId))
         };
         var result = await _labs.UpdateOneAsync(lab => lab.Id == lab_id, updateDefinition, new UpdateOptions { ArrayFilters = arrayFilters });
 
         return result.ModifiedCount > 0;
+    }
+
+    public async Task<List<AnnouncementDTO>> GetAnnouncementsAsync(int lab_id)
+    {
+        var lab = await GetLabByIdAsync(lab_id);
+        var announcements = new List<AnnouncementDTO>();
+        foreach (var announcement in lab.Announcements)
+        {
+            var sender = (UserDTO)await _userService.GetUserById(announcement.Sender);
+            var comments = new List<CommentDTO>();
+            foreach (var comment in announcement.Comments)
+            {
+                var comment_sender = (UserDTO)await _userService.GetUserById(comment.Sender);
+                comments.Add(new CommentDTO
+                {
+                    Id = comment.Id,
+                    user = comment_sender,
+                    Message = comment.Message,
+                    Time = comment.Time
+                });
+            }
+            announcements.Add(new AnnouncementDTO
+            {
+                Id = announcement.Id,
+                user = sender,
+                Message = announcement.Message,
+                Files = announcement.Files,
+                Time = announcement.Time,
+                Comments = comments
+            });
+        }
+        return announcements;
     }
 
     public async Task<OneOf<Sessions, ErrorMessage>> StartSessionAsync(int lab_id)
