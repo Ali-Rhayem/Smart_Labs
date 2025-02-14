@@ -39,8 +39,6 @@ const App: React.FC = () => {
 					<Route
 						element={<ProtectedLayout userRole={currentUserRole} />}
 					>
-						{/* <Route path="/" element={<DashboardPage />} /> */}
-						{/* <Route path="/dashboard" element={<DashboardPage />} /> */}
 						<Route
 							path="/labs"
 							element={
