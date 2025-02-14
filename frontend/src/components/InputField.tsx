@@ -53,6 +53,7 @@ const InputField: React.FC<InputFieldProps> = ({
 				variant="outlined"
 				margin="normal"
 				error={Boolean(error?.length)}
+				helperText={error}
 				disabled={disabled}
 				multiline={multiline}
 				rows={rows}
@@ -141,13 +142,6 @@ const InputField: React.FC<InputFieldProps> = ({
 					},
 				}}
 			/>
-			{error && error.length > 0 && (
-				<ul className="text-red-500 text-xs mt-1">
-					{error.map((er, index) => (
-						<li key={index}>{er}</li>
-					))}
-				</ul>
-			)}
 		</>
 	);
 };
