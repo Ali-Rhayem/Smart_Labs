@@ -18,17 +18,20 @@ export interface Lab {
 	started: boolean;
 }
 
-export interface CreateLabDto {
+export interface LabDto {
 	name: string;
 	labCode: string;
 	labName: string;
 	description: string | null;
 	ppe: PPE[] | [];
-	instructors: number[] | [];
-	students: number[] | [];
 	schedule: Schedule[];
 	semesterID: number | null;
 	room: string;
+}
+
+export interface CreateLabDto extends LabDto {
+	instructor_Emails: String[];
+	student_Emails: String[];
 }
 
 type DayOfWeek =
