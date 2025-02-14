@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
-import 'package:smart_labs_mobile/models/lab_model.dart';
+import 'package:smart_labs_mobile/models/lab_schedule.dart';
+import 'package:smart_labs_mobile/providers/lab_provider.dart';
 import 'package:smart_labs_mobile/services/api_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:smart_labs_mobile/utils/date_time_utils.dart';
@@ -10,6 +11,7 @@ import 'package:smart_labs_mobile/widgets/lab_text_field.dart';
 import 'package:smart_labs_mobile/widgets/ppe_dropdwon.dart';
 import 'package:smart_labs_mobile/widgets/time_selectors.dart';
 import 'package:smart_labs_mobile/widgets/week_day_selector.dart';
+import 'package:smart_labs_mobile/providers/room_provider.dart';
 
 var logger = Logger();
 // TODO: add error display message
@@ -186,12 +188,7 @@ class _CreateLabScreenState extends ConsumerState<CreateLabScreen> {
                 ),
               ),
               const SizedBox(height: 10),
-              LabTextField(
-                controller: _roomController,
-                label: 'Room',
-                validator: (value) =>
-                    value?.isEmpty ?? true ? 'Please enter room number' : null,
-              ),
+              _buildRoomDropdown(),
               const SizedBox(height: 16),
               SizedBox(
                 width: double.infinity,
@@ -297,6 +294,7 @@ class _CreateLabScreenState extends ConsumerState<CreateLabScreen> {
         final response = await _apiService.post('/Lab', labData);
         if (response['success']) {
           if (mounted) {
+            await ref.read(labsProvider.notifier).fetchLabs();
             Navigator.pop(context);
           }
         } else {
@@ -315,5 +313,47 @@ class _CreateLabScreenState extends ConsumerState<CreateLabScreen> {
         }
       }
     }
+  }
+
+  Widget _buildRoomDropdown() {
+    return Consumer(
+      builder: (context, ref, child) {
+        final roomsAsync = ref.watch(roomsProvider);
+
+        return roomsAsync.when(
+          loading: () => const CircularProgressIndicator(),
+          error: (error, stack) => Text('Error: $error'),
+          data: (rooms) => DropdownButtonFormField<String>(
+            value: _roomController.text.isEmpty ? null : _roomController.text,
+            decoration: InputDecoration(
+              filled: true,
+              fillColor: const Color(0xFF1C1C1C),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: const BorderSide(color: Colors.white24),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: const BorderSide(color: Colors.white24),
+              ),
+            ),
+            dropdownColor: const Color(0xFF1C1C1C),
+            style: const TextStyle(color: Colors.white),
+            items: rooms.map((room) {
+              return DropdownMenuItem(
+                value: room.name,
+                child: Text(room.name),
+              );
+            }).toList(),
+            onChanged: (value) {
+              setState(() {
+                _roomController.text = value ?? '';
+              });
+            },
+            validator: (value) => value == null ? 'Please select a room' : null,
+          ),
+        );
+      },
+    );
   }
 }
