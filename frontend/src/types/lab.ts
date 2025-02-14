@@ -45,3 +45,18 @@ export interface Schedule {
 	startTime: string;
 	endTime: string;
 }
+
+export interface UpdateLabDto
+	extends Partial<
+		Omit<
+			Lab,
+			| "id"
+			| "ppe"
+			| "instructors"
+			| "students"
+			| "report"
+			| "announcements"
+			| "started"
+			| "endLab"
+		>
+	> {}
