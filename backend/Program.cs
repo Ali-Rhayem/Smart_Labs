@@ -26,6 +26,16 @@ builder.Services.AddScoped(sp =>
     return client.GetDatabase(databaseName);
 });
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowReactApp", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<LabService>();
 builder.Services.AddScoped<SemesterService>();
@@ -97,6 +107,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseCors("AllowReactApp");
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
