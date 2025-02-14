@@ -3,25 +3,39 @@ import 'package:flutter/material.dart';
 class RowDetails extends StatelessWidget {
   final String label;
   final String value;
-  const RowDetails({super.key, required this.label, required this.value});
+  final bool isDark;
+
+  const RowDetails({
+    super.key,
+    required this.label,
+    required this.value,
+    required this.isDark,
+  });
 
   @override
-  Widget build(context) {
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8.0),
+      padding: const EdgeInsets.only(bottom: 12),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             '$label: ',
-            style: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
+            style: TextStyle(
+              color: theme.colorScheme.onSurface,
+              fontWeight: FontWeight.w600,
+              fontSize: 14,
             ),
           ),
-          Text(
-            value,
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.7),
+          Expanded(
+            child: Text(
+              value,
+              style: TextStyle(
+                color: theme.colorScheme.onSurface.withOpacity(0.7),
+                fontSize: 14,
+              ),
             ),
           ),
         ],
