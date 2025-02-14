@@ -12,6 +12,8 @@ interface InputFieldProps {
 	error?: string[] | null;
 	disabled?: boolean;
 	onChange: React.ChangeEventHandler<HTMLInputElement>;
+	multiline?: boolean;
+	rows?: number;
 }
 
 const InputField: React.FC<InputFieldProps> = ({
@@ -24,6 +26,8 @@ const InputField: React.FC<InputFieldProps> = ({
 	error = null,
 	disabled = false,
 	onChange,
+	multiline = false,
+	rows = 1,
 }) => {
 	const [showPassword, setShowPassword] = useState(false);
 
@@ -50,6 +54,8 @@ const InputField: React.FC<InputFieldProps> = ({
 				margin="normal"
 				error={Boolean(error?.length)}
 				disabled={disabled}
+				multiline={multiline}
+				rows={rows}
 				InputLabelProps={{
 					style: { color: "var(--color-text)" },
 				}}
