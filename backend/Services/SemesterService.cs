@@ -57,16 +57,17 @@ public class SemesterService
 
     public async Task<bool> SetCurrentSemesterAsync(int id)
     {
-        var currentSemester = await GetCurrentSemesterAsync();
-        if (currentSemester != null)
-        {
-            currentSemester.CurrentSemester = false;
-            await UpdateSemesterAsync(currentSemester.Id, currentSemester);
-        }
         var semester = await GetSemesterByIdAsync(id);
+        if (semester == null)
+            return false;
+
+        // set current semester to false for all semesters
+        await _semesters.UpdateManyAsync(Builders<Semester>.Filter.Empty, Builders<Semester>.Update.Set("CurrentSemester", false));
+
         semester.CurrentSemester = true;
         var result = await UpdateSemesterAsync(id, semester);
         return result != null;
+
     }
 
 
