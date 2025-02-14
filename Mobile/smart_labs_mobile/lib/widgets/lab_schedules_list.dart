@@ -15,26 +15,31 @@ class LabSchedulesList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Schedules',
           style: TextStyle(
-            color: Colors.white,
+            color: theme.colorScheme.onBackground,
             fontSize: 16,
             fontWeight: FontWeight.bold,
           ),
         ),
         const SizedBox(height: 8),
         ...schedules.map((schedule) => Card(
-              color: const Color(0xFF1C1C1C),
+              color: theme.colorScheme.surface,
               margin: const EdgeInsets.only(bottom: 8),
               child: ListTile(
-                title: Text(schedule.dayOfWeek, style: const TextStyle(color: Colors.white)),
+                title: Text(
+                  schedule.dayOfWeek,
+                  style: TextStyle(color: theme.colorScheme.onSurface),
+                ),
                 subtitle: Text(
                   '${schedule.startTime} - ${schedule.endTime}',
-                  style: const TextStyle(color: Colors.white70),
+                  style: TextStyle(
+                      color: theme.colorScheme.onSurface.withOpacity(0.7)),
                 ),
                 trailing: IconButton(
                   icon: const Icon(Icons.delete, color: Colors.red),
@@ -44,11 +49,11 @@ class LabSchedulesList extends StatelessWidget {
             )),
         ElevatedButton.icon(
           onPressed: onAddSchedule,
-          icon: const Icon(Icons.add, color: Colors.black),
+          icon: const Icon(Icons.add),
           label: const Text('Add Schedule'),
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFFFFFF00),
-            foregroundColor: Colors.black,
+            backgroundColor: theme.colorScheme.primary,
+            foregroundColor: theme.colorScheme.onPrimary,
           ),
         ),
       ],
