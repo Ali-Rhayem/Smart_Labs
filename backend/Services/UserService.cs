@@ -170,4 +170,11 @@ public class UserService
         var result = await _users.UpdateOneAsync(u => u.Id == firstLogin.Id, update);
         return result.IsAcknowledged ? newUser : null;
     }
+
+    public async Task<bool> ChangePassword(int id, string newPassword)
+    {
+        var update = Builders<User>.Update.Set(u => u.Password, BCrypt.Net.BCrypt.HashPassword(newPassword));
+        var result = await _users.UpdateOneAsync(u => u.Id == id, update);
+        return result.IsAcknowledged && result.ModifiedCount > 0;
+    }
 }
