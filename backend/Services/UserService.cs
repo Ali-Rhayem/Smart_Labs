@@ -2,6 +2,7 @@ using MongoDB.Driver;
 using backend.Models;
 using OneOf;
 using System.ComponentModel.DataAnnotations;
+using backend.helpers;
 
 namespace backend.Services;
 
@@ -10,12 +11,14 @@ public class UserService
     private readonly IMongoCollection<User> _users;
     private readonly IMongoCollection<UpdateUser> _UpdateUser;
     private readonly FacultyService _facultyService;
+    private readonly LabHelper _labHelper;
 
-    public UserService(IMongoDatabase database, FacultyService facultyService)
+    public UserService(IMongoDatabase database, FacultyService facultyService, LabHelper labHelper)
     {
         _users = database.GetCollection<User>("Users");
         _UpdateUser = database.GetCollection<UpdateUser>("Users");
         _facultyService = facultyService;
+        _labHelper = labHelper;
     }
 
     // for testing purposes
@@ -125,8 +128,7 @@ public class UserService
 
     public async Task<User> GetUserByEmailAsync(string email)
     {
-        var projection = Builders<User>.Projection.Exclude(u => u.Password);
-        return await _users.Find(u => u.Email == email).Project<User>(projection).FirstOrDefaultAsync();
+        return await _users.Find(u => u.Email == email).FirstOrDefaultAsync();
     }
 
     public async Task<User> GetUserByFcmTokenAsync(string fcmToken)
@@ -174,6 +176,26 @@ public class UserService
     public async Task<bool> ChangePassword(int id, string newPassword)
     {
         var update = Builders<User>.Update.Set(u => u.Password, BCrypt.Net.BCrypt.HashPassword(newPassword));
+        var result = await _users.UpdateOneAsync(u => u.Id == id, update);
+        return result.IsAcknowledged && result.ModifiedCount > 0;
+    }
+
+    public async Task<bool> ResetPasswordAsync(int id)
+    {
+        // generate a new password
+        var password = _labHelper.GenerateTempPassword();
+        // send email to user with the new password
+        var user = await GetUserById(id);
+        var subject = "Your Temporary Password";
+        var message = "Dear User,\n\nYour temporary password is: " + password + "\n\nPlease log in and change your password immediately.\n\nBest regards,\nUniversity Team";
+        bool send_email = _labHelper.SendEmail(user.Email, message, subject);
+        if (!send_email)
+        {
+            return false;
+        }
+
+        // update the user
+        var update = Builders<User>.Update.Set(u => u.Password, BCrypt.Net.BCrypt.HashPassword(password));
         var result = await _users.UpdateOneAsync(u => u.Id == id, update);
         return result.IsAcknowledged && result.ModifiedCount > 0;
     }
