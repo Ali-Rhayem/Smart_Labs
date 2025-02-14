@@ -36,6 +36,8 @@ class _InstructorMainWrapperState extends ConsumerState<InstructorMainWrapper> {
   @override
   Widget build(BuildContext context) {
     final unreadCount = ref.watch(notificationsProvider).unreadCount;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
       // the current page is determined by _currentIndex
@@ -50,10 +52,11 @@ class _InstructorMainWrapperState extends ConsumerState<InstructorMainWrapper> {
                   ),
                 );
               },
-              backgroundColor: const Color(0xFFFFFF00),
-              child: const Icon(
+              backgroundColor:
+                  isDark ? const Color(0xFFFFFF00) : theme.colorScheme.primary,
+              child: Icon(
                 Icons.add,
-                color: Colors.black,
+                color: isDark ? Colors.black : Colors.white,
               ),
             )
           : null,
@@ -61,6 +64,10 @@ class _InstructorMainWrapperState extends ConsumerState<InstructorMainWrapper> {
         type: BottomNavigationBarType.fixed,
         currentIndex: _currentIndex,
         onTap: _onItemTapped,
+        selectedItemColor:
+            isDark ? const Color(0xFFFFFF00) : theme.colorScheme.primary,
+        unselectedItemColor: theme.colorScheme.onSurface.withOpacity(0.6),
+        backgroundColor: theme.colorScheme.surface,
         items: [
           const BottomNavigationBarItem(
             icon: Icon(Icons.biotech_outlined),
@@ -72,9 +79,15 @@ class _InstructorMainWrapperState extends ConsumerState<InstructorMainWrapper> {
           ),
           BottomNavigationBarItem(
             icon: Badge(
-              backgroundColor: const Color(0xFFFFFF00),
+              backgroundColor:
+                  isDark ? const Color(0xFFFFFF00) : theme.colorScheme.primary,
               isLabelVisible: unreadCount > 0,
-              label: Text(unreadCount.toString()),
+              label: Text(
+                unreadCount.toString(),
+                style: TextStyle(
+                  color: isDark ? Colors.black : Colors.white,
+                ),
+              ),
               child: const Icon(Icons.notifications_none),
             ),
             label: 'Notifications',
