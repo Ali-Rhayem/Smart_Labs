@@ -1,13 +1,15 @@
-import React from "react";
+import { FC, FormEvent, useState } from "react";
 import {
 	Dialog,
 	DialogTitle,
 	DialogContent,
 	DialogActions,
 	Button,
-	TextField,
 } from "@mui/material";
-import { Lab } from "../types/lab";
+import { Lab, UpdateLabDto } from "../types/lab";
+import { useRooms } from "../hooks/useRooms";
+import Dropdown from "./Dropdown";
+import InputField from "./InputField";
 
 interface EditLabModalProps {
 	open: boolean;
@@ -16,28 +18,53 @@ interface EditLabModalProps {
 	lab: Lab;
 }
 
-const EditLabModal: React.FC<EditLabModalProps> = ({
+const EditLabModal: FC<EditLabModalProps> = ({
 	open,
 	onClose,
 	onSubmit,
 	lab,
 }) => {
-	const [formData, setFormData] = React.useState({
-		labName: lab.labName,
-		labCode: lab.labCode,
-		description: lab.description,
-		room: lab.room,
-	});
+	const { data: rooms = [] } = useRooms();
+	const [formData, setFormData] = useState<UpdateLabDto>({});
 
-	const handleSubmit = (e: React.FormEvent) => {
+	const handleSubmit = (e: FormEvent) => {
 		e.preventDefault();
+		if (
+			!formData.labName &&
+			!formData.labCode &&
+			!formData.room &&
+			!formData.schedule
+		) {
+			setFormData({});
+			onClose();
+			return;
+		}
+		if (!formData.labName) {
+			formData.labName = lab.labName;
+		}
+		if (!formData.labCode) {
+			formData.labCode = lab.labCode;
+		}
+		if (!formData.room) {
+			formData.room = lab.room;
+		}
+		if (!formData.schedule) {
+			formData.schedule = lab.schedule;
+		}
+		if (!formData.semesterID) {
+			formData.semesterID = lab.semesterID;
+		}
+		console.log(formData);
 		onSubmit(formData);
 	};
 
 	return (
 		<Dialog
 			open={open}
-			onClose={onClose}
+			onClose={() => {
+				onClose();
+				setFormData({});
+			}}
 			maxWidth="sm"
 			fullWidth
 			PaperProps={{
@@ -50,144 +77,72 @@ const EditLabModal: React.FC<EditLabModalProps> = ({
 			<DialogTitle>Edit Lab</DialogTitle>
 			<form onSubmit={handleSubmit}>
 				<DialogContent>
-					<TextField
+					<InputField
+						id="labName"
 						label="Lab Name"
-						fullWidth
-						margin="normal"
-						value={formData.labName}
+						name="labName"
+						type="text"
+						value={formData?.labName || lab.labName}
+						placeholder="Enter lab name"
 						onChange={(e) =>
 							setFormData({
 								...formData,
 								labName: e.target.value,
 							})
 						}
-						sx={{
-							"& .MuiOutlinedInput-root": {
-								"& fieldset": {
-									borderColor: "var(--color-border)",
-								},
-								"&:hover fieldset": {
-									borderColor: "var(--color-primary)",
-								},
-								"&.Mui-focused fieldset": {
-									borderColor: "var(--color-primary)",
-								},
-								input: {
-									color: "var(--color-text)",
-								},
-							},
-							"& .MuiInputLabel-root": {
-								color: "var(--color-text-secondary)",
-								"&.Mui-focused": {
-									color: "var(--color-primary)",
-								},
-							},
-						}}
 					/>
-					<TextField
+					<InputField
+						id="labCode"
 						label="Lab Code"
-						fullWidth
-						margin="normal"
-						value={formData.labCode}
+						name="labCode"
+						type="text"
+						value={formData.labCode || lab.labCode}
+						placeholder="Enter lab code"
 						onChange={(e) =>
 							setFormData({
 								...formData,
 								labCode: e.target.value,
 							})
 						}
-						sx={{
-							"& .MuiOutlinedInput-root": {
-								"& fieldset": {
-									borderColor: "var(--color-border)",
-								},
-								"&:hover fieldset": {
-									borderColor: "var(--color-primary)",
-								},
-								"&.Mui-focused fieldset": {
-									borderColor: "var(--color-primary)",
-								},
-								input: {
-									color: "var(--color-text)",
-								},
-							},
-							"& .MuiInputLabel-root": {
-								color: "var(--color-text-secondary)",
-								"&.Mui-focused": {
-									color: "var(--color-primary)",
-								},
-							},
-						}}
 					/>
-					<TextField
+					<InputField
+						id="description"
 						label="Description"
-						fullWidth
-						margin="normal"
-						multiline
-						rows={4}
-						value={formData.description}
+						name="description"
+						type="text"
+						value={formData.description || lab.description}
+						placeholder="Enter description"
 						onChange={(e) =>
 							setFormData({
 								...formData,
 								description: e.target.value,
 							})
 						}
-						sx={{
-							"& .MuiOutlinedInput-root": {
-								"& fieldset": {
-									borderColor: "var(--color-border)",
-								},
-								"&:hover fieldset": {
-									borderColor: "var(--color-primary)",
-								},
-								"&.Mui-focused fieldset": {
-									borderColor: "var(--color-primary)",
-								},
-								textarea: {
-									color: "var(--color-text)",
-								},
-							},
-							"& .MuiInputLabel-root": {
-								color: "var(--color-text-secondary)",
-								"&.Mui-focused": {
-									color: "var(--color-primary)",
-								},
-							},
-						}}
+						multiline
+						rows={4}
 					/>
-					<TextField
+					<Dropdown
 						label="Room"
-						fullWidth
-						margin="normal"
-						value={formData.room}
-						onChange={(e) =>
-							setFormData({ ...formData, room: e.target.value })
+						value={formData.room || lab.room}
+						options={rooms.map((room) => ({
+							value: room.name,
+							label: room.name,
+						}))}
+						onChange={(value) =>
+							setFormData({ ...formData, room: value })
 						}
-						sx={{
-							"& .MuiOutlinedInput-root": {
-								"& fieldset": {
-									borderColor: "var(--color-border)",
-								},
-								"&:hover fieldset": {
-									borderColor: "var(--color-primary)",
-								},
-								"&.Mui-focused fieldset": {
-									borderColor: "var(--color-primary)",
-								},
-								input: {
-									color: "var(--color-text)",
-								},
-							},
-							"& .MuiInputLabel-root": {
-								color: "var(--color-text-secondary)",
-								"&.Mui-focused": {
-									color: "var(--color-primary)",
-								},
-							},
-						}}
 					/>
 				</DialogContent>
 				<DialogActions>
-					<Button onClick={onClose} sx={{color: "var(--color-primary)"}}>Cancel</Button>
+					<Button
+						onClick={() => {
+							onClose();
+							setFormData({});
+						}}
+						sx={{ color: "var(--color-danger)" }}
+					>
+						Cancel
+					</Button>
 					<Button
 						type="submit"
 						variant="contained"
