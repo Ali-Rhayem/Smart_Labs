@@ -21,7 +21,9 @@ const LabsPage: React.FC = () => {
 
 	useEffect(() => {
 		if (error) {
-			setAlertMessage((error as any).response?.data?.errors || "Failed to fetch labs");
+			setAlertMessage(
+				(error as any).response?.data?.errors || "Failed to fetch labs"
+			);
 			setSeverity("error");
 			setOpenSnackbar(true);
 		}
@@ -84,6 +86,10 @@ const LabsPage: React.FC = () => {
 						<Button
 							variant="contained"
 							startIcon={<AddIcon />}
+							sx={{
+								backgroundColor: "var(--color-primary)",
+								color: "var(--color-text-button)",
+							}}
 							onClick={() => console.log("Create new lab")}
 						>
 							Create Lab
