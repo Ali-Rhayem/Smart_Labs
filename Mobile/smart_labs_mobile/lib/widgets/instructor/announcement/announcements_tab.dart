@@ -30,7 +30,6 @@ class AnnouncementsTab extends ConsumerStatefulWidget {
 }
 
 class _AnnouncementsTabState extends ConsumerState<AnnouncementsTab> {
-  static const Color kNeonAccent = Color(0xFFFFFF00);
   final TextEditingController _messageController = TextEditingController();
 
   Future<void> _addAnnouncement() async {
@@ -78,6 +77,8 @@ class _AnnouncementsTabState extends ConsumerState<AnnouncementsTab> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final announcementsAsync =
         ref.watch(labAnnouncementsProvider(widget.lab.labId));
 
@@ -85,12 +86,18 @@ class _AnnouncementsTabState extends ConsumerState<AnnouncementsTab> {
       children: [
         Expanded(
           child: RefreshIndicator(
-            color: kNeonAccent,
+            color: isDark ? const Color(0xFFFFFF00) : theme.colorScheme.primary,
             onRefresh: () => ref
                 .read(labAnnouncementsProvider(widget.lab.labId).notifier)
                 .fetchAnnouncements(),
             child: announcementsAsync.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
+              loading: () => Center(
+                child: CircularProgressIndicator(
+                  color: isDark
+                      ? const Color(0xFFFFFF00)
+                      : theme.colorScheme.primary,
+                ),
+              ),
               error: (error, stack) => Center(child: Text('Error: $error')),
               data: (announcements) => ListView.builder(
                 itemCount: announcements.length,
@@ -99,8 +106,17 @@ class _AnnouncementsTabState extends ConsumerState<AnnouncementsTab> {
                 itemBuilder: (context, index) {
                   final announcement = announcements[index];
                   return Card(
-                    color: const Color(0xFF1C1C1C),
+                    color: isDark
+                        ? const Color(0xFF1C1C1C)
+                        : theme.colorScheme.surface,
                     margin: const EdgeInsets.only(bottom: 10),
+                    elevation: isDark ? 0 : 1,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      side: BorderSide(
+                        color: isDark ? Colors.white12 : Colors.black12,
+                      ),
+                    ),
                     child: Column(
                       children: [
                         Padding(
@@ -109,7 +125,6 @@ class _AnnouncementsTabState extends ConsumerState<AnnouncementsTab> {
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              // User Avatar
                               CircleAvatar(
                                 radius: 20,
                                 backgroundImage: announcement.user.imageUrl !=
@@ -125,21 +140,19 @@ class _AnnouncementsTabState extends ConsumerState<AnnouncementsTab> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    // User Name
                                     Text(
                                       announcement.user.name,
-                                      style: const TextStyle(
-                                        color: Colors.white,
+                                      style: TextStyle(
+                                        color: theme.colorScheme.onSurface,
                                         fontSize: 14,
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
                                     const SizedBox(height: 4),
-                                    // Announcement Message
                                     Text(
                                       announcement.message,
-                                      style: const TextStyle(
-                                        color: Colors.white,
+                                      style: TextStyle(
+                                        color: theme.colorScheme.onSurface,
                                         fontSize: 16,
                                       ),
                                     ),
@@ -186,21 +199,26 @@ class _AnnouncementsTabState extends ConsumerState<AnnouncementsTab> {
                                 Text(
                                   formatDateTime(announcement.time),
                                   style: TextStyle(
-                                    color: Colors.white.withValues(alpha: 0.5),
+                                    color: theme.colorScheme.onSurface
+                                        .withOpacity(0.5),
                                     fontSize: 12,
                                   ),
                                 ),
                                 const Spacer(),
-                                const Icon(
+                                Icon(
                                   Icons.comment_outlined,
                                   size: 18,
-                                  color: kNeonAccent,
+                                  color: isDark
+                                      ? const Color(0xFFFFFF00)
+                                      : theme.colorScheme.primary,
                                 ),
                                 const SizedBox(width: 8),
                                 Text(
                                   '${announcement.comments.length} Comments',
-                                  style: const TextStyle(
-                                    color: kNeonAccent,
+                                  style: TextStyle(
+                                    color: isDark
+                                        ? const Color(0xFFFFFF00)
+                                        : theme.colorScheme.primary,
                                   ),
                                 ),
                               ],
@@ -222,23 +240,47 @@ class _AnnouncementsTabState extends ConsumerState<AnnouncementsTab> {
               Expanded(
                 child: TextField(
                   controller: _messageController,
-                  style: const TextStyle(color: Colors.white),
+                  style: TextStyle(color: theme.colorScheme.onSurface),
                   decoration: InputDecoration(
                     hintText: 'Write an announcement...',
                     hintStyle: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.5),
+                      color: theme.colorScheme.onSurface.withOpacity(0.5),
                     ),
                     filled: true,
-                    fillColor: const Color(0xFF1C1C1C),
+                    fillColor: isDark
+                        ? const Color(0xFF1C1C1C)
+                        : theme.colorScheme.surface,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(
+                        color: isDark ? Colors.white24 : Colors.black12,
+                      ),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(
+                        color: isDark ? Colors.white24 : Colors.black12,
+                      ),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(
+                        color: isDark
+                            ? const Color(0xFFFFFF00)
+                            : theme.colorScheme.primary,
+                      ),
                     ),
                   ),
                 ),
               ),
               const SizedBox(width: 8),
               IconButton(
-                icon: const Icon(Icons.send, color: kNeonAccent),
+                icon: Icon(
+                  Icons.send,
+                  color: isDark
+                      ? const Color(0xFFFFFF00)
+                      : theme.colorScheme.primary,
+                ),
                 onPressed: _addAnnouncement,
               ),
             ],
