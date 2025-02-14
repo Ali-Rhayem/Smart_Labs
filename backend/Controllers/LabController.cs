@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Authorization;
 using backend.Models;
 using backend.Services;
 using System.ComponentModel.DataAnnotations;
+using FirebaseAdmin.Auth;
+using System.Text.Json;
 
 namespace backend.Controllers
 {
@@ -268,10 +270,10 @@ namespace backend.Controllers
             return NoContent();
         }
 
-        // POST: api/lab/{labId}/instructors/{instructorId}
-        [HttpPost("{labId}/instructors/{instructorId}")]
+        // POST: api/lab/{labId}/instructors
+        [HttpPost("{labId}/instructors")]
         [Authorize(Roles = "admin,instructor")]
-        public async Task<ActionResult> AddInstructorToLab(int labId, string instructor_email)
+        public async Task<ActionResult> AddInstructorToLab(int labId, [FromBody] List<string> emails)
         {
             var userRoleClaim = HttpContext.User.FindFirst(ClaimTypes.Role);
             var userIdClaim = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier);
@@ -287,21 +289,28 @@ namespace backend.Controllers
                     return Unauthorized();
                 }
             }
-            // check if email is valid
-            if (!new EmailAddressAttribute().IsValid(instructor_email))
-                return BadRequest(new { errors = "Invalid email." });
-
-            // check if instructorid is realy an instructor
-            var instructor = await _userService.GetUserByEmailAsync(instructor_email);
-            if (instructor == null || instructor.Role != "instructor")
-                return BadRequest(new { errors = "User is not an instructor." });
-
-            // check if instructor in lab
-            if (lab.Instructors.Contains(instructor.Id))
+            // check if emails is valid
+            foreach (var email in emails)
             {
-                return BadRequest(new { errors = "Instructor already in lab." });
+                var instructor = await _userService.GetUserByEmailAsync(email);
+                if (!new EmailAddressAttribute().IsValid(email))
+                    emails.Remove(email);
+                else if (instructor == null || instructor.Role != "instructor")
+                    emails.Remove(email);
+                else if (lab.Instructors.Contains(instructor.Id))
+                    emails.Remove(email);
+
             }
-            var result = await _labService.AddInstructorToLabAsync(labId, instructor.Id);
+            if (emails.Count == 0)
+                return BadRequest(new { errors = "No valid instructors to add." });
+
+            int[] instructorIds = new int[emails.Count];
+            foreach (var email in emails)
+            {
+                var instructor = await _userService.GetUserByEmailAsync(email);
+                instructorIds.Append(instructor.Id);
+            }
+            var result = await _labService.AddInstructorToLabAsync(labId, instructorIds);
 
             if (!result)
                 return NotFound();
@@ -515,6 +524,30 @@ namespace backend.Controllers
                 return NotFound();
 
             return NoContent();
+        }
+
+        // GET: api/lab/{labId}/announcements
+        [HttpGet("{labId}/announcements")]
+        [Authorize]
+        public async Task<ActionResult<List<AnnouncementDTO>>> GetAnnouncements(int labId)
+        {
+            var UserIdClaim = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier);
+            var lab = await _labService.GetLabByIdAsync(labId);
+            if (lab == null)
+            {
+                return NotFound(new { errors = "Lab not found." });
+            }
+            if (!lab.Instructors.Contains(int.Parse(UserIdClaim!.Value)) && !lab.Students.Contains(int.Parse(UserIdClaim!.Value)))
+            {
+                return Unauthorized(new { errors = "User not in lab." });
+            }
+
+            var announcements = await _labService.GetAnnouncementsAsync(labId);
+            if (announcements == null)
+            {
+                return NotFound(new { errors = "No Announcements" });
+            }
+            return Ok(announcements);
         }
 
         // POST: api/lab/5/startSession
