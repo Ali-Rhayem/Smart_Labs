@@ -63,11 +63,16 @@ class _CreateLabScreenState extends ConsumerState<CreateLabScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: const Color(0xFF121212),
+      backgroundColor:
+          isDark ? const Color(0xFF121212) : theme.colorScheme.background,
       appBar: AppBar(
         title: const Text('Create New Lab'),
-        backgroundColor: const Color(0xFF1C1C1C),
+        backgroundColor:
+            isDark ? const Color(0xFF1C1C1C) : theme.colorScheme.surface,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -76,48 +81,48 @@ class _CreateLabScreenState extends ConsumerState<CreateLabScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
+              Text(
                 'Lab Name',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: theme.colorScheme.onSurface,
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               const SizedBox(height: 10),
-              LabTextField(
+              _buildTextField(
                 controller: _labNameController,
                 label: 'Name',
                 validator: (value) =>
                     value?.isEmpty ?? true ? 'Please enter lab name' : null,
               ),
               const SizedBox(height: 16),
-              const Text(
+              Text(
                 'Lab Code',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: theme.colorScheme.onSurface,
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               const SizedBox(height: 10),
-              LabTextField(
+              _buildTextField(
                 controller: _labCodeController,
                 label: 'Code',
                 validator: (value) =>
                     value?.isEmpty ?? true ? 'Please enter lab code' : null,
               ),
               const SizedBox(height: 16),
-              const Text(
+              Text(
                 'Lab Description',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: theme.colorScheme.onSurface,
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               const SizedBox(height: 10),
-              LabTextField(
+              _buildTextField(
                 controller: _descriptionController,
                 label: 'Description',
                 maxLines: 3,
@@ -195,16 +200,24 @@ class _CreateLabScreenState extends ConsumerState<CreateLabScreen> {
                 child: ElevatedButton(
                   onPressed: _submitForm,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFFFFF00),
-                    foregroundColor: Colors.black,
+                    backgroundColor: isDark
+                        ? const Color(0xFFFFFF00)
+                        : theme.colorScheme.primary,
+                    foregroundColor:
+                        isDark ? Colors.black : theme.colorScheme.onPrimary,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-                  child: const Text(
+                  child: Text(
                     'Create Lab',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color:
+                          isDark ? Colors.black : theme.colorScheme.onPrimary,
+                    ),
                   ),
                 ),
               ),
@@ -215,19 +228,69 @@ class _CreateLabScreenState extends ConsumerState<CreateLabScreen> {
     );
   }
 
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    int maxLines = 1,
+    String? Function(String?)? validator,
+  }) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    return TextFormField(
+      controller: controller,
+      validator: validator,
+      maxLines: maxLines,
+      style: TextStyle(color: theme.colorScheme.onSurface),
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle:
+            TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.7)),
+        filled: true,
+        fillColor: isDark ? const Color(0xFF1C1C1C) : theme.colorScheme.surface,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide:
+              BorderSide(color: theme.colorScheme.onSurface.withOpacity(0.2)),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide:
+              BorderSide(color: theme.colorScheme.onSurface.withOpacity(0.2)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isDark ? const Color(0xFFFFFF00) : theme.colorScheme.primary,
+          ),
+        ),
+      ),
+    );
+  }
+
   Future<void> _selectTime(bool isStartTime) async {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     final picked = await showTimePicker(
       context: context,
       initialTime: isStartTime ? _startTime : _endTime,
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.dark(
-              primary: Color(0xFFFFFF00),
-              onPrimary: Colors.black,
-              surface: Color(0xFF1C1C1C),
-              onSurface: Colors.white,
-            ),
+            colorScheme: isDark
+                ? const ColorScheme.dark(
+                    primary: Color(0xFFFFFF00),
+                    onPrimary: Colors.black,
+                    surface: Color(0xFF1C1C1C),
+                    onSurface: Colors.white,
+                  )
+                : ColorScheme.light(
+                    primary: theme.colorScheme.primary,
+                    onPrimary: theme.colorScheme.onPrimary,
+                    surface: theme.colorScheme.surface,
+                    onSurface: theme.colorScheme.onSurface,
+                  ),
           ),
           child: child!,
         );
@@ -318,33 +381,66 @@ class _CreateLabScreenState extends ConsumerState<CreateLabScreen> {
   Widget _buildRoomDropdown() {
     return Consumer(
       builder: (context, ref, child) {
+        final theme = Theme.of(context);
+        final isDark = theme.brightness == Brightness.dark;
         final roomsAsync = ref.watch(roomsProvider);
 
         return roomsAsync.when(
-          loading: () => const CircularProgressIndicator(),
-          error: (error, stack) => Text('Error: $error'),
+          loading: () => CircularProgressIndicator(
+            color: isDark ? const Color(0xFFFFFF00) : theme.colorScheme.primary,
+          ),
+          error: (error, stack) => Text(
+            'Error: $error',
+            style: TextStyle(color: theme.colorScheme.error),
+          ),
           data: (rooms) => DropdownButtonFormField<String>(
             value: _roomController.text.isEmpty ? null : _roomController.text,
             decoration: InputDecoration(
               filled: true,
-              fillColor: const Color(0xFF1C1C1C),
+              fillColor:
+                  isDark ? const Color(0xFF1C1C1C) : theme.colorScheme.surface,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: Colors.white24),
+                borderSide: BorderSide(
+                  color: isDark
+                      ? Colors.white24
+                      : theme.colorScheme.onSurface.withOpacity(0.2),
+                ),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: Colors.white24),
+                borderSide: BorderSide(
+                  color: isDark
+                      ? Colors.white24
+                      : theme.colorScheme.onSurface.withOpacity(0.2),
+                ),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(
+                  color: isDark
+                      ? const Color(0xFFFFFF00)
+                      : theme.colorScheme.primary,
+                ),
               ),
             ),
-            dropdownColor: const Color(0xFF1C1C1C),
-            style: const TextStyle(color: Colors.white),
-            items: rooms.map((room) {
-              return DropdownMenuItem(
-                value: room.name,
-                child: Text(room.name),
-              );
-            }).toList(),
+            dropdownColor:
+                isDark ? const Color(0xFF1C1C1C) : theme.colorScheme.surface,
+            style: TextStyle(color: theme.colorScheme.onSurface),
+            hint: Text(
+              'Select Room',
+              style: TextStyle(
+                color: theme.colorScheme.onSurface.withOpacity(0.7),
+              ),
+            ),
+            items: [
+              ...rooms.map((room) {
+                return DropdownMenuItem(
+                  value: room.name,
+                  child: Text(room.name),
+                );
+              }).toList(),
+            ],
             onChanged: (value) {
               setState(() {
                 _roomController.text = value ?? '';
