@@ -73,57 +73,135 @@ class PeopleTab extends ConsumerWidget {
                 itemBuilder: (context, index) {
                   final student = students[index];
                   return Card(
+                    margin:
+                        const EdgeInsets.symmetric(vertical: 4, horizontal: 10),
                     color: isDark
                         ? const Color(0xFF1C1C1C)
                         : theme.colorScheme.surface,
-                    child: ExpansionTile(
-                      leading: student.imageUrl != null &&
-                              student.imageUrl!.isNotEmpty
-                          ? CircleAvatar(
-                              backgroundImage: NetworkImage(
-                                '${dotenv.env['IMAGE_BASE_URL']}/${student.imageUrl}',
-                              ),
-                            )
-                          : CircleAvatar(
-                              backgroundColor: isDark
-                                  ? kNeonAccent
-                                  : theme.colorScheme.primary,
-                              child: Text(
-                                student.name[0].toUpperCase(),
-                                style: TextStyle(
-                                  color: isDark ? Colors.black : Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      side: BorderSide(
+                        color: isDark ? Colors.white12 : Colors.black12,
+                        width: 1,
+                      ),
+                    ),
+                    elevation: isDark ? 0 : 1,
+                    child: student.faculty == null && student.major == null
+                        ? ListTile(
+                            leading: student.imageUrl != null &&
+                                    student.imageUrl!.isNotEmpty
+                                ? CircleAvatar(
+                                    backgroundImage: NetworkImage(
+                                      '${dotenv.env['IMAGE_BASE_URL']}/${student.imageUrl}',
+                                    ),
+                                  )
+                                : CircleAvatar(
+                                    backgroundColor: isDark
+                                        ? kNeonAccent
+                                        : theme.colorScheme.primary,
+                                    child: Text(
+                                      student.name[0].toUpperCase(),
+                                      style: TextStyle(
+                                        color: isDark
+                                            ? Colors.black
+                                            : Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                            title: Text(
+                              student.name,
+                              style: TextStyle(
+                                color: theme.colorScheme.onSurface,
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
-                      title: Text(
-                        student.name,
-                        style: TextStyle(color: theme.colorScheme.onSurface),
-                      ),
-                      subtitle: Text(
-                        student.email,
-                        style: TextStyle(
-                          color: theme.colorScheme.onSurface.withOpacity(0.7),
-                        ),
-                      ),
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              if (student.faculty != null)
-                                RowDetails(
-                                    label: 'Faculty', value: student.faculty!),
-                              if (student.major != null)
-                                RowDetails(
-                                    label: 'Major', value: student.major!),
-                              const SizedBox(height: 8),
-                            ],
+                            subtitle: Text(
+                              student.email,
+                              style: TextStyle(
+                                color: theme.colorScheme.onSurface
+                                    .withOpacity(0.7),
+                              ),
+                            ),
+                          )
+                        : Theme(
+                            data: Theme.of(context).copyWith(
+                              dividerColor: Colors.transparent,
+                            ),
+                            child: ExpansionTile(
+                              leading: student.imageUrl != null &&
+                                      student.imageUrl!.isNotEmpty
+                                  ? CircleAvatar(
+                                      backgroundImage: NetworkImage(
+                                        '${dotenv.env['IMAGE_BASE_URL']}/${student.imageUrl}',
+                                      ),
+                                    )
+                                  : CircleAvatar(
+                                      backgroundColor: isDark
+                                          ? kNeonAccent
+                                          : theme.colorScheme.primary,
+                                      child: Text(
+                                        student.name[0].toUpperCase(),
+                                        style: TextStyle(
+                                          color: isDark
+                                              ? Colors.black
+                                              : Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                              title: Text(
+                                student.name,
+                                style: TextStyle(
+                                  color: theme.colorScheme.onSurface,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              subtitle: Text(
+                                student.email,
+                                style: TextStyle(
+                                  color: theme.colorScheme.onSurface
+                                      .withOpacity(0.7),
+                                ),
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                side: BorderSide(
+                                  color: (isDark
+                                      ? Colors.white24
+                                      : Colors.black26),
+                                  width: 1,
+                                ),
+                              ),
+                              collapsedShape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.all(16.0),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      if (student.faculty != null)
+                                        RowDetails(
+                                          label: 'Faculty',
+                                          value: student.faculty!,
+                                          isDark: isDark,
+                                        ),
+                                      if (student.major != null)
+                                        RowDetails(
+                                          label: 'Major',
+                                          value: student.major!,
+                                          isDark: isDark,
+                                        ),
+                                      const SizedBox(height: 8),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
                   );
                 },
               );
@@ -180,134 +258,94 @@ class PeopleTab extends ConsumerWidget {
                 itemBuilder: (context, index) {
                   final instructor = instructors[index];
                   return Card(
+                    margin:
+                        const EdgeInsets.symmetric(vertical: 4, horizontal: 10),
                     color: isDark
                         ? const Color(0xFF1C1C1C)
                         : theme.colorScheme.surface,
-                    child: ExpansionTile(
-                      leading: instructor.imageUrl != null
-                          ? CircleAvatar(
-                              backgroundImage: NetworkImage(
-                                '${dotenv.env['IMAGE_BASE_URL']}/${instructor.imageUrl}',
-                              ),
-                            )
-                          : CircleAvatar(
-                              backgroundColor: isDark
-                                  ? kNeonAccent
-                                  : theme.colorScheme.primary,
-                              child: Text(
-                                instructor.name[0].toUpperCase(),
-                                style: TextStyle(
-                                  color: isDark ? Colors.black : Colors.white,
-                                  fontWeight: FontWeight.bold,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      side: BorderSide(
+                        color: isDark ? Colors.white12 : Colors.black12,
+                        width: 1,
+                      ),
+                    ),
+                    elevation: isDark ? 0 : 1,
+                    child: Theme(
+                      data: Theme.of(context).copyWith(
+                        dividerColor: Colors.transparent,
+                      ),
+                      child: ExpansionTile(
+                        leading: instructor.imageUrl != null
+                            ? CircleAvatar(
+                                backgroundImage: NetworkImage(
+                                  '${dotenv.env['IMAGE_BASE_URL']}/${instructor.imageUrl}',
+                                ),
+                              )
+                            : CircleAvatar(
+                                backgroundColor: isDark
+                                    ? kNeonAccent
+                                    : theme.colorScheme.primary,
+                                child: Text(
+                                  instructor.name[0].toUpperCase(),
+                                  style: TextStyle(
+                                    color: isDark ? Colors.black : Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                               ),
-                            ),
-                      title: Text(
-                        instructor.name,
-                        style: TextStyle(color: theme.colorScheme.onSurface),
-                      ),
-                      subtitle: Text(
-                        instructor.email,
-                        style: TextStyle(
-                          color: theme.colorScheme.onSurface.withOpacity(0.7),
-                        ),
-                      ),
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              if (instructor.faculty != null)
-                                RowDetails(
-                                    label: 'Faculty',
-                                    value: instructor.faculty!),
-                              if (instructor.major != null)
-                                RowDetails(
-                                    label: 'Major', value: instructor.major!),
-                              const SizedBox(height: 8),
-                            ],
+                        title: Text(
+                          instructor.name,
+                          style: TextStyle(
+                            color: theme.colorScheme.onSurface,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
-                      ],
+                        subtitle: Text(
+                          instructor.email,
+                          style: TextStyle(
+                            color: theme.colorScheme.onSurface.withOpacity(0.7),
+                          ),
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          side: BorderSide(
+                            color: (isDark ? Colors.white24 : Colors.black26),
+                            width: 1,
+                          ),
+                        ),
+                        collapsedShape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                if (instructor.faculty != null)
+                                  RowDetails(
+                                    label: 'Faculty',
+                                    value: instructor.faculty!,
+                                    isDark: isDark,
+                                  ),
+                                if (instructor.major != null)
+                                  RowDetails(
+                                    label: 'Major',
+                                    value: instructor.major!,
+                                    isDark: isDark,
+                                  ),
+                                const SizedBox(height: 8),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   );
                 },
               );
             },
-          ),
-        ],
-      ),
-    );
-  }
-
-  Future<void> _showAddStudentsDialog(
-      BuildContext context, WidgetRef ref) async {
-    final TextEditingController emailsController = TextEditingController();
-
-    return showDialog(
-      context: context,
-      builder: (BuildContext dialogContext) => AlertDialog(
-        backgroundColor: const Color(0xFF1C1C1C),
-        title:
-            const Text('Add Students', style: TextStyle(color: Colors.white)),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text(
-              'Enter student emails (one per line):',
-              style: TextStyle(color: Colors.white70),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: emailsController,
-              style: const TextStyle(color: Colors.white),
-              maxLines: 5,
-              decoration: InputDecoration(
-                hintText: 'student1@example.com\nstudent2@example.com',
-                hintStyle:
-                    TextStyle(color: Colors.white.withValues(alpha: 0.3)),
-                border: const OutlineInputBorder(),
-                enabledBorder: OutlineInputBorder(
-                  borderSide:
-                      BorderSide(color: Colors.white.withValues(alpha: 0.3)),
-                ),
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child:
-                const Text('Cancel', style: TextStyle(color: Colors.white70)),
-          ),
-          TextButton(
-            onPressed: () async {
-              final emails = emailsController.text
-                  .split('\n')
-                  .map((e) => e.trim())
-                  .where((e) => e.isNotEmpty)
-                  .toList();
-
-              if (emails.isEmpty) return;
-
-              try {
-                await ref
-                    .read(labStudentsProvider(lab.labId).notifier)
-                    .addStudents(emails);
-                if (dialogContext.mounted) {
-                  Navigator.pop(dialogContext);
-                }
-              } catch (e) {
-                if (dialogContext.mounted) {
-                  ScaffoldMessenger.of(dialogContext).showSnackBar(
-                    SnackBar(content: Text(e.toString())),
-                  );
-                }
-              }
-            },
-            child: const Text('Add', style: TextStyle(color: kNeonAccent)),
           ),
         ],
       ),
