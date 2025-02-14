@@ -24,6 +24,8 @@ import { labService } from "../services/labService";
 import { useQueryClient } from "@tanstack/react-query";
 import SessionsTab from "../components/SessionsTab";
 import AnnouncementsTab from "../components/AnnouncementsTab";
+import { User } from "../types/user";
+import { UpdateLabDto } from "../types/lab";
 
 interface TabPanelProps {
 	children?: React.ReactNode;
@@ -102,9 +104,13 @@ const LabPage: React.FC = () => {
 		}
 	};
 
-	const handleEditLab = async (data: Partial<Lab>) => {
+	const handleEditLab = async (data: Partial<UpdateLabDto>) => {
 		try {
 			await labService.updateLab(lab.id, data);
+			queryClient.invalidateQueries({
+				queryKey: ["labs", `${user?.role}`, user?.id],
+			});
+			setLab((prev: any) => ({ ...prev, ...data }));
 			setAlertMessage("Lab updated successfully");
 			setSeverity("success");
 			setOpenSnackbar(true);
@@ -132,10 +138,7 @@ const LabPage: React.FC = () => {
 			queryClient.invalidateQueries({
 				queryKey: ["labs", `${user?.role}`, user?.id],
 			});
-			setLab((prev: any) => ({
-				...prev,
-				ppe: selected,
-			}));
+			setLab((prev: any) => ({ ...prev, ppe: selected }));
 			setSelectedPPEs(selected);
 			setAlertMessage("PPE requirements updated successfully");
 			setSeverity("success");
