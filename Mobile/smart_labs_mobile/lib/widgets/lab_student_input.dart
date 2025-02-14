@@ -33,13 +33,16 @@ class LabStudentInputState extends State<LabStudentInput> {
   /// Build the entire widget UI
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Add Students',
           style: TextStyle(
-            color: Colors.white,
+            color: theme.colorScheme.onSurface,
             fontSize: 16,
             fontWeight: FontWeight.bold,
           ),
@@ -50,23 +53,35 @@ class LabStudentInputState extends State<LabStudentInput> {
             Expanded(
               child: TextFormField(
                 controller: _controller,
-                style: const TextStyle(color: Colors.white),
+                style: TextStyle(color: theme.colorScheme.onSurface),
                 decoration: InputDecoration(
                   hintText: 'Enter student ID',
-                  hintStyle: const TextStyle(color: Colors.white54),
+                  hintStyle: TextStyle(
+                    color: theme.colorScheme.onSurface.withOpacity(0.5),
+                  ),
                   filled: true,
-                  fillColor: const Color(0xFF1C1C1C),
+                  fillColor: isDark
+                      ? const Color(0xFF1C1C1C)
+                      : theme.colorScheme.surface,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
-                    borderSide: const BorderSide(color: Colors.white24),
+                    borderSide: BorderSide(
+                      color: isDark ? Colors.white24 : Colors.black12,
+                    ),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
-                    borderSide: const BorderSide(color: Colors.white24),
+                    borderSide: BorderSide(
+                      color: isDark ? Colors.white24 : Colors.black12,
+                    ),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
-                    borderSide: const BorderSide(color: Color(0xFFFFFF00)),
+                    borderSide: BorderSide(
+                      color: isDark
+                          ? const Color(0xFFFFFF00)
+                          : theme.colorScheme.primary,
+                    ),
                   ),
                 ),
               ),
@@ -74,7 +89,12 @@ class LabStudentInputState extends State<LabStudentInput> {
             const SizedBox(width: 8),
             IconButton(
               onPressed: _handleAdd,
-              icon: const Icon(Icons.add, color: Color(0xFFFFFF00)),
+              icon: Icon(
+                Icons.add,
+                color: isDark
+                    ? const Color(0xFFFFFF00)
+                    : theme.colorScheme.primary,
+              ),
             ),
           ],
         ),
@@ -84,11 +104,22 @@ class LabStudentInputState extends State<LabStudentInput> {
           runSpacing: 8,
           children: widget.students.map((student) {
             return Chip(
-              label: Text(student, style: const TextStyle(color: Colors.black)),
-              backgroundColor: const Color(0xFFFFFF00),
-              side: const BorderSide(color: Colors.black),
-              labelStyle: const TextStyle(color: Colors.black),
-              deleteIcon: const Icon(Icons.close, size: 18, color: Colors.black),
+              label: Text(
+                student,
+                style: TextStyle(
+                  color: isDark ? Colors.black : Colors.white,
+                ),
+              ),
+              backgroundColor:
+                  isDark ? const Color(0xFFFFFF00) : theme.colorScheme.primary,
+              side: BorderSide(
+                color: isDark ? Colors.black : Colors.transparent,
+              ),
+              deleteIcon: Icon(
+                Icons.close,
+                size: 18,
+                color: isDark ? Colors.black : Colors.white,
+              ),
               onDeleted: () => widget.onRemoveStudent(student),
             );
           }).toList(),
