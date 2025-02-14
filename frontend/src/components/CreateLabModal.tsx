@@ -8,6 +8,7 @@ import { useAllPPEs } from "../hooks/usePPE";
 import { CreateLabDto } from "../types/lab";
 import MultiSelect from "./MultiSelect";
 import { PPE } from "../types/ppe";
+import ScheduleSelect from "./ScheduleSelect";
 
 interface CreateLabModalProps {
 	open: boolean;
@@ -32,7 +33,7 @@ const CreateLabModal: React.FC<CreateLabModalProps> = ({
 			labCode: "",
 			ppe: [],
 			schedule: [],
-			semesterID: null,
+			semesterID: 0,
 		},
 		instructor_Emails: [],
 		student_Emails: [],
@@ -42,6 +43,7 @@ const CreateLabModal: React.FC<CreateLabModalProps> = ({
 
 	const handleSubmit = (e: React.FormEvent) => {
 		e.preventDefault();
+		console.log(formData);
 		const newErrors: { [key: string]: string[] } = {};
 
 		if (!formData.lab.labName.trim())
@@ -226,6 +228,20 @@ const CreateLabModal: React.FC<CreateLabModalProps> = ({
 							typeof option === "string" ? option : option.name
 						}
 						placeholder="Select required PPE"
+					/>
+
+					<ScheduleSelect
+						schedules={formData.lab.schedule}
+						onChange={(schedules) =>
+							setFormData({
+								...formData,
+								lab: {
+									...formData.lab,
+									schedule: schedules,
+								},
+							})
+						}
+						error={errors.schedule}
 					/>
 				</DialogContent>
 
