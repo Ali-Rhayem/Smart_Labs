@@ -22,7 +22,7 @@ namespace backend.Controllers
         // GET: api/Sessions/lab/5
         [HttpGet("lab/{id}")]
         [Authorize]
-        public async Task<ActionResult<List<Sessions>>> GetSessionsOfLab(int id)
+        public async Task<ActionResult<List<SessionsDTO>>> GetSessionsOfLab(int id)
         {
             return await _sessionService.GetSessionsOfLabAsync(id);
         }
