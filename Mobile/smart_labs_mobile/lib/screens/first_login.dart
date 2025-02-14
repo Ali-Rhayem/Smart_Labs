@@ -22,7 +22,7 @@ class _FirstLoginScreenState extends ConsumerState<FirstLoginScreen> {
   final _confirmPasswordController = TextEditingController();
   final _controller = EditProfileController();
   final _apiService = ApiService();
-  
+
   bool _isLoading = false;
   bool _obscureNewPassword = true;
   bool _obscureConfirmPassword = true;
@@ -88,21 +88,21 @@ class _FirstLoginScreenState extends ConsumerState<FirstLoginScreen> {
       if (!mounted) return;
 
       // if (response['success']) {
-        // Update user provider and navigate to main screen
-        final updatedUser = user.copyWith(
-          // name: _nameController.text,
-          // major: _selectedMajor,
-          // faculty: _selectedFaculty,
-          // imageUrl: response['data']['image'],
-          isFirstLogin: false,
-        );
-        ref.read(userProvider.notifier).setUser(updatedUser);
+      // Update user provider and navigate to main screen
+      final updatedUser = user.copyWith(
+        // name: _nameController.text,
+        // major: _selectedMajor,
+        // faculty: _selectedFaculty,
+        // imageUrl: response['data']['image'],
+        isFirstLogin: false,
+      );
+      ref.read(userProvider.notifier).setUser(updatedUser);
 
-        if (user.role == 'instructor') {
-          Navigator.pushReplacementNamed(context, '/instructorMain');
-        } else {
-          Navigator.pushReplacementNamed(context, '/studentMain');
-        }
+      if (user.role == 'instructor') {
+        Navigator.pushReplacementNamed(context, '/instructorMain');
+      } else {
+        Navigator.pushReplacementNamed(context, '/studentMain');
+      }
       // } else {
       //   throw Exception(response['message'] ?? 'Failed to update profile');
       // }
@@ -120,11 +120,21 @@ class _FirstLoginScreenState extends ConsumerState<FirstLoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: const Color(0xFF121212),
+      backgroundColor:
+          isDark ? const Color(0xFF121212) : theme.colorScheme.background,
       appBar: AppBar(
-        title: const Text('Complete Your Profile'),
-        backgroundColor: const Color(0xFF1C1C1C),
+        title: Text(
+          'Complete Your Profile',
+          style: TextStyle(
+            color: theme.colorScheme.onSurface,
+          ),
+        ),
+        backgroundColor:
+            isDark ? const Color(0xFF1C1C1C) : theme.colorScheme.surface,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -186,7 +196,8 @@ class _FirstLoginScreenState extends ConsumerState<FirstLoginScreen> {
                 label: 'Confirm Password',
                 obscure: _obscureConfirmPassword,
                 onToggleVisibility: () {
-                  setState(() => _obscureConfirmPassword = !_obscureConfirmPassword);
+                  setState(
+                      () => _obscureConfirmPassword = !_obscureConfirmPassword);
                 },
                 validator: (value) {
                   if (value != _newPasswordController.text) {
@@ -201,19 +212,25 @@ class _FirstLoginScreenState extends ConsumerState<FirstLoginScreen> {
                       selectedFaculty: _selectedFaculty,
                       selectedMajor: _selectedMajor,
                       availableMajors: _availableMajors,
-                      onFacultyChanged: (value) => _updateFaculty(value, faculties),
-                      onMajorChanged: (value) => setState(() => _selectedMajor = value),
+                      onFacultyChanged: (value) =>
+                          _updateFaculty(value, faculties),
+                      onMajorChanged: (value) =>
+                          setState(() => _selectedMajor = value),
                       faculties: faculties,
                       userFaculty: null,
                       userMajor: null,
                     ),
-                    loading: () => const Center(
-                      child: CircularProgressIndicator(color: Color(0xFFFFFF00)),
+                    loading: () => Center(
+                      child: CircularProgressIndicator(
+                        color: isDark
+                            ? const Color(0xFFFFEB00)
+                            : theme.colorScheme.primary,
+                      ),
                     ),
                     error: (error, stack) => Center(
                       child: Text(
                         'Error loading faculties: $error',
-                        style: const TextStyle(color: Colors.red),
+                        style: TextStyle(color: theme.colorScheme.error),
                       ),
                     ),
                   ),
@@ -221,25 +238,29 @@ class _FirstLoginScreenState extends ConsumerState<FirstLoginScreen> {
               ElevatedButton(
                 onPressed: _isLoading ? null : _submitForm,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFFFEB00),
+                  backgroundColor: isDark
+                      ? const Color(0xFFFFEB00)
+                      : theme.colorScheme.primary,
+                  foregroundColor: isDark ? Colors.black : Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
                 child: _isLoading
-                    ? const SizedBox(
+                    ? SizedBox(
                         height: 20,
                         width: 20,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            isDark ? Colors.black : Colors.white,
+                          ),
                         ),
                       )
                     : const Text(
                         'Complete Profile',
                         style: TextStyle(
-                          color: Colors.black,
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
@@ -259,31 +280,41 @@ class _FirstLoginScreenState extends ConsumerState<FirstLoginScreen> {
     required VoidCallback onToggleVisibility,
     String? Function(String?)? validator,
   }) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return TextFormField(
       controller: controller,
       obscureText: obscure,
-      style: const TextStyle(color: Colors.white),
+      style: TextStyle(color: theme.colorScheme.onSurface),
       decoration: InputDecoration(
         labelText: label,
-        labelStyle: const TextStyle(color: Colors.white70),
+        labelStyle:
+            TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.7)),
         filled: true,
-        fillColor: const Color(0xFF1C1C1C),
+        fillColor: isDark ? const Color(0xFF1C1C1C) : theme.colorScheme.surface,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: Colors.white24),
+          borderSide: BorderSide(
+            color: theme.colorScheme.onSurface.withOpacity(0.2),
+          ),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: Colors.white24),
+          borderSide: BorderSide(
+            color: theme.colorScheme.onSurface.withOpacity(0.2),
+          ),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: Color(0xFFFFEB00)),
+          borderSide: BorderSide(
+            color: isDark ? const Color(0xFFFFEB00) : theme.colorScheme.primary,
+          ),
         ),
         suffixIcon: IconButton(
           icon: Icon(
             obscure ? Icons.visibility_off : Icons.visibility,
-            color: const Color(0xFFFFEB00),
+            color: isDark ? const Color(0xFFFFEB00) : theme.colorScheme.primary,
           ),
           onPressed: onToggleVisibility,
         ),
