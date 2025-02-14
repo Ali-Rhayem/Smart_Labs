@@ -176,7 +176,6 @@ namespace backend.Controllers
         // POST: api/user/changePassword
         [HttpPost("changePassword")]
         [Authorize]
-        // object from body
         public async Task<ActionResult> ChangePassword([FromBody] JsonElement body)
         {
 
@@ -226,6 +225,38 @@ namespace backend.Controllers
                 return StatusCode(500, new { errors = "Failed to update user." });
 
             return Ok(new { message = "Password updated successfully." });
+        }
+
+        // POST: api/user/resetPassword
+        [HttpPost("resetPassword")]
+        [Authorize]
+        public async Task<ActionResult> ResetPassword([FromBody] JsonElement body)
+        {
+            var email = body.GetProperty("email").GetString();
+
+            if (string.IsNullOrEmpty(email))
+            {
+                return BadRequest(new { errors = "all fields are required." });
+            }
+            // Check the user in the database
+            var user = await _userService.GetUserByEmailAsync(email);
+            if (user == null)
+                return NotFound(new { errors = "User not found." });
+
+            // check if user is the current user
+            var userIdClaim = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null || user.Id != int.Parse(userIdClaim.Value))
+            {
+                return Unauthorized(new { errors = "Invalid user." });
+            }
+
+            // generate a random password
+            var result = await _userService.ResetPasswordAsync(user.Id);
+
+            if (!result)
+                return StatusCode(500, new { errors = "Failed to reset password." });
+
+            return Ok(new { message = "Password reset successfully." });
         }
 
     }
