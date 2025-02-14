@@ -36,8 +36,7 @@ public class UserService
     {
         var projection = Builders<User>.Projection
             .Exclude(u => u.Password)
-            .Exclude(u => u.Role)
-            .Exclude(u => u.FaceIdentityVector);
+            .Exclude(u => u.Role);
 
         return await _users.Find(_ => true).Project<User>(projection).ToListAsync();
     }
@@ -45,8 +44,7 @@ public class UserService
     public async Task<User> GetUserById(int id)
     {
         var projection = Builders<User>.Projection
-            .Exclude(u => u.Password)
-            .Exclude(u => u.FaceIdentityVector);
+            .Exclude(u => u.Password);
 
         return await _users
             .Find(user => user.Id == id).Project<User>(projection).FirstOrDefaultAsync();
@@ -127,13 +125,13 @@ public class UserService
 
     public async Task<User> GetUserByEmailAsync(string email)
     {
-        var projection = Builders<User>.Projection.Exclude(u => u.FaceIdentityVector);
+        var projection = Builders<User>.Projection.Exclude(u => u.Password);
         return await _users.Find(u => u.Email == email).Project<User>(projection).FirstOrDefaultAsync();
     }
 
     public async Task<User> GetUserByFcmTokenAsync(string fcmToken)
     {
-        var projection = Builders<User>.Projection.Exclude(u => u.FaceIdentityVector);
+        var projection = Builders<User>.Projection.Exclude(u => u.Password);
         return await _users.Find(u => u.FcmToken == fcmToken).Project<User>(projection).FirstOrDefaultAsync();
     }
 
