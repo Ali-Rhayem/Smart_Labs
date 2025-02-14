@@ -1,4 +1,3 @@
-import { PPE } from "./ppe";
 import { Announcement } from "./announcements";
 
 export interface Lab {
@@ -6,7 +5,7 @@ export interface Lab {
 	labCode: string;
 	labName: string;
 	description: string;
-	ppe: PPE[];
+	ppe: number[];
 	instructors: number[];
 	students: number[];
 	schedule: Schedule[];
@@ -19,19 +18,19 @@ export interface Lab {
 }
 
 export interface LabDto {
-	name: string;
 	labCode: string;
 	labName: string;
 	description: string | null;
-	ppe: PPE[] | [];
+	ppe: number[];
 	schedule: Schedule[];
 	semesterID: number | null;
 	room: string;
 }
 
-export interface CreateLabDto extends LabDto {
-	instructor_Emails: String[];
-	student_Emails: String[];
+export interface CreateLabDto {
+	lab: LabDto;
+	instructor_Emails: string[];
+	student_Emails: string[];
 }
 
 type DayOfWeek =
