@@ -36,7 +36,7 @@ public class User
     public required string Role { get; set; }
 
     [BsonElement("face_identity_vector")]
-    public List<float> FaceIdentityVector { get; set; } = new();
+    private List<List<float>> FaceIdentityVector { get; set; } = new();
 
     [BsonElement("fcm_token")]
     public string? FcmToken { get; set; }
