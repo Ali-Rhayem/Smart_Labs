@@ -3,12 +3,12 @@ import json
 import base64
 import datetime
 import time
-import os
-from dotenv import load_dotenv
 import random
 import threading
 import sys
 
+import os
+from dotenv import load_dotenv
 load_dotenv()
 
 def images_to_base64(image_path):
@@ -36,7 +36,7 @@ def get_random_image():
 
 # Create a KafkaProducer instance to be reused.
 producer = KafkaProducer(
-    bootstrap_servers="localhost:9092",
+    bootstrap_servers=os.getenv("BOOTSTRAP_SERVERS"),
     value_serializer=lambda v: json.dumps(v).encode('utf-8'),
     max_request_size=10 * 1024 * 1024  # 10 MB
 )
@@ -52,7 +52,7 @@ def produce_image(command_data):
     # Update the command data with the image encoding.
     command_data["encoding"] = images_to_base64(image_path)
     command_data["time"] = datetime.datetime.now(datetime.UTC).strftime("%H:%M:%S")
-    future = producer.send("analyze", value=command_data)
+    future = producer.send(os.getenv("ANALYSIS_TOPIC"), value=command_data)
     try:
         # Wait for the send to complete.
         future.get(timeout=10)
@@ -74,11 +74,11 @@ def periodic_producer(command_data):
             time.sleep(1)
 
 # Set up the consumer.
-topic = "recording_se"
+topic = os.getenv("RECORDING_TOPIC")
 ROOM = 'B-103'
 consumer = KafkaConsumer(
     topic,
-    bootstrap_servers="localhost:9092",
+    bootstrap_servers=os.getenv("BOOTSTRAP_SERVERS"),
     group_id=ROOM,
     auto_offset_reset='latest',
     enable_auto_commit=True,
