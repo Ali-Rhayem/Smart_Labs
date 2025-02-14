@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using backend.Models;
 using backend.Services;
+using System.Text.Json;
 
 namespace backend.Controllers
 
@@ -140,6 +141,38 @@ namespace backend.Controllers
             });
         }
 
+        // POST: api/user/firstlogin
+        [HttpPost("firstlogin")]
+        [Authorize]
+        public async Task<ActionResult> FirstLogin([FromBody] FirstLogin firstLoginRequest)
+        {
+            // Check the user in the database
+            var userIdClaim = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null)
+                return Unauthorized(new { errors = "Invalid user." });
+
+            var user = await _userService.GetUserById(int.Parse(userIdClaim.Value));
+            if (user == null)
+                return Unauthorized(new { errors = "Invalid user." });
+
+            if (!user.First_login)
+                return BadRequest(new { errors = "User has already completed the first login." });
+
+            if (firstLoginRequest.Password != firstLoginRequest.ConfirmPassword)
+                return BadRequest(new { errors = "Passwords do not match." });
+
+            // Update the user's password
+            firstLoginRequest.First_login = false;
+            firstLoginRequest.Id = user.Id;
+            firstLoginRequest.Password = BCrypt.Net.BCrypt.HashPassword(firstLoginRequest.Password);
+            var result = await _userService.FirstLoginAsync(firstLoginRequest);
+
+            if (result == null)
+                return StatusCode(500, new { errors = "Failed to update user." });
+
+            return Ok(new { message = "User updated successfully." });
+        }
 
     }
+
 }
