@@ -13,6 +13,8 @@ class SessionsTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final sessionsAsync = ref.watch(labSessionsProvider(lab.labId));
     final updatedLab = ref.watch(labsProvider).whenData(
           (labs) => labs.firstWhere((l) => l.labId == lab.labId),
@@ -43,25 +45,35 @@ class SessionsTab extends ConsumerWidget {
               }
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor:
-                  updatedLab.value?.started ?? false ? Colors.red : kNeonAccent,
-              foregroundColor: Colors.black,
+              backgroundColor: updatedLab.value?.started ?? false
+                  ? Colors.red
+                  : (isDark ? kNeonAccent : theme.colorScheme.primary),
+              foregroundColor: isDark
+                  ? Colors.black
+                  : (updatedLab.value?.started ?? false
+                      ? Colors.white
+                      : theme.colorScheme.onPrimary),
               minimumSize: const Size(double.infinity, 48),
             ),
             child: Text(
               updatedLab.value?.started ?? false
                   ? 'End Session'
                   : 'Start Session',
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
+                color: isDark
+                    ? Colors.black
+                    : (updatedLab.value?.started ?? false
+                        ? Colors.white
+                        : theme.colorScheme.onPrimary),
               ),
             ),
           ),
         ),
         Expanded(
           child: RefreshIndicator(
-            color: kNeonAccent,
+            color: isDark ? kNeonAccent : theme.colorScheme.primary,
             onRefresh: () async {
               // Fetch sessions
               await ref
@@ -77,13 +89,17 @@ class SessionsTab extends ConsumerWidget {
               }
             },
             child: sessionsAsync.when(
-              loading: () => const Center(
-                child: CircularProgressIndicator(color: kNeonAccent),
+              loading: () => Center(
+                child: CircularProgressIndicator(
+                  color: isDark ? kNeonAccent : theme.colorScheme.primary,
+                ),
               ),
               error: (error, stack) => Center(
                 child: Text(
                   'Error: $error',
-                  style: const TextStyle(color: Colors.white70),
+                  style: TextStyle(
+                    color: theme.colorScheme.onBackground.withOpacity(0.7),
+                  ),
                 ),
               ),
               data: (sessions) {
@@ -95,7 +111,8 @@ class SessionsTab extends ConsumerWidget {
                         child: Text(
                           'No sessions available.',
                           style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.7),
+                            color:
+                                theme.colorScheme.onBackground.withOpacity(0.7),
                             fontSize: 16,
                           ),
                         ),
