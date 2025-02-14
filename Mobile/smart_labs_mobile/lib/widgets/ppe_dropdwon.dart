@@ -19,60 +19,78 @@ class PPEDropdown extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final textColor = theme.colorScheme.onSurface;
+    final chipBackgroundColor =
+        isDark ? const Color(0xFF1C1C1C) : theme.colorScheme.surface;
+    final selectedColor =
+        isDark ? const Color(0xFFFFFF00) : theme.colorScheme.primary;
+
     return ref.watch(ppeProvider).when(
-      data: (ppeList) {
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Required PPE',
+          data: (ppeList) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Required PPE',
+                  style: TextStyle(
+                    color: textColor,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: ppeList.map((ppe) {
+                    final isSelected =
+                        selectedPPEIds.contains(ppe.id.toString());
+                    return FilterChip(
+                      label: Text(
+                        ppe.name,
+                        style: TextStyle(
+                          color: isSelected
+                              ? (isDark ? Colors.black : Colors.white)
+                              : textColor,
+                        ),
+                      ),
+                      selected: isSelected,
+                      onSelected: (bool selected) {
+                        if (selected) {
+                          logger.w("Selected PPE: ${ppe.name}");
+                          onAddPPE(ppe.id.toString(), ppe.name);
+                        } else {
+                          onRemovePPE(ppe.id.toString(), ppe.name);
+                        }
+                      },
+                      backgroundColor: chipBackgroundColor,
+                      selectedColor: selectedColor,
+                      checkmarkColor: isDark ? Colors.black : Colors.white,
+                      side: BorderSide(
+                        color: isDark ? Colors.white24 : Colors.grey[400]!,
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ],
+            );
+          },
+          loading: () => Center(
+            child: CircularProgressIndicator(
+              color:
+                  isDark ? const Color(0xFFFFFF00) : theme.colorScheme.primary,
+            ),
+          ),
+          error: (error, stack) => Center(
+            child: Text(
+              'Error loading PPE items: $error',
               style: TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
+                color: theme.colorScheme.error,
               ),
             ),
-            const SizedBox(height: 16),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: ppeList.map((ppe) {
-                final isSelected = selectedPPEIds.contains(ppe.id.toString());
-                return FilterChip(
-                  label: Text(
-                    ppe.name,
-                    style: TextStyle(
-                      color: isSelected ? Colors.black : Colors.white,
-                    ),
-                  ),
-                  selected: isSelected,
-                  onSelected: (bool selected) {
-                    if (selected) {
-                      logger.w("Selected PPE: ${ppe.name}");
-                      onAddPPE(ppe.id.toString(), ppe.name);
-                    } else {
-                      onRemovePPE(ppe.id.toString(), ppe.name);
-                    }
-                  },
-                  backgroundColor: const Color(0xFF1C1C1C),
-                  selectedColor: const Color(0xFFFFFF00),
-                  checkmarkColor: Colors.black,
-                  side: const BorderSide(color: Colors.white24),
-                );
-              }).toList(),
-            ),
-          ],
+          ),
         );
-      },
-      loading: () => const Center(
-        child: CircularProgressIndicator(color: Color(0xFFFFFF00)),
-      ),
-      error: (error, stack) => Center(
-        child: Text(
-          'Error loading PPE items: $error',
-          style: const TextStyle(color: Colors.red),
-        ),
-      ),
-    );
   }
 }
