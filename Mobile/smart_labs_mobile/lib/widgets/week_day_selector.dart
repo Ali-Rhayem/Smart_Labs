@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 /// A widget that displays a horizontal list of weekdays (Mon-Sun).
-/// 
+///
 /// [selectedWeekday] should be a value from 1 (Monday) to 7 (Sunday).
 /// [onWeekdayChanged] is called when the user taps a weekday.
 class WeekdaySelector extends StatelessWidget {
@@ -17,14 +17,16 @@ class WeekdaySelector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Day of Week',
           style: TextStyle(
-            color: Colors.white,
+            color: theme.colorScheme.onSurface,
             fontSize: 16,
             fontWeight: FontWeight.bold,
           ),
@@ -46,19 +48,25 @@ class WeekdaySelector extends StatelessWidget {
                   child: Container(
                     width: 45,
                     decoration: BoxDecoration(
-                      color: isSelected 
-                          ? const Color(0xFFFFFF00) 
-                          : const Color(0xFF1C1C1C),
+                      color: isSelected
+                          ? (isDark
+                              ? const Color(0xFFFFFF00)
+                              : theme.colorScheme.primary)
+                          : (isDark
+                              ? const Color(0xFF1C1C1C)
+                              : theme.colorScheme.surface),
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.white24),
+                      border: Border.all(
+                        color: isDark ? Colors.white24 : Colors.black12,
+                      ),
                     ),
                     child: Center(
                       child: Text(
                         weekdays[index],
                         style: TextStyle(
-                          color: isSelected 
-                              ? Colors.black 
-                              : Colors.white,
+                          color: isSelected
+                              ? (isDark ? Colors.black : Colors.white)
+                              : theme.colorScheme.onSurface,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
