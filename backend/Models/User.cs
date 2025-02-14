@@ -40,4 +40,7 @@ public class User
 
     [BsonElement("fcm_token")]
     public string? FcmToken { get; set; }
+
+    [BsonElement("first_login")]
+    public bool First_login { get; set; } = true;
 }
