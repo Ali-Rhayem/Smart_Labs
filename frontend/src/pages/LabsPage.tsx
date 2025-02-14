@@ -7,6 +7,9 @@ import AddIcon from "@mui/icons-material/Add";
 import { useNavigate } from "react-router-dom";
 import { useLabsQuery } from "../hooks/useLabsQuery";
 import ErrorAlert from "../components/ErrorAlertProps";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { labService } from "../services/labService";
+import CreateLabModal from "../components/CreateLabModal";
 
 const LabsPage: React.FC = () => {
 	const { data: labs = [], isLoading, error } = useLabsQuery();
@@ -15,6 +18,8 @@ const LabsPage: React.FC = () => {
 	const [severity, setSeverity] = useState<"error" | "success">("error");
 	const { user } = useUser();
 	const navigate = useNavigate();
+	const [createModalOpen, setCreateModalOpen] = useState(false);
+	const queryClient = useQueryClient();
 
 	const canCreateLab =
 		user && (user.role === "instructor" || user.role === "admin");
@@ -32,6 +37,24 @@ const LabsPage: React.FC = () => {
 	const handleViewLab = (lab: Lab) => {
 		navigate(`/labs/${lab.id}`, { state: { lab } });
 	};
+
+	const createLabMutation = useMutation({
+		mutationFn: labService.createLab,
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["labs"] });
+			setCreateModalOpen(false);
+			setAlertMessage("Lab created successfully");
+			setSeverity("success");
+			setOpenSnackbar(true);
+		},
+		onError: (error: any) => {
+			setAlertMessage(
+				error.response?.data?.errors || "Failed to create lab"
+			);
+			setSeverity("error");
+			setOpenSnackbar(true);
+		},
+	});
 
 	if (isLoading) {
 		return (
@@ -90,7 +113,7 @@ const LabsPage: React.FC = () => {
 								backgroundColor: "var(--color-primary)",
 								color: "var(--color-text-button)",
 							}}
-							onClick={() => console.log("Create new lab")}
+							onClick={() => setCreateModalOpen(true)}
 						>
 							Create Lab
 						</Button>
@@ -112,6 +135,12 @@ const LabsPage: React.FC = () => {
 					)}
 				</Grid>
 			</Box>
+
+			<CreateLabModal
+				open={createModalOpen}
+				onClose={() => setCreateModalOpen(false)}
+				onSubmit={(data) => createLabMutation.mutate(data)}
+			/>
 
 			<ErrorAlert
 				open={openSnackbar}
