@@ -6,18 +6,18 @@ from PIL import Image
 import numpy as np
 from pprint import pprint
 import time
-import os
 from consumer_utils import *
-from dotenv import load_dotenv
 import datetime
+import os
+from dotenv import load_dotenv
 load_dotenv()
 
-topic = "analyze"
+topic = os.getenv("ANALYSIS_TOPIC")
 ROOM = 'B-201'
 
 consumer = KafkaConsumer(
     topic,
-    bootstrap_servers="localhost:9092",
+    bootstrap_servers=os.getenv("BOOTSTRAP_SERVERS"),
     group_id=ROOM,
     auto_offset_reset='latest',
     enable_auto_commit=True,
