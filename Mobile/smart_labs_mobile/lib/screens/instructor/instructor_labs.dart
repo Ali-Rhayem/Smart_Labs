@@ -12,22 +12,26 @@ class DoctorLabsScreen extends ConsumerStatefulWidget {
 }
 
 class _DoctorLabsScreenState extends ConsumerState<DoctorLabsScreen> {
-  static const Color kNeonAccent = Color(0xFFFFFF00);
   String _searchQuery = '';
 
   @override
   Widget build(BuildContext context) {
     final labsAsync = ref.watch(labsProvider);
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF121212),
+      backgroundColor:
+          isDark ? const Color(0xFF121212) : theme.colorScheme.background,
       body: SafeArea(
         child: Column(
           children: [
             SearchAndFilterHeader(
               title: 'My Labs',
-              backgroundColor: const Color(0xFF121212),
-              accentColor: kNeonAccent,
+              backgroundColor:
+                  isDark ? const Color(0xFF121212) : theme.colorScheme.surface,
+              accentColor:
+                  isDark ? const Color(0xFFFFFF00) : theme.colorScheme.primary,
               onSearchChanged: (query) {
                 setState(() => _searchQuery = query.toLowerCase());
               },
@@ -35,13 +39,19 @@ class _DoctorLabsScreenState extends ConsumerState<DoctorLabsScreen> {
             ),
             Expanded(
               child: labsAsync.when(
-                loading: () => const Center(
-                  child: CircularProgressIndicator(color: kNeonAccent),
+                loading: () => Center(
+                  child: CircularProgressIndicator(
+                    color: isDark
+                        ? const Color(0xFFFFFF00)
+                        : theme.colorScheme.primary,
+                  ),
                 ),
                 error: (error, stack) => Center(
                   child: Text(
                     'Error: $error',
-                    style: const TextStyle(color: Colors.white),
+                    style: TextStyle(
+                      color: theme.colorScheme.onBackground,
+                    ),
                   ),
                 ),
                 data: (labs) {
@@ -58,13 +68,15 @@ class _DoctorLabsScreenState extends ConsumerState<DoctorLabsScreen> {
                           Icon(
                             Icons.science_outlined,
                             size: 64,
-                            color: Colors.white.withValues(alpha: 0.5),
+                            color:
+                                theme.colorScheme.onBackground.withOpacity(0.5),
                           ),
                           const SizedBox(height: 16),
                           Text(
                             'No labs found',
                             style: TextStyle(
-                              color: Colors.white.withValues(alpha: 0.7),
+                              color: theme.colorScheme.onBackground
+                                  .withOpacity(0.7),
                               fontSize: 18,
                             ),
                           ),
@@ -74,7 +86,9 @@ class _DoctorLabsScreenState extends ConsumerState<DoctorLabsScreen> {
                   }
 
                   return RefreshIndicator(
-                    color: kNeonAccent,
+                    color: isDark
+                        ? const Color(0xFFFFFF00)
+                        : theme.colorScheme.primary,
                     onRefresh: () =>
                         ref.read(labsProvider.notifier).fetchLabs(),
                     child: ListView.builder(
@@ -99,14 +113,18 @@ class _DoctorLabsScreenState extends ConsumerState<DoctorLabsScreen> {
   }
 
   void _showFilterDialog() {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
-          backgroundColor: const Color(0xFF1C1C1C),
-          title: const Text(
+          backgroundColor:
+              isDark ? const Color(0xFF1C1C1C) : theme.colorScheme.surface,
+          title: Text(
             'Filter Labs',
-            style: TextStyle(color: Colors.white),
+            style: TextStyle(color: theme.colorScheme.onSurface),
           ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -121,14 +139,18 @@ class _DoctorLabsScreenState extends ConsumerState<DoctorLabsScreen> {
               onPressed: () => Navigator.of(context).pop(),
               child: Text(
                 'Cancel',
-                style: TextStyle(color: Colors.white.withValues(alpha: 0.7)),
+                style: TextStyle(
+                  color: theme.colorScheme.onSurface.withOpacity(0.7),
+                ),
               ),
             ),
             ElevatedButton(
               onPressed: () => Navigator.of(context).pop(),
               style: ElevatedButton.styleFrom(
-                backgroundColor: kNeonAccent,
-                foregroundColor: Colors.black,
+                backgroundColor: isDark
+                    ? const Color(0xFFFFFF00)
+                    : theme.colorScheme.primary,
+                foregroundColor: isDark ? Colors.black : Colors.white,
               ),
               child: const Text('Apply'),
             ),
@@ -139,14 +161,17 @@ class _DoctorLabsScreenState extends ConsumerState<DoctorLabsScreen> {
   }
 
   Widget _buildFilterOption(String title) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return ListTile(
       title: Text(
         title,
-        style: const TextStyle(color: Colors.white),
+        style: TextStyle(color: theme.colorScheme.onSurface),
       ),
-      trailing: const Icon(
+      trailing: Icon(
         Icons.check_circle_outline,
-        color: kNeonAccent,
+        color: isDark ? const Color(0xFFFFFF00) : theme.colorScheme.primary,
       ),
       onTap: () {
         // Implement filter logic
