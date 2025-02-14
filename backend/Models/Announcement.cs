@@ -15,7 +15,7 @@ public class Announcement
     public List<string> Files { get; set; } = [];
 
     [BsonElement("Time")]
-    public DateTime Time { get; set; }
+    public DateTime Time { get; set; } = DateTime.UtcNow;
 
     [BsonElement("Comments")]
     public List<Comment> Comments { get; set; } = [];
