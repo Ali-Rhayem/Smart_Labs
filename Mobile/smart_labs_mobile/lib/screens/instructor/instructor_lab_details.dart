@@ -8,6 +8,7 @@ import 'package:smart_labs_mobile/widgets/instructor/lab_header.dart';
 import 'package:smart_labs_mobile/widgets/instructor/people_tab.dart';
 import 'package:smart_labs_mobile/widgets/instructor/session/sessions_tab.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:smart_labs_mobile/screens/instructor/edit_lab_screen.dart';
 
 var logger = Logger();
 
@@ -62,7 +63,12 @@ class InstructorLabDetailScreen extends ConsumerWidget {
                   color: theme.colorScheme.onSurface,
                 ),
                 onPressed: () {
-                  // TODO: Implement edit lab functionality
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => EditLabScreen(lab: currentLab),
+                    ),
+                  );
                 },
               ),
             ],
