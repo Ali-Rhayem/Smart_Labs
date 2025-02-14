@@ -19,6 +19,8 @@ class PeopleTab extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final studentsAsync = ref.watch(labStudentsProvider(lab.labId));
     final instructorsAsync = ref.watch(labInstructorsProvider(lab.labId));
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return SingleChildScrollView(
       child: Column(
@@ -59,10 +61,10 @@ class PeopleTab extends ConsumerWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10),
             child: Row(
               children: [
-                const Text(
+                Text(
                   'Students',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: theme.colorScheme.onBackground,
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
@@ -70,20 +72,27 @@ class PeopleTab extends ConsumerWidget {
                 const Spacer(),
                 IconButton(
                   onPressed: () => _showAddStudentsDialog(context, ref),
-                  icon: const Icon(Icons.person_add),
+                  icon: Icon(
+                    Icons.person_add,
+                    color: theme.colorScheme.onBackground,
+                  ),
                 ),
               ],
             ),
           ),
 
           studentsAsync.when(
-            loading: () => const Center(
-              child: CircularProgressIndicator(color: kNeonAccent),
+            loading: () => Center(
+              child: CircularProgressIndicator(
+                color: isDark ? kNeonAccent : theme.colorScheme.primary,
+              ),
             ),
             error: (error, stack) => Center(
               child: Text(
                 'Error: $error',
-                style: const TextStyle(color: Colors.white70),
+                style: TextStyle(
+                  color: theme.colorScheme.onBackground.withOpacity(0.7),
+                ),
               ),
             ),
             data: (students) {
@@ -92,7 +101,7 @@ class PeopleTab extends ConsumerWidget {
                   child: Text(
                     'No students enrolled',
                     style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.7),
+                      color: theme.colorScheme.onBackground.withOpacity(0.7),
                       fontSize: 16,
                     ),
                   ),
@@ -107,59 +116,143 @@ class PeopleTab extends ConsumerWidget {
                 itemBuilder: (context, index) {
                   final student = students[index];
                   return Card(
-                    color: const Color(0xFF1C1C1C),
-                    child: ExpansionTile(
-                      leading: student.imageUrl != null &&
-                              student.imageUrl!.isNotEmpty
-                          ? CircleAvatar(
-                              backgroundImage: NetworkImage(
-                                '${dotenv.env['IMAGE_BASE_URL']}/${student.imageUrl}',
-                              ),
-                            )
-                          : CircleAvatar(
-                              backgroundColor: kNeonAccent,
-                              child: Text(
-                                student.name[0].toUpperCase(),
-                                style: const TextStyle(
-                                  color: Colors.black,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                    margin:
+                        const EdgeInsets.symmetric(vertical: 4, horizontal: 10),
+                    color: isDark
+                        ? const Color(0xFF1C1C1C)
+                        : theme.colorScheme.surface,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      side: BorderSide(
+                        color: isDark ? Colors.white12 : Colors.black12,
+                        width: 1,
+                      ),
+                    ),
+                    elevation: isDark ? 0 : 1,
+                    child: student.faculty == null && student.major == null
+                        ? ListTile(
+                            leading: student.imageUrl != null &&
+                                    student.imageUrl!.isNotEmpty
+                                ? CircleAvatar(
+                                    backgroundImage: NetworkImage(
+                                      '${dotenv.env['IMAGE_BASE_URL']}/${student.imageUrl}',
+                                    ),
+                                  )
+                                : CircleAvatar(
+                                    backgroundColor: isDark
+                                        ? kNeonAccent
+                                        : theme.colorScheme.primary,
+                                    child: Text(
+                                      student.name[0].toUpperCase(),
+                                      style: TextStyle(
+                                        color: isDark
+                                            ? Colors.black
+                                            : Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                            title: Text(
+                              student.name,
+                              style: TextStyle(
+                                color: theme.colorScheme.onSurface,
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
-                      title: Text(
-                        student.name,
-                        style: const TextStyle(color: Colors.white),
-                      ),
-                      subtitle: Text(
-                        student.email,
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.7),
-                        ),
-                      ),
-                      trailing: IconButton(
-                        icon: const Icon(Icons.remove_circle_outline,
-                            color: Colors.red),
-                        onPressed: () =>
-                            _showRemoveStudentDialog(context, ref, student),
-                      ),
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              if (student.faculty != null)
-                                RowDetails(
-                                    label: 'Faculty', value: student.faculty!),
-                              if (student.major != null)
-                                RowDetails(
-                                    label: 'Major', value: student.major!),
-                              const SizedBox(height: 8),
-                            ],
+                            subtitle: Text(
+                              student.email,
+                              style: TextStyle(
+                                color: theme.colorScheme.onSurface
+                                    .withOpacity(0.7),
+                              ),
+                            ),
+                            trailing: IconButton(
+                              icon: const Icon(Icons.remove_circle_outline,
+                                  color: Colors.red),
+                              onPressed: () => _showRemoveStudentDialog(
+                                  context, ref, student),
+                            ),
+                          )
+                        : Theme(
+                            data: Theme.of(context).copyWith(
+                              dividerColor: Colors.transparent,
+                            ),
+                            child: ExpansionTile(
+                              leading: student.imageUrl != null &&
+                                      student.imageUrl!.isNotEmpty
+                                  ? CircleAvatar(
+                                      backgroundImage: NetworkImage(
+                                        '${dotenv.env['IMAGE_BASE_URL']}/${student.imageUrl}',
+                                      ),
+                                    )
+                                  : CircleAvatar(
+                                      backgroundColor: isDark
+                                          ? kNeonAccent
+                                          : theme.colorScheme.primary,
+                                      child: Text(
+                                        student.name[0].toUpperCase(),
+                                        style: TextStyle(
+                                          color: isDark
+                                              ? Colors.black
+                                              : Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                              title: Text(
+                                student.name,
+                                style: TextStyle(
+                                    color: theme.colorScheme.onSurface),
+                              ),
+                              subtitle: Text(
+                                student.email,
+                                style: TextStyle(
+                                  color: theme.colorScheme.onSurface
+                                      .withOpacity(0.7),
+                                ),
+                              ),
+                              trailing: IconButton(
+                                icon: const Icon(Icons.remove_circle_outline,
+                                    color: Colors.red),
+                                onPressed: () => _showRemoveStudentDialog(
+                                    context, ref, student),
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                side: BorderSide(
+                                  color: (isDark
+                                      ? Colors.white24
+                                      : Colors.black26),
+                                  width: 1,
+                                ),
+                              ),
+                              collapsedShape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.all(16.0),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      if (student.faculty != null)
+                                        RowDetails(
+                                            label: 'Faculty',
+                                            value: student.faculty!,
+                                            isDark: isDark),
+                                      if (student.major != null)
+                                        RowDetails(
+                                            label: 'Major',
+                                            value: student.major!,
+                                            isDark: isDark),
+                                      const SizedBox(height: 8),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
                   );
                 },
               );
@@ -170,10 +263,10 @@ class PeopleTab extends ConsumerWidget {
                 const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
             child: Row(
               children: [
-                const Text(
+                Text(
                   'Instructors',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: theme.colorScheme.onBackground,
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
@@ -181,19 +274,26 @@ class PeopleTab extends ConsumerWidget {
                 const Spacer(),
                 IconButton(
                   onPressed: () => _showAddInstructorsDialog(context, ref),
-                  icon: const Icon(Icons.person_add),
+                  icon: Icon(
+                    Icons.person_add,
+                    color: theme.colorScheme.onBackground,
+                  ),
                 ),
               ],
             ),
           ),
           instructorsAsync.when(
-            loading: () => const Center(
-              child: CircularProgressIndicator(color: kNeonAccent),
+            loading: () => Center(
+              child: CircularProgressIndicator(
+                color: isDark ? kNeonAccent : theme.colorScheme.primary,
+              ),
             ),
             error: (error, stack) => Center(
               child: Text(
                 'Error: $error',
-                style: const TextStyle(color: Colors.white70),
+                style: TextStyle(
+                  color: theme.colorScheme.onBackground.withOpacity(0.7),
+                ),
               ),
             ),
             data: (instructors) {
@@ -202,7 +302,7 @@ class PeopleTab extends ConsumerWidget {
                   child: Text(
                     'No instructors enrolled',
                     style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.7),
+                      color: theme.colorScheme.onBackground.withOpacity(0.7),
                       fontSize: 16,
                     ),
                   ),
@@ -217,59 +317,142 @@ class PeopleTab extends ConsumerWidget {
                 itemBuilder: (context, index) {
                   final instructor = instructors[index];
                   return Card(
-                    color: const Color(0xFF1C1C1C),
-                    child: ExpansionTile(
-                      leading: instructor.imageUrl != null
-                          ? CircleAvatar(
-                              backgroundImage: NetworkImage(
-                                '${dotenv.env['IMAGE_BASE_URL']}/${instructor.imageUrl}',
-                              ),
-                            )
-                          : CircleAvatar(
-                              backgroundColor: kNeonAccent,
-                              child: Text(
-                                instructor.name[0].toUpperCase(),
-                                style: const TextStyle(
-                                  color: Colors.black,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                    margin:
+                        const EdgeInsets.symmetric(vertical: 4, horizontal: 10),
+                    color: isDark
+                        ? const Color(0xFF1C1C1C)
+                        : theme.colorScheme.surface,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      side: BorderSide(
+                        color: isDark ? Colors.white12 : Colors.black12,
+                        width: 1,
+                      ),
+                    ),
+                    elevation: isDark ? 0 : 1,
+                    child: instructor.faculty == null &&
+                            instructor.major == null
+                        ? ListTile(
+                            leading: instructor.imageUrl != null
+                                ? CircleAvatar(
+                                    backgroundImage: NetworkImage(
+                                      '${dotenv.env['IMAGE_BASE_URL']}/${instructor.imageUrl}',
+                                    ),
+                                  )
+                                : CircleAvatar(
+                                    backgroundColor: isDark
+                                        ? kNeonAccent
+                                        : theme.colorScheme.primary,
+                                    child: Text(
+                                      instructor.name[0].toUpperCase(),
+                                      style: TextStyle(
+                                        color: isDark
+                                            ? Colors.black
+                                            : Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                            title: Text(
+                              instructor.name,
+                              style: TextStyle(
+                                color: theme.colorScheme.onSurface,
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
-                      title: Text(
-                        instructor.name,
-                        style: const TextStyle(color: Colors.white),
-                      ),
-                      subtitle: Text(
-                        instructor.email,
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.7),
-                        ),
-                      ),
-                      trailing: IconButton(
-                        icon: const Icon(Icons.remove_circle_outline,
-                            color: Colors.red),
-                        onPressed: () => _showRemoveInstructorDialog(
-                            context, ref, instructor),
-                      ),
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              if (instructor.faculty != null)
-                                RowDetails(
-                                    label: 'Faculty',
-                                    value: instructor.faculty!),
-                              if (instructor.major != null)
-                                RowDetails(
-                                    label: 'Major', value: instructor.major!),
-                              const SizedBox(height: 8),
-                            ],
+                            subtitle: Text(
+                              instructor.email,
+                              style: TextStyle(
+                                color: theme.colorScheme.onSurface
+                                    .withOpacity(0.7),
+                              ),
+                            ),
+                            trailing: IconButton(
+                              icon: const Icon(Icons.remove_circle_outline,
+                                  color: Colors.red),
+                              onPressed: () => _showRemoveInstructorDialog(
+                                  context, ref, instructor),
+                            ),
+                          )
+                        : Theme(
+                            data: Theme.of(context).copyWith(
+                              dividerColor: Colors.transparent,
+                            ),
+                            child: ExpansionTile(
+                              leading: instructor.imageUrl != null
+                                  ? CircleAvatar(
+                                      backgroundImage: NetworkImage(
+                                        '${dotenv.env['IMAGE_BASE_URL']}/${instructor.imageUrl}',
+                                      ),
+                                    )
+                                  : CircleAvatar(
+                                      backgroundColor: isDark
+                                          ? kNeonAccent
+                                          : theme.colorScheme.primary,
+                                      child: Text(
+                                        instructor.name[0].toUpperCase(),
+                                        style: TextStyle(
+                                          color: isDark
+                                              ? Colors.black
+                                              : Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                              title: Text(
+                                instructor.name,
+                                style: TextStyle(
+                                    color: theme.colorScheme.onSurface),
+                              ),
+                              subtitle: Text(
+                                instructor.email,
+                                style: TextStyle(
+                                  color: theme.colorScheme.onSurface
+                                      .withOpacity(0.7),
+                                ),
+                              ),
+                              trailing: IconButton(
+                                icon: const Icon(Icons.remove_circle_outline,
+                                    color: Colors.red),
+                                onPressed: () => _showRemoveInstructorDialog(
+                                    context, ref, instructor),
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                side: BorderSide(
+                                  color: (isDark
+                                      ? Colors.white24
+                                      : Colors.black26),
+                                  width: 1,
+                                ),
+                              ),
+                              collapsedShape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.all(16.0),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      if (instructor.faculty != null)
+                                        RowDetails(
+                                            label: 'Faculty',
+                                            value: instructor.faculty!,
+                                            isDark: isDark),
+                                      if (instructor.major != null)
+                                        RowDetails(
+                                            label: 'Major',
+                                            value: instructor.major!,
+                                            isDark: isDark),
+                                      const SizedBox(height: 8),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
                   );
                 },
               );
@@ -283,33 +466,46 @@ class PeopleTab extends ConsumerWidget {
   Future<void> _showAddStudentsDialog(
       BuildContext context, WidgetRef ref) async {
     final TextEditingController emailsController = TextEditingController();
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return showDialog(
       context: context,
       builder: (BuildContext dialogContext) => AlertDialog(
-        backgroundColor: const Color(0xFF1C1C1C),
-        title:
-            const Text('Add Students', style: TextStyle(color: Colors.white)),
+        backgroundColor:
+            isDark ? const Color(0xFF1C1C1C) : theme.colorScheme.surface,
+        title: Text(
+          'Add Students',
+          style: TextStyle(color: theme.colorScheme.onSurface),
+        ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text(
+            Text(
               'Enter student emails (one per line):',
-              style: TextStyle(color: Colors.white70),
+              style: TextStyle(
+                  color: theme.colorScheme.onSurface.withOpacity(0.7)),
             ),
             const SizedBox(height: 8),
             TextField(
               controller: emailsController,
-              style: const TextStyle(color: Colors.white),
+              style: TextStyle(color: theme.colorScheme.onSurface),
               maxLines: 5,
               decoration: InputDecoration(
                 hintText: 'student1@example.com\nstudent2@example.com',
-                hintStyle:
-                    TextStyle(color: Colors.white.withValues(alpha: 0.3)),
+                hintStyle: TextStyle(
+                  color: theme.colorScheme.onSurface.withOpacity(0.3),
+                ),
                 border: const OutlineInputBorder(),
                 enabledBorder: OutlineInputBorder(
-                  borderSide:
-                      BorderSide(color: Colors.white.withValues(alpha: 0.3)),
+                  borderSide: BorderSide(
+                    color: theme.colorScheme.onSurface.withOpacity(0.3),
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(
+                    color: isDark ? kNeonAccent : theme.colorScheme.primary,
+                  ),
                 ),
               ),
             ),
@@ -318,8 +514,12 @@ class PeopleTab extends ConsumerWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child:
-                const Text('Cancel', style: TextStyle(color: Colors.white70)),
+            child: Text(
+              'Cancel',
+              style: TextStyle(
+                color: theme.colorScheme.onSurface.withOpacity(0.7),
+              ),
+            ),
           ),
           TextButton(
             onPressed: () async {
@@ -346,7 +546,12 @@ class PeopleTab extends ConsumerWidget {
                 }
               }
             },
-            child: const Text('Add', style: TextStyle(color: kNeonAccent)),
+            child: Text(
+              'Add',
+              style: TextStyle(
+                color: isDark ? kNeonAccent : theme.colorScheme.primary,
+              ),
+            ),
           ),
         ],
       ),
@@ -355,21 +560,30 @@ class PeopleTab extends ConsumerWidget {
 
   Future<void> _showRemoveStudentDialog(
       BuildContext context, WidgetRef ref, User student) async {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return showDialog(
       context: context,
       builder: (BuildContext dialogContext) => AlertDialog(
-        backgroundColor: const Color(0xFF1C1C1C),
-        title:
-            const Text('Remove Student', style: TextStyle(color: Colors.white)),
+        backgroundColor:
+            isDark ? const Color(0xFF1C1C1C) : theme.colorScheme.surface,
+        title: Text(
+          'Remove Student',
+          style: TextStyle(color: theme.colorScheme.onSurface),
+        ),
         content: Text(
           'Are you sure you want to remove ${student.name} from this lab?',
-          style: const TextStyle(color: Colors.white70),
+          style: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.7)),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child:
-                const Text('Cancel', style: TextStyle(color: Colors.white70)),
+            child: Text(
+              'Cancel',
+              style: TextStyle(
+                  color: theme.colorScheme.onSurface.withOpacity(0.7)),
+            ),
           ),
           TextButton(
             onPressed: () async {
@@ -398,56 +612,68 @@ class PeopleTab extends ConsumerWidget {
   Future<void> _showAddInstructorsDialog(
       BuildContext context, WidgetRef ref) async {
     final TextEditingController emailsController = TextEditingController();
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return showDialog(
       context: context,
       builder: (BuildContext dialogContext) => AlertDialog(
-        backgroundColor: const Color(0xFF1C1C1C),
-        title: const Text(
+        backgroundColor:
+            isDark ? const Color(0xFF1C1C1C) : theme.colorScheme.surface,
+        title: Text(
           'Add Instructors',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: theme.colorScheme.onSurface),
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text(
+            Text(
               'Enter instructor emails (one per line):',
-              style: TextStyle(color: Colors.white70),
+              style: TextStyle(
+                  color: theme.colorScheme.onSurface.withOpacity(0.7)),
             ),
             const SizedBox(height: 8),
             TextField(
               controller: emailsController,
-              style: const TextStyle(color: Colors.white),
+              style: TextStyle(color: theme.colorScheme.onSurface),
               maxLines: 5,
               decoration: InputDecoration(
                 hintText: 'instructor1@example.com\ninstructor2@example.com',
-                hintStyle:
-                    TextStyle(color: Colors.white.withValues(alpha: 0.3)),
+                hintStyle: TextStyle(
+                  color: theme.colorScheme.onSurface.withOpacity(0.3),
+                ),
                 border: const OutlineInputBorder(),
                 enabledBorder: OutlineInputBorder(
-                  borderSide:
-                      BorderSide(color: Colors.white.withValues(alpha: 0.3)),
+                  borderSide: BorderSide(
+                    color: theme.colorScheme.onSurface.withOpacity(0.3),
+                  ),
                 ),
-                focusedBorder: const OutlineInputBorder(
-                  borderSide: BorderSide(color: kNeonAccent),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(
+                    color: isDark ? kNeonAccent : theme.colorScheme.primary,
+                  ),
                 ),
                 filled: true,
-                fillColor: Colors.black12,
+                fillColor: isDark ? Colors.black12 : theme.colorScheme.surface,
               ),
             ),
             const SizedBox(height: 8),
-            const Text(
+            Text(
               'Note: Instructors will receive an email invitation to join the lab.',
-              style: TextStyle(color: Colors.white54, fontSize: 12),
+              style: TextStyle(
+                color: theme.colorScheme.onSurface.withOpacity(0.5),
+                fontSize: 12,
+              ),
             ),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: const Text(
+            child: Text(
               'Cancel',
-              style: TextStyle(color: Colors.white70),
+              style: TextStyle(
+                  color: theme.colorScheme.onSurface.withOpacity(0.7)),
             ),
           ),
           ElevatedButton(
@@ -467,8 +693,8 @@ class PeopleTab extends ConsumerWidget {
                 if (dialogContext.mounted) {
                   Navigator.pop(dialogContext);
                   ScaffoldMessenger.of(dialogContext).showSnackBar(
-                    const SnackBar(
-                      content: Text('Instructors added successfully'),
+                    SnackBar(
+                      content: const Text('Instructors added successfully'),
                       backgroundColor: Colors.green,
                     ),
                   );
@@ -485,8 +711,9 @@ class PeopleTab extends ConsumerWidget {
               }
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: kNeonAccent,
-              foregroundColor: Colors.black,
+              backgroundColor: isDark ? kNeonAccent : theme.colorScheme.primary,
+              foregroundColor:
+                  isDark ? Colors.black : theme.colorScheme.onPrimary,
             ),
             child: const Text('Add Instructors'),
           ),
@@ -497,24 +724,32 @@ class PeopleTab extends ConsumerWidget {
 
   Future<void> _showRemoveInstructorDialog(
       BuildContext context, WidgetRef ref, User instructor) async {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final secureStorage = SecureStorage();
     final currentUserId = await secureStorage.readId();
 
     return showDialog(
       context: context,
       builder: (BuildContext dialogContext) => AlertDialog(
-        backgroundColor: const Color(0xFF1C1C1C),
-        title: const Text('Remove Instructor',
-            style: TextStyle(color: Colors.white)),
+        backgroundColor:
+            isDark ? const Color(0xFF1C1C1C) : theme.colorScheme.surface,
+        title: Text(
+          'Remove Instructor',
+          style: TextStyle(color: theme.colorScheme.onSurface),
+        ),
         content: Text(
           'Are you sure you want to remove ${instructor.name} from this lab?',
-          style: const TextStyle(color: Colors.white70),
+          style: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.7)),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child:
-                const Text('Cancel', style: TextStyle(color: Colors.white70)),
+            child: Text(
+              'Cancel',
+              style: TextStyle(
+                  color: theme.colorScheme.onSurface.withOpacity(0.7)),
+            ),
           ),
           TextButton(
             onPressed: () async {
