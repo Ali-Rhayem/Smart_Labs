@@ -173,6 +173,61 @@ namespace backend.Controllers
             return Ok(new { message = "User updated successfully." });
         }
 
+        // POST: api/user/changePassword
+        [HttpPost("changePassword")]
+        [Authorize]
+        // object from body
+        public async Task<ActionResult> ChangePassword([FromBody] JsonElement body)
+        {
+
+            var old_password = body.GetProperty("old_password").GetString();
+            var new_password = body.GetProperty("new_password").GetString();
+            var confirm_password = body.GetProperty("confirm_password").GetString();
+
+            if (string.IsNullOrEmpty(old_password) || string.IsNullOrEmpty(new_password) || string.IsNullOrEmpty(confirm_password))
+            {
+                return BadRequest(new { errors = "all fields are required." });
+            }
+
+            // Check the user in the database
+            var userIdClaim = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null)
+                return Unauthorized(new { errors = "Invalid user." });
+
+            var user = await _userService.GetUserById(int.Parse(userIdClaim.Value));
+            if (user == null)
+                return Unauthorized(new { errors = "Invalid user." });
+
+            if (!BCrypt.Net.BCrypt.Verify(old_password, user.Password))
+                return Unauthorized(new { errors = "Invalid password." });
+
+            if (new_password == old_password || BCrypt.Net.BCrypt.Verify(new_password, user.Password))
+                return BadRequest(new { errors = "New password must be different from the old password." });
+
+            if (new_password != confirm_password)
+                return BadRequest(new { errors = "Passwords do not match." });
+
+            // validate strongth of new password
+            if (new_password.Length < 8)
+                return BadRequest(new { errors = "Password must be at least 8 characters long." });
+            else if (!new_password.Any(char.IsUpper))
+                return BadRequest(new { errors = "Password must contain at least one uppercase letter." });
+            else if (!new_password.Any(char.IsLower))
+                return BadRequest(new { errors = "Password must contain at least one lowercase letter." });
+            else if (!new_password.Any(char.IsDigit))
+                return BadRequest(new { errors = "Password must contain at least one digit." });
+            else if (!new_password.Any(c => !char.IsLetterOrDigit(c)))
+                return BadRequest(new { errors = "Password must contain at least one special character." });
+
+            // Update the user's password
+            var result = await _userService.ChangePassword(user.Id, new_password);
+
+            if (!result)
+                return StatusCode(500, new { errors = "Failed to update user." });
+
+            return Ok(new { message = "Password updated successfully." });
+        }
+
     }
 
 }
