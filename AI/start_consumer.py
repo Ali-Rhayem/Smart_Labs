@@ -6,7 +6,6 @@ import time
 import random
 import threading
 import sys
-
 import os
 from dotenv import load_dotenv
 load_dotenv()
@@ -34,6 +33,14 @@ def get_random_image():
     
     return os.path.join(folder_path, random.choice(images))
 
+def take_image_from_camera():
+    try:
+        capture_command = "sudo rpicam-still --timeout 100 -o ~/Desktop/image.jpg --vflip"
+        subprocess.run(capture_command, shell=True, check=True)
+        return "~/Desktop/image.jpg"
+    except subprocess.CalledProcessError as e:
+        print(f"Failed to capture image: {e}")
+        return None
 # Create a KafkaProducer instance to be reused.
 producer = KafkaProducer(
     bootstrap_servers=os.getenv("BOOTSTRAP_SERVERS"),
@@ -45,11 +52,9 @@ producer = KafkaProducer(
 producing_event = threading.Event()
 
 def produce_image(command_data):
-    """
-    Produce one image message to the "analyze" topic using a new random image.
-    """
-    image_path = get_random_image()
-    # Update the command data with the image encoding.
+
+    # image_path = get_random_image()
+    image_path = take_image_from_camera()
     command_data["encoding"] = images_to_base64(image_path)
     command_data["time"] = datetime.datetime.now(datetime.UTC).strftime("%H:%M:%S")
     future = producer.send(os.getenv("ANALYSIS_TOPIC"), value=command_data)
