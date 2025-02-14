@@ -1,0 +1,497 @@
+import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
+import 'package:smart_labs_mobile/models/lab_model.dart';
+import 'package:smart_labs_mobile/models/lab_schedule.dart';
+import 'package:smart_labs_mobile/providers/lab_provider.dart';
+import 'package:smart_labs_mobile/services/api_service.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:smart_labs_mobile/widgets/lab_schedules_list.dart';
+import 'package:smart_labs_mobile/widgets/ppe_dropdwon.dart';
+import 'package:smart_labs_mobile/widgets/time_selectors.dart';
+import 'package:smart_labs_mobile/widgets/week_day_selector.dart';
+import 'package:smart_labs_mobile/providers/room_provider.dart';
+import 'package:smart_labs_mobile/utils/date_time_utils.dart';
+
+var logger = Logger();
+
+class EditLabScreen extends ConsumerStatefulWidget {
+  final Lab lab;
+
+  const EditLabScreen({super.key, required this.lab});
+
+  @override
+  ConsumerState<EditLabScreen> createState() => _EditLabScreenState();
+}
+
+class _EditLabScreenState extends ConsumerState<EditLabScreen> {
+  final _formKey = GlobalKey<FormState>();
+  late TextEditingController _labNameController;
+  late TextEditingController _labCodeController;
+  late TextEditingController _descriptionController;
+  late TextEditingController _roomController;
+  late List<LabSchedule> _schedules;
+
+  int _selectedWeekday = DateTime.now().weekday;
+  TimeOfDay _startTime = TimeOfDay.now();
+  TimeOfDay _endTime = TimeOfDay.now();
+  final ApiService _apiService = ApiService();
+
+  final List<String> _selectedPPEIds = [];
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize controllers with existing lab data
+    _labNameController = TextEditingController(text: widget.lab.labName);
+    _labCodeController = TextEditingController(text: widget.lab.labCode);
+    _descriptionController =
+        TextEditingController(text: widget.lab.description);
+    _roomController = TextEditingController(text: widget.lab.room ?? '');
+    _schedules = List.from(widget.lab.schedule);
+
+    // Initialize selected PPE IDs from the lab's PPE string
+    final ppeList = widget.lab.ppe.split(', ');
+    _selectedPPEIds.addAll(ppeList.where((ppe) => ppe.isNotEmpty));
+  }
+
+  @override
+  void dispose() {
+    _labNameController.dispose();
+    _labCodeController.dispose();
+    _descriptionController.dispose();
+    _roomController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    return Scaffold(
+      backgroundColor:
+          isDark ? const Color(0xFF121212) : theme.colorScheme.background,
+      appBar: AppBar(
+        title: const Text('Edit Lab'),
+        backgroundColor:
+            isDark ? const Color(0xFF1C1C1C) : theme.colorScheme.surface,
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Lab Name',
+                style: TextStyle(
+                  color: theme.colorScheme.onSurface,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 10),
+              _buildTextField(
+                controller: _labNameController,
+                label: 'Name',
+                validator: (value) =>
+                    value?.isEmpty ?? true ? 'Please enter lab name' : null,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Lab Code',
+                style: TextStyle(
+                  color: theme.colorScheme.onSurface,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 10),
+              _buildTextField(
+                controller: _labCodeController,
+                label: 'Code',
+                validator: (value) =>
+                    value?.isEmpty ?? true ? 'Please enter lab code' : null,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Lab Description',
+                style: TextStyle(
+                  color: theme.colorScheme.onSurface,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 10),
+              _buildTextField(
+                controller: _descriptionController,
+                label: 'Description',
+                maxLines: 3,
+                validator: (value) =>
+                    value?.isEmpty ?? true ? 'Please enter description' : null,
+              ),
+              const SizedBox(height: 16),
+              PPEDropdown(
+                selectedPPEIds: _selectedPPEIds,
+                onAddPPE: (ppeId, ppeName) {
+                  setState(() {
+                    _selectedPPEIds.add(ppeId);
+                  });
+                },
+                onRemovePPE: (ppeId, ppeName) {
+                  setState(() {
+                    _selectedPPEIds.remove(ppeId);
+                  });
+                },
+              ),
+              const SizedBox(height: 16),
+              WeekdaySelector(
+                selectedWeekday: _selectedWeekday,
+                onWeekdayChanged: (newDay) {
+                  setState(() {
+                    _selectedWeekday = newDay;
+                  });
+                },
+              ),
+              const SizedBox(height: 16),
+              TimeSelectors(
+                label: 'Lab Schedule',
+                startTime: _startTime,
+                endTime: _endTime,
+                onSelectStartTime: () => _selectTime(true),
+                onSelectEndTime: () => _selectTime(false),
+              ),
+              const SizedBox(height: 16),
+              LabSchedulesList(
+                schedules: _schedules,
+                onAddSchedule: _addSchedule,
+                onRemoveSchedule: (schedule) {
+                  setState(() {
+                    _schedules.remove(schedule);
+                  });
+                },
+              ),
+              const SizedBox(height: 16),
+              _buildRoomDropdown(),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: _submitForm,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: isDark
+                        ? const Color(0xFFFFFF00)
+                        : theme.colorScheme.primary,
+                    foregroundColor:
+                        isDark ? Colors.black : theme.colorScheme.onPrimary,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: Text(
+                    'Save Changes',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color:
+                          isDark ? Colors.black : theme.colorScheme.onPrimary,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    int maxLines = 1,
+    String? Function(String?)? validator,
+  }) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    return TextFormField(
+      controller: controller,
+      validator: validator,
+      maxLines: maxLines,
+      style: TextStyle(color: theme.colorScheme.onSurface),
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle:
+            TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.7)),
+        filled: true,
+        fillColor: isDark ? const Color(0xFF1C1C1C) : theme.colorScheme.surface,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide:
+              BorderSide(color: theme.colorScheme.onSurface.withOpacity(0.2)),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide:
+              BorderSide(color: theme.colorScheme.onSurface.withOpacity(0.2)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isDark ? const Color(0xFFFFFF00) : theme.colorScheme.primary,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _selectTime(bool isStartTime) async {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: isStartTime ? _startTime : _endTime,
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: isDark
+                ? const ColorScheme.dark(
+                    primary: Color(0xFFFFFF00),
+                    onPrimary: Colors.black,
+                    surface: Color(0xFF1C1C1C),
+                    onSurface: Colors.white,
+                  )
+                : ColorScheme.light(
+                    primary: theme.colorScheme.primary,
+                    onPrimary: theme.colorScheme.onPrimary,
+                    surface: theme.colorScheme.surface,
+                    onSurface: theme.colorScheme.onSurface,
+                  ),
+          ),
+          child: child!,
+        );
+      },
+    );
+    if (picked != null) {
+      setState(() {
+        if (isStartTime) {
+          _startTime = picked;
+        } else {
+          _endTime = picked;
+        }
+      });
+    }
+  }
+
+  void _addSchedule() {
+    setState(() {
+      _schedules.add(
+        LabSchedule(
+          dayOfWeek: getWeekdayName(_selectedWeekday),
+          startTime: formatTimeToHHMM(_startTime),
+          endTime: formatTimeToHHMM(_endTime),
+        ),
+      );
+    });
+  }
+
+  Widget _buildRoomDropdown() {
+    return Consumer(
+      builder: (context, ref, child) {
+        final theme = Theme.of(context);
+        final isDark = theme.brightness == Brightness.dark;
+        final roomsAsync = ref.watch(roomsProvider);
+
+        return roomsAsync.when(
+          loading: () => CircularProgressIndicator(
+            color: isDark ? const Color(0xFFFFFF00) : theme.colorScheme.primary,
+          ),
+          error: (error, stack) => Text(
+            'Error: $error',
+            style: TextStyle(color: theme.colorScheme.error),
+          ),
+          data: (rooms) {
+            // Make sure the current room is in the list
+            if (_roomController.text.isNotEmpty &&
+                !rooms.any((room) => room.name == _roomController.text)) {
+              rooms = [...rooms];
+              rooms.add(Room(id: '-1', name: _roomController.text));
+            }
+
+            return DropdownButtonFormField<String>(
+              value:
+                  _roomController.text.isNotEmpty ? _roomController.text : null,
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: isDark
+                    ? const Color(0xFF1C1C1C)
+                    : theme.colorScheme.surface,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(
+                    color: theme.colorScheme.onSurface.withOpacity(0.2),
+                  ),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(
+                    color: theme.colorScheme.onSurface.withOpacity(0.2),
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(
+                    color: isDark
+                        ? const Color(0xFFFFFF00)
+                        : theme.colorScheme.primary,
+                  ),
+                ),
+              ),
+              dropdownColor:
+                  isDark ? const Color(0xFF1C1C1C) : theme.colorScheme.surface,
+              style: TextStyle(color: theme.colorScheme.onSurface),
+              hint: Text(
+                'Select Room',
+                style: TextStyle(
+                  color: theme.colorScheme.onSurface.withOpacity(0.7),
+                ),
+              ),
+              items: rooms.map((room) {
+                return DropdownMenuItem(
+                  value: room.name,
+                  child: Text(room.name),
+                );
+              }).toList(),
+              onChanged: (value) {
+                setState(() {
+                  _roomController.text = value ?? '';
+                });
+              },
+              validator: (value) =>
+                  value == null ? 'Please select a room' : null,
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Future<void> _submitForm() async {
+    if (_formKey.currentState?.validate() ?? false) {
+      if (_selectedPPEIds.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please select required PPE')),
+        );
+        return;
+      }
+      if (_schedules.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please add at least one schedule')),
+        );
+        return;
+      }
+
+      // Check if any changes were made to the lab data
+      bool hasLabChanges = _labNameController.text != widget.lab.labName ||
+          _labCodeController.text != widget.lab.labCode ||
+          _descriptionController.text != widget.lab.description ||
+          _roomController.text != (widget.lab.room ?? '') ||
+          !_areSchedulesEqual(_schedules, widget.lab.schedule);
+
+      // Check if PPE changed
+      final originalPPEList =
+          widget.lab.ppe.split(', ').where((ppe) => ppe.isNotEmpty).toList();
+      bool hasPPEChanges = !_areListsEqual(_selectedPPEIds, originalPPEList);
+
+      if (!hasLabChanges && !hasPPEChanges) {
+        if (mounted) {
+          Navigator.pop(context);
+        }
+        return;
+      }
+
+      try {
+        // Only update lab details if there are changes
+        if (hasLabChanges) {
+          final labData = {
+            "labCode": _labCodeController.text,
+            "labName": _labNameController.text,
+            "schedule": _schedules.map((s) => s.toJson()).toList(),
+            "description": _descriptionController.text,
+            "endLab": false,
+            "room": _roomController.text,
+          };
+
+          final labResponse =
+              await _apiService.put('/Lab/${widget.lab.labId}', labData);
+          if (!labResponse['success']) {
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                    content:
+                        Text(labResponse['message'] ?? 'Failed to update lab')),
+              );
+            }
+            return;
+          }
+        }
+
+        // Only update PPE if there are changes
+        if (hasPPEChanges) {
+          final ppeResponse = await _apiService.postRaw(
+            '/Lab/${widget.lab.labId}/ppe',
+            _selectedPPEIds,
+          );
+
+          if (!ppeResponse['success']) {
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                    content:
+                        Text(ppeResponse['message'] ?? 'Failed to update PPE')),
+              );
+            }
+            return;
+          }
+        }
+
+        // If we reach here, all updates were successful
+        if (mounted) {
+          await ref.read(labsProvider.notifier).fetchLabs();
+          Navigator.pop(context);
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Failed to update lab: $e')),
+          );
+        }
+      }
+    }
+  }
+
+  // Helper method to compare schedules
+  bool _areSchedulesEqual(List<LabSchedule> a, List<LabSchedule> b) {
+    if (a.length != b.length) return false;
+    for (int i = 0; i < a.length; i++) {
+      if (a[i].dayOfWeek != b[i].dayOfWeek ||
+          a[i].startTime != b[i].startTime ||
+          a[i].endTime != b[i].endTime) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  // Helper method to compare lists
+  bool _areListsEqual(List<String> a, List<String> b) {
+    if (a.length != b.length) return false;
+    final setA = Set.from(a);
+    final setB = Set.from(b);
+    return setA.difference(setB).isEmpty && setB.difference(setA).isEmpty;
+  }
+}
