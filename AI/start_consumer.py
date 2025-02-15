@@ -53,8 +53,8 @@ producing_event = threading.Event()
 
 def produce_image(command_data):
 
-    # image_path = get_random_image()
-    image_path = take_image_from_camera()
+    image_path = get_random_image()
+    # image_path = take_image_from_camera()
     command_data["encoding"] = images_to_base64(image_path)
     command_data["time"] = datetime.datetime.now(datetime.UTC).strftime("%H:%M:%S")
     future = producer.send(os.getenv("ANALYSIS_TOPIC"), value=command_data)
@@ -80,11 +80,11 @@ def periodic_producer(command_data):
 
 # Set up the consumer.
 topic = os.getenv("RECORDING_TOPIC")
-ROOM = 'B-103'
+
 consumer = KafkaConsumer(
     topic,
     bootstrap_servers=os.getenv("BOOTSTRAP_SERVERS"),
-    group_id=ROOM,
+    group_id=os.getenv("ROOM_GROUP"),
     auto_offset_reset='latest',
     enable_auto_commit=True,
     value_deserializer=lambda x: x.decode('utf-8'),
