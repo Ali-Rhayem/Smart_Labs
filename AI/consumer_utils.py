@@ -30,7 +30,7 @@ def display_image(img_rgb):
     plt.axis('off')  # Hide the axes for better visualization
     plt.show()
 
-def analyze_image(base64_str, image_path):
+def analyze_image(base64_str, image_name):
     global model
     if model is None:
         model = YOLO(model_path)
@@ -38,23 +38,30 @@ def analyze_image(base64_str, image_path):
     if base64_str is None:
         raise ValueError("Failed to import the input image.")
     
+    # Decode the base64 string to image data
     image_data = base64.b64decode(base64_str)
     
+    # Convert image data to numpy array
     np_arr = np.frombuffer(image_data, np.uint8)
     image = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
     
-    image_array = np.array(image)
-
-    results = model.predict(source=image_array)
+    # Run the YOLO model on the image
+    results = model.predict(source=image)
     
+    # Generate the annotated image
     annotated_image = results[0].plot()  # Returns image with annotations
     
     # Save the annotated image to the specified path
     if not os.path.exists("./images"):
         os.makedirs("./images")
-    cv2.imwrite(os.path.join(f"./images/{image_path}"), annotated_image)
     
-    return results, image
+    # Save the annotated image
+    print("Image NAME ",image_name)
+    save_path = os.path.join("./images", image_name)
+    print("SAVING THE IMAGE at ", save_path)
+    cv2.imwrite(save_path, annotated_image)
+    
+    return results, annotated_image
     
 def facenet_embed(img_rgb: np.ndarray):
     try:
