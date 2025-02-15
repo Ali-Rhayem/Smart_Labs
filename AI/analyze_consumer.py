@@ -38,9 +38,9 @@ try:
             lab_id = data["lab_id"]
             date = datetime.date.today().strftime("%Y-%m-%d")
             time_data = data["time"]
-            image_path = data["image_path"]
+            image_name = data["image_name"]
 
-            results, image = analyze_image(image_base64,image_path)
+            results, image = analyze_image(image_base64,image_name)
 
             person_objs = []
             faces = []
