@@ -104,6 +104,30 @@ const LabPage: React.FC = () => {
 		}
 	};
 
+	const handleAddStudent = async (emails: string[]) => {
+		try {
+			const students_ids = await labService.addStudents(lab.id, emails);
+			queryClient.invalidateQueries({
+				queryKey: ["labs", `${user?.role}`, user?.id],
+			});
+			// add students ids on the students array in lab
+			setLab((prev: any) => ({
+				...prev,
+				students: [...prev.students, ...students_ids],
+			}));
+			queryClient.invalidateQueries({
+				queryKey: ["labStudents", lab.id],
+			});
+			setAlertMessage("Students added successfully");
+			setSeverity("success");
+			setOpenSnackbar(true);
+		} catch (err) {
+			setAlertMessage("Failed to add students");
+			setSeverity("error");
+			setOpenSnackbar(true);
+		}
+	};
+
 	const handleEditLab = async (data: Partial<UpdateLabDto>) => {
 		try {
 			await labService.updateLab(lab.id, data);
@@ -321,6 +345,8 @@ const LabPage: React.FC = () => {
 					students={students}
 					isLoading={usersLoading}
 					canManage={canManageLab}
+					onAddInstructor={() => {}}
+					onAddStudent={handleAddStudent}
 					onRemoveInstructor={handleRemoveInstructor}
 					onRemoveStudent={handleRemoveStudent}
 				/>
