@@ -42,59 +42,59 @@ class TimeSelectors extends StatelessWidget {
         Row(
           children: [
             Expanded(
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 16,
-                ),
-                decoration: BoxDecoration(
-                  color: isDark
-                      ? const Color(0xFF1C1C1C)
-                      : theme.colorScheme.surface,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: isDark
-                        ? Colors.white24
-                        : theme.colorScheme.onSurface.withOpacity(0.2),
+              child: InkWell(
+                onTap: () async {
+                  final picked = await showTimePicker(
+                    context: context,
+                    initialTime: startTime,
+                    builder: (context, child) {
+                      return Theme(
+                        data: Theme.of(context).copyWith(
+                          colorScheme: isDark
+                              ? const ColorScheme.dark(
+                                  primary: Color(0xFFFFFF00),
+                                  onPrimary: Colors.black,
+                                  surface: Color(0xFF1C1C1C),
+                                  onSurface: Colors.white,
+                                )
+                              : theme.colorScheme,
+                        ),
+                        child: child!,
+                      );
+                    },
+                  );
+                  if (picked != null) {
+                    onSelectStartTime(picked);
+                  }
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 16,
                   ),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Start Time',
-                      style: TextStyle(
-                        color: theme.colorScheme.onSurface.withOpacity(0.7),
-                        fontSize: 12,
-                      ),
+                  decoration: BoxDecoration(
+                    color: isDark
+                        ? const Color(0xFF1C1C1C)
+                        : theme.colorScheme.surface,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: isDark
+                          ? Colors.white24
+                          : theme.colorScheme.onSurface.withOpacity(0.2),
                     ),
-                    const SizedBox(height: 4),
-                    InkWell(
-                      onTap: () async {
-                        final picked = await showTimePicker(
-                          context: context,
-                          initialTime: startTime,
-                          builder: (context, child) {
-                            return Theme(
-                              data: Theme.of(context).copyWith(
-                                colorScheme: isDark
-                                    ? const ColorScheme.dark(
-                                        primary: Color(0xFFFFFF00),
-                                        onPrimary: Colors.black,
-                                        surface: Color(0xFF1C1C1C),
-                                        onSurface: Colors.white,
-                                      )
-                                    : theme.colorScheme,
-                              ),
-                              child: child!,
-                            );
-                          },
-                        );
-                        if (picked != null) {
-                          onSelectStartTime(picked);
-                        }
-                      },
-                      child: Text(
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Start Time',
+                        style: TextStyle(
+                          color: theme.colorScheme.onSurface.withOpacity(0.7),
+                          fontSize: 12,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
                         startTime.format(context),
                         style: TextStyle(
                           color: theme.colorScheme.onSurface,
@@ -102,66 +102,66 @@ class TimeSelectors extends StatelessWidget {
                           fontWeight: FontWeight.w500,
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
             const SizedBox(width: 16),
             Expanded(
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 16,
-                ),
-                decoration: BoxDecoration(
-                  color: isDark
-                      ? const Color(0xFF1C1C1C)
-                      : theme.colorScheme.surface,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: isDark
-                        ? Colors.white24
-                        : theme.colorScheme.onSurface.withOpacity(0.2),
+              child: InkWell(
+                onTap: () async {
+                  final picked = await showTimePicker(
+                    context: context,
+                    initialTime: endTime,
+                    builder: (context, child) {
+                      return Theme(
+                        data: Theme.of(context).copyWith(
+                          colorScheme: isDark
+                              ? const ColorScheme.dark(
+                                  primary: Color(0xFFFFFF00),
+                                  onPrimary: Colors.black,
+                                  surface: Color(0xFF1C1C1C),
+                                  onSurface: Colors.white,
+                                )
+                              : theme.colorScheme,
+                        ),
+                        child: child!,
+                      );
+                    },
+                  );
+                  if (picked != null) {
+                    onSelectEndTime(picked);
+                  }
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 16,
                   ),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'End Time',
-                      style: TextStyle(
-                        color: theme.colorScheme.onSurface.withOpacity(0.7),
-                        fontSize: 12,
-                      ),
+                  decoration: BoxDecoration(
+                    color: isDark
+                        ? const Color(0xFF1C1C1C)
+                        : theme.colorScheme.surface,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: isDark
+                          ? Colors.white24
+                          : theme.colorScheme.onSurface.withOpacity(0.2),
                     ),
-                    const SizedBox(height: 4),
-                    InkWell(
-                      onTap: () async {
-                        final picked = await showTimePicker(
-                          context: context,
-                          initialTime: endTime,
-                          builder: (context, child) {
-                            return Theme(
-                              data: Theme.of(context).copyWith(
-                                colorScheme: isDark
-                                    ? const ColorScheme.dark(
-                                        primary: Color(0xFFFFFF00),
-                                        onPrimary: Colors.black,
-                                        surface: Color(0xFF1C1C1C),
-                                        onSurface: Colors.white,
-                                      )
-                                    : theme.colorScheme,
-                              ),
-                              child: child!,
-                            );
-                          },
-                        );
-                        if (picked != null) {
-                          onSelectEndTime(picked);
-                        }
-                      },
-                      child: Text(
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'End Time',
+                        style: TextStyle(
+                          color: theme.colorScheme.onSurface.withOpacity(0.7),
+                          fontSize: 12,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
                         endTime.format(context),
                         style: TextStyle(
                           color: theme.colorScheme.onSurface,
@@ -169,8 +169,8 @@ class TimeSelectors extends StatelessWidget {
                           fontWeight: FontWeight.w500,
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
