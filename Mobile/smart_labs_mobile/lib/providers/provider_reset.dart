@@ -3,6 +3,7 @@ import 'package:smart_labs_mobile/providers/announcement_provider.dart';
 import 'package:smart_labs_mobile/providers/lab_instructor_provider.dart';
 import 'package:smart_labs_mobile/providers/lab_student_provider.dart';
 import 'package:smart_labs_mobile/providers/notification_provider.dart';
+import 'package:smart_labs_mobile/providers/semester_provider.dart';
 import 'package:smart_labs_mobile/providers/session_provider.dart';
 
 void resetAllProviders(WidgetRef ref) {
@@ -33,4 +34,5 @@ void resetAllProviders(WidgetRef ref) {
   ref.invalidate(labSessionsProvider);
   ref.invalidate(labAnnouncementsProvider);
   ref.invalidate(notificationsProvider);
+  ref.invalidate(semestersProvider);
 }
