@@ -27,6 +27,9 @@ export const labService = {
 	createLab: (data: CreateLabDto) =>
 		smart_labs.postAPI<Lab, CreateLabDto>("/lab", data),
 
+	addStudents: (id: number, emails: string[]) =>
+		smart_labs.postAPI<number[], string[]>(`/lab/${id}/students`, emails),
+
 	deleteLab: (id: number) => smart_labs.deleteAPI<void>(`/lab/${id}`),
 
 	updateLab: (id: number, data: Partial<CreateLabDto>) =>
