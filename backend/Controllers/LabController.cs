@@ -597,5 +597,25 @@ namespace backend.Controllers
                 error => StatusCode(error.StatusCode, new { errors = error.Message })
                 );
         }
+
+        // POST: api/lab/5/analyze
+        [HttpPost("{id}/analyze")]
+        [Authorize(Roles = "instructor, admin")]
+        public async Task<ActionResult> AnalyzeLab(int id)
+        {
+            var userIdClaim = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier);
+            var userRoleClaim = HttpContext.User.FindFirst(ClaimTypes.Role);
+            var lab = await _labService.GetLabByIdAsync(id);
+
+            if (lab == null)
+                return NotFound(new { errors = "Lab not found." });
+
+            if (userRoleClaim!.Value == "instructor" && !lab.Instructors.Contains(int.Parse(userIdClaim!.Value)))
+                return Unauthorized(new { errors = "User not authorized." });
+
+            var result = await _labService.AnalyzeLabAsync(id);
+
+            return Ok(result);
+        }
     }
 }
