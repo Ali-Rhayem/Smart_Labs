@@ -94,6 +94,17 @@ const LabPage: React.FC = () => {
 	const handleRemoveStudent = async (user: User) => {
 		try {
 			await labService.removeStudent(lab.id, user.id);
+			queryClient.invalidateQueries({
+				queryKey: ["labs", `${user?.role}`, user?.id],
+			});
+			// remove student from lab state
+			setLab((prev: any) => ({
+				...prev,
+				students: prev.students.filter((id: number) => id !== user.id),
+			}));
+			queryClient.invalidateQueries({
+				queryKey: ["labStudents", lab.id],
+			});
 			setAlertMessage("Student removed successfully");
 			setSeverity("success");
 			setOpenSnackbar(true);
@@ -110,7 +121,6 @@ const LabPage: React.FC = () => {
 			queryClient.invalidateQueries({
 				queryKey: ["labs", `${user?.role}`, user?.id],
 			});
-			// add students ids on the students array in lab
 			setLab((prev: any) => ({
 				...prev,
 				students: [...prev.students, ...students_ids],
