@@ -30,7 +30,7 @@ def display_image(img_rgb):
     plt.axis('off')  # Hide the axes for better visualization
     plt.show()
 
-def analyze_image(base64_str):
+def analyze_image(base64_str, image_path):
     global model
     if model is None:
         model = YOLO(model_path)
@@ -46,6 +46,13 @@ def analyze_image(base64_str):
     image_array = np.array(image)
 
     results = model.predict(source=image_array)
+    
+    annotated_image = results[0].plot()  # Returns image with annotations
+    
+    # Save the annotated image to the specified path
+    if not os.path.exists("./images"):
+        os.makedirs("./images")
+    cv2.imwrite(os.path.join(f"./images/{image_path}"), annotated_image)
     
     return results, image
     
