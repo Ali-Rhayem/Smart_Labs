@@ -36,6 +36,9 @@ export const labService = {
 	removeStudent: (labId: number, studentId: number) =>
 		smart_labs.deleteAPI<void>(`/lab/${labId}/students/${studentId}`),
 
+	removeInstructor: (labId: number, instructorId: number) =>
+		smart_labs.deleteAPI<void>(`/lab/${labId}/instructors/${instructorId}`),
+
 	deleteLab: (id: number) => smart_labs.deleteAPI<void>(`/lab/${id}`),
 
 	updateLab: (id: number, data: Partial<CreateLabDto>) =>
