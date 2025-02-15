@@ -164,8 +164,16 @@ class _EditLabScreenState extends ConsumerState<EditLabScreen> {
                 label: 'Lab Schedule',
                 startTime: _startTime,
                 endTime: _endTime,
-                onSelectStartTime: () => _selectTime(true),
-                onSelectEndTime: () => _selectTime(false),
+                onSelectStartTime: (picked) {
+                  setState(() {
+                    _startTime = picked;
+                  });
+                },
+                onSelectEndTime: (picked) {
+                  setState(() {
+                    _endTime = picked;
+                  });
+                },
               ),
               const SizedBox(height: 16),
               LabSchedulesList(
