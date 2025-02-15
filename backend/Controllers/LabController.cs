@@ -286,11 +286,11 @@ namespace backend.Controllers
             {
                 if (!lab.Instructors.Contains(int.Parse(userIdClaim!.Value)))
                 {
-                    return Unauthorized();
+                    return Unauthorized(new { errors = "User not authorized." });
                 }
             }
             // check if emails is valid
-            foreach (var email in emails)
+            foreach (var email in emails.ToList())
             {
                 var instructor = await _userService.GetUserByEmailAsync(email);
                 if (!new EmailAddressAttribute().IsValid(email))
@@ -304,11 +304,11 @@ namespace backend.Controllers
             if (emails.Count == 0)
                 return BadRequest(new { errors = "No valid instructors to add." });
 
-            int[] instructorIds = new int[emails.Count];
+            List<int> instructorIds = [];
             foreach (var email in emails)
             {
                 var instructor = await _userService.GetUserByEmailAsync(email);
-                instructorIds.Append(instructor.Id);
+                instructorIds.Add(instructor.Id);
             }
             var result = await _labService.AddInstructorToLabAsync(labId, instructorIds);
 
