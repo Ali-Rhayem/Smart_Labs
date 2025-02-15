@@ -289,7 +289,6 @@ class SessionDetailScreen extends StatelessWidget {
     return Builder(
       builder: (context) {
         final theme = Theme.of(context);
-        final isDark = theme.brightness == Brightness.dark;
 
         // Extract percentage value and convert to double
         final percentage = double.tryParse(value.replaceAll('%', '')) ?? 0.0;
