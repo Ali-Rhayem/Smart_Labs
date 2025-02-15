@@ -43,9 +43,9 @@ def take_image_from_camera():
         output_dir = os.path.expanduser("~/Desktop/images")
         os.makedirs(output_dir, exist_ok=True)
         # Create output path with timestamp
-        output_path = f"~/Desktop/images/image_{timestamp}.jpg"
+        output_path = os.path.expanduser(f"~/Desktop/images/image_{timestamp}.jpg")
         # Build capture command
-        capture_command = f"sudo rpicam-still --timeout 100 -o {output_path} --vflip"
+        capture_command = f"sudo rpicam-still --timeout 100 -o {output_path} --vflip > /dev/null 2>&1"
         
         time.sleep(0.2)
         subprocess.run(capture_command, shell=True, check=True)
