@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
 	Box,
 	Typography,
@@ -14,6 +14,7 @@ import { imageUrl } from "../config/config";
 import PersonRemoveIcon from "@mui/icons-material/PersonRemove";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import SchoolIcon from "@mui/icons-material/School";
+import { AddPeopleModal } from "./AddPeopleModal";
 
 interface UserCardProps {
 	user: User;
@@ -81,8 +82,8 @@ interface PeopleTabProps {
 	students: User[];
 	isLoading?: boolean;
 	canManage?: boolean;
-	onAddInstructor?: () => void;
-	onAddStudent?: () => void;
+	onAddInstructor?: (emails: string[]) => void;
+	onAddStudent?: (emails: string[]) => void;
 	onRemoveInstructor?: (user: User) => void;
 	onRemoveStudent?: (user: User) => void;
 }
@@ -97,6 +98,16 @@ const PeopleTab: React.FC<PeopleTabProps> = ({
 	onRemoveInstructor,
 	onRemoveStudent,
 }) => {
+	const [modalOpen, setModalOpen] = useState(false);
+	const [modalType, setModalType] = useState<"student" | "instructor">(
+		"student"
+	);
+
+	const handleOpenModal = (type: "student" | "instructor") => {
+		setModalType(type);
+		setModalOpen(true);
+	};
+
 	if (isLoading) {
 		return <CircularProgress />;
 	}
@@ -119,7 +130,7 @@ const PeopleTab: React.FC<PeopleTabProps> = ({
 						variant="contained"
 						size="small"
 						startIcon={<PersonAddIcon />}
-						onClick={onAddInstructor}
+						onClick={() => handleOpenModal("instructor")}
 						sx={{
 							bgcolor: "var(--color-primary)",
 							color: "var(--color-text-button)",
@@ -159,7 +170,7 @@ const PeopleTab: React.FC<PeopleTabProps> = ({
 						variant="contained"
 						size="small"
 						startIcon={<SchoolIcon />}
-						onClick={onAddStudent}
+						onClick={() => handleOpenModal("student")}
 						sx={{
 							bgcolor: "var(--color-primary)",
 							color: "var(--color-text-button)",
@@ -180,6 +191,17 @@ const PeopleTab: React.FC<PeopleTabProps> = ({
 					</Grid>
 				))}
 			</Grid>
+
+			<AddPeopleModal
+				open={modalOpen}
+				onClose={() => setModalOpen(false)}
+				onSubmit={
+					modalType === "student"
+						? onAddStudent || (() => {})
+						: onAddInstructor || (() => {})
+				}
+				type={modalType}
+			/>
 		</Box>
 	);
 };
