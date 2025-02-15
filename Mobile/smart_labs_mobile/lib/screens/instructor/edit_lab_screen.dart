@@ -11,6 +11,7 @@ import 'package:smart_labs_mobile/widgets/time_selectors.dart';
 import 'package:smart_labs_mobile/widgets/week_day_selector.dart';
 import 'package:smart_labs_mobile/providers/room_provider.dart';
 import 'package:smart_labs_mobile/utils/date_time_utils.dart';
+import 'package:smart_labs_mobile/providers/semester_provider.dart';
 
 var logger = Logger();
 
@@ -29,6 +30,7 @@ class _EditLabScreenState extends ConsumerState<EditLabScreen> {
   late TextEditingController _labCodeController;
   late TextEditingController _descriptionController;
   late TextEditingController _roomController;
+  late TextEditingController _semesterController;
   late List<LabSchedule> _schedules;
 
   int _selectedWeekday = DateTime.now().weekday;
@@ -37,17 +39,19 @@ class _EditLabScreenState extends ConsumerState<EditLabScreen> {
   final ApiService _apiService = ApiService();
 
   final List<String> _selectedPPEIds = [];
+  late int _selectedSemesterId;
 
   @override
   void initState() {
     super.initState();
-    // Initialize controllers with existing lab data
     _labNameController = TextEditingController(text: widget.lab.labName);
     _labCodeController = TextEditingController(text: widget.lab.labCode);
     _descriptionController =
         TextEditingController(text: widget.lab.description);
     _roomController = TextEditingController(text: widget.lab.room ?? '');
+    _semesterController = TextEditingController();
     _schedules = List.from(widget.lab.schedule);
+    _selectedSemesterId = int.parse(widget.lab.semesterId);
 
     // Initialize selected PPE IDs from the lab's PPE string
     final ppeList = widget.lab.ppe.split(', ');
@@ -60,6 +64,7 @@ class _EditLabScreenState extends ConsumerState<EditLabScreen> {
     _labCodeController.dispose();
     _descriptionController.dispose();
     _roomController.dispose();
+    _semesterController.dispose();
     super.dispose();
   }
 
@@ -174,6 +179,17 @@ class _EditLabScreenState extends ConsumerState<EditLabScreen> {
               ),
               const SizedBox(height: 16),
               _buildRoomDropdown(),
+              const SizedBox(height: 16),
+              const Text(
+                'Semester',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 10),
+              _buildSemesterDropdown(),
               const SizedBox(height: 24),
               SizedBox(
                 width: double.infinity,
@@ -380,6 +396,75 @@ class _EditLabScreenState extends ConsumerState<EditLabScreen> {
     );
   }
 
+  Widget _buildSemesterDropdown() {
+    return Consumer(
+      builder: (context, ref, child) {
+        final theme = Theme.of(context);
+        final isDark = theme.brightness == Brightness.dark;
+        final semestersAsync = ref.watch(semestersProvider);
+
+        return semestersAsync.when(
+          loading: () => CircularProgressIndicator(
+            color: isDark ? const Color(0xFFFFFF00) : theme.colorScheme.primary,
+          ),
+          error: (error, stack) => Text(
+            'Error: $error',
+            style: TextStyle(color: theme.colorScheme.error),
+          ),
+          data: (semesters) {
+            return DropdownButtonFormField<int>(
+              value: _selectedSemesterId,
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: isDark
+                    ? const Color(0xFF1C1C1C)
+                    : theme.colorScheme.surface,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(
+                    color: theme.colorScheme.onSurface.withOpacity(0.2),
+                  ),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(
+                    color: theme.colorScheme.onSurface.withOpacity(0.2),
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(
+                    color: isDark
+                        ? const Color(0xFFFFFF00)
+                        : theme.colorScheme.primary,
+                  ),
+                ),
+              ),
+              dropdownColor:
+                  isDark ? const Color(0xFF1C1C1C) : theme.colorScheme.surface,
+              style: TextStyle(color: theme.colorScheme.onSurface),
+              items: semesters.map((semester) {
+                return DropdownMenuItem(
+                  value: semester.id,
+                  child: Text(semester.name),
+                );
+              }).toList(),
+              onChanged: (value) {
+                if (value != null) {
+                  setState(() {
+                    _selectedSemesterId = value;
+                  });
+                }
+              },
+              validator: (value) =>
+                  value == null ? 'Please select a semester' : null,
+            );
+          },
+        );
+      },
+    );
+  }
+
   Future<void> _submitForm() async {
     if (_formKey.currentState?.validate() ?? false) {
       if (_selectedPPEIds.isEmpty) {
@@ -400,6 +485,7 @@ class _EditLabScreenState extends ConsumerState<EditLabScreen> {
           _labCodeController.text != widget.lab.labCode ||
           _descriptionController.text != widget.lab.description ||
           _roomController.text != (widget.lab.room ?? '') ||
+          _selectedSemesterId != int.parse(widget.lab.semesterId) ||
           !_areSchedulesEqual(_schedules, widget.lab.schedule);
 
       // Check if PPE changed
@@ -424,6 +510,7 @@ class _EditLabScreenState extends ConsumerState<EditLabScreen> {
             "description": _descriptionController.text,
             "endLab": false,
             "room": _roomController.text,
+            "semesterId": _selectedSemesterId,
           };
 
           final labResponse =
