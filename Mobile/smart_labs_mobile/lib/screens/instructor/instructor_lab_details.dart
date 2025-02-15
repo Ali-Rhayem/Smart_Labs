@@ -112,7 +112,7 @@ class InstructorLabDetailScreen extends ConsumerWidget {
                   children: [
                     SessionsTab(lab: currentLab),
                     PeopleTab(lab: currentLab),
-                    const AnalyticsTab(),
+                    AnalyticsTab(labId: currentLab.labId),
                     AnnouncementsTab(lab: currentLab),
                   ],
                 ),
