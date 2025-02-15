@@ -18,7 +18,7 @@ db = client[os.getenv("MONGO_DB")]
 
 model = None
 usersProfiles = None
-model_path = './models/yolov8_ppe_m.pt'
+model_path = './models/yolov8_ppe1.pt'
 
 def display_image(img_rgb):
     if img_rgb is None:
