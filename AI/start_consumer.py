@@ -69,7 +69,7 @@ def produce_image(command_data):
     image_path = get_random_image()
     # image_path = take_image_from_camera()
     command_data["encoding"] = images_to_base64(image_path)
-    command_data["image_path"] = image_path
+    command_data["image_name"] = image_path.split("/")[-1]
     command_data["time"] = datetime.datetime.now(datetime.UTC).strftime("%H:%M:%S")
     future = producer.send(os.getenv("ANALYSIS_TOPIC"), value=command_data)
     try:
