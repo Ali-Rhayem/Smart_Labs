@@ -38,8 +38,9 @@ try:
             lab_id = data["lab_id"]
             date = datetime.date.today().strftime("%Y-%m-%d")
             time_data = data["time"]
+            image_path = data["image_path"]
 
-            results, image = analyze_image(image_base64)
+            results, image = analyze_image(image_base64,image_path)
 
             person_objs = []
             faces = []
@@ -158,10 +159,10 @@ try:
                         person_objs[index]["gloves"].append(object_bbox)
 
             # Optionally, draw objects on the image.
-            # draw_objects(image, person_objs)
+            draw_objects(image, person_objs)
 
             people = []
-            pprint(person_objs)
+            # pprint(person_objs)
 
             # Prepare the data for the database.
             for person in person_objs:
@@ -284,10 +285,10 @@ try:
                 
                 total_attendance = round(total_attendance / len(students_in_lab))
                 print("result", result)
-                print("total_attendance", total_attendance)
-                print("total_ppe_compliance", total_ppe_compliance)
-                print("total_people_attended", total_people_attended)
-                print("Total students in lab", students_in_lab)
+                # print("total_attendance", total_attendance)
+                # print("total_ppe_compliance", total_ppe_compliance)
+                # print("total_people_attended", total_people_attended)
+                # print("Total students in lab", students_in_lab)
                 
                 results_arr = [{"_id": int(key), **value} for key, value in result.items()]
                 
