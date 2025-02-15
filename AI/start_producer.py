@@ -19,7 +19,7 @@ data = {
             "command": "end",
             # "encoding": images_to_base64(image_path),
             "ppe_arr": ["gloves", "goggles"],
-            "session_id": 3,
+            "session_id": 4,
             "lab_id": 6,
             "room": "B-103",
             # "date": datetime.date.today().strftime("%Y-%m-%d"),
