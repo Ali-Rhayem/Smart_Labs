@@ -84,16 +84,16 @@ class CustomTextField extends StatelessWidget {
       decoration: InputDecoration(
         labelText: labelText,
         labelStyle:
-            TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.7)),
+            TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.7)),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
           borderSide:
-              BorderSide(color: theme.colorScheme.onSurface.withOpacity(0.2)),
+              BorderSide(color: theme.colorScheme.onSurface.withValues(alpha: 0.2)),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
           borderSide:
-              BorderSide(color: theme.colorScheme.onSurface.withOpacity(0.2)),
+              BorderSide(color: theme.colorScheme.onSurface.withValues(alpha: 0.2)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
@@ -142,13 +142,13 @@ class FacultyMajorDropdowns extends StatelessWidget {
       border: Border.all(
         color: isDark
             ? Colors.white24
-            : theme.colorScheme.onSurface.withOpacity(0.2),
+            : theme.colorScheme.onSurface.withValues(alpha: 0.2),
       ),
     );
 
     final inputDecoration = InputDecoration(
       labelStyle: TextStyle(
-        color: theme.colorScheme.onSurface.withOpacity(0.7),
+        color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
       ),
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       border: InputBorder.none,
@@ -222,7 +222,7 @@ class FacultyMajorDropdowns extends StatelessWidget {
                   child: Text(
                     'No majors available',
                     style: TextStyle(
-                      color: theme.colorScheme.onSurface.withOpacity(0.5),
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                     ),
                   ),
                 )
