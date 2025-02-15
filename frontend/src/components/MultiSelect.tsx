@@ -50,7 +50,7 @@ const MultiSelect = <T extends string | { [key: string]: any }>({
 			onChange={handleChange}
 			getOptionLabel={getOptionLabel}
 			sx={{
-				mb: 2,
+				mt: 2,
 				"& .MuiAutocomplete-tag": {
 					color: "var(--color-text)",
 				},
