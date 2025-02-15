@@ -64,6 +64,16 @@ class EditProfileController {
       updateData['image'] = null;
     }
 
-    return await _apiService.put('/User/$id', updateData);
+    final response = await _apiService.put('/User/$id', updateData);
+
+    if (response['success']) {
+      // Fetch the updated user data to ensure we have the latest information
+      final userResponse = await _apiService.get('/User/$id');
+      if (userResponse['success']) {
+        response['data'] = userResponse['data'];
+      }
+    }
+
+    return response;
   }
 }
