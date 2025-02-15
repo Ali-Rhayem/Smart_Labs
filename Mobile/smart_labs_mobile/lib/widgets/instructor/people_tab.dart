@@ -111,7 +111,7 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
               child: Text(
                 'Error: $error',
                 style: TextStyle(
-                  color: theme.colorScheme.onBackground.withOpacity(0.7),
+                  color: theme.colorScheme.onBackground.withValues(alpha: 0.7),
                 ),
               ),
             ),
@@ -121,7 +121,7 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
                   child: Text(
                     'No students enrolled',
                     style: TextStyle(
-                      color: theme.colorScheme.onBackground.withOpacity(0.7),
+                      color: theme.colorScheme.onBackground.withValues(alpha: 0.7),
                       fontSize: 16,
                     ),
                   ),
@@ -205,7 +205,7 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
                               student.email,
                               style: TextStyle(
                                 color: theme.colorScheme.onSurface
-                                    .withOpacity(0.7),
+                                    .withValues(alpha: 0.7),
                               ),
                             ),
                             trailing: _isEditMode
@@ -277,7 +277,7 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
                                 student.email,
                                 style: TextStyle(
                                   color: theme.colorScheme.onSurface
-                                      .withOpacity(0.7),
+                                      .withValues(alpha: 0.7),
                                 ),
                               ),
                               trailing: _isEditMode
@@ -365,7 +365,7 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
               child: Text(
                 'Error: $error',
                 style: TextStyle(
-                  color: theme.colorScheme.onBackground.withOpacity(0.7),
+                  color: theme.colorScheme.onBackground.withValues(alpha: 0.7),
                 ),
               ),
             ),
@@ -375,7 +375,7 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
                   child: Text(
                     'No instructors enrolled',
                     style: TextStyle(
-                      color: theme.colorScheme.onBackground.withOpacity(0.7),
+                      color: theme.colorScheme.onBackground.withValues(alpha: 0.7),
                       fontSize: 16,
                     ),
                   ),
@@ -460,7 +460,7 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
                               instructor.email,
                               style: TextStyle(
                                 color: theme.colorScheme.onSurface
-                                    .withOpacity(0.7),
+                                    .withValues(alpha: 0.7),
                               ),
                             ),
                             trailing: _isEditMode
@@ -534,7 +534,7 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
                                 instructor.email,
                                 style: TextStyle(
                                   color: theme.colorScheme.onSurface
-                                      .withOpacity(0.7),
+                                      .withValues(alpha: 0.7),
                                 ),
                               ),
                               trailing: _isEditMode
@@ -614,7 +614,7 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
             Text(
               'Enter student emails (one per line):',
               style: TextStyle(
-                  color: theme.colorScheme.onSurface.withOpacity(0.7)),
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.7)),
             ),
             const SizedBox(height: 8),
             TextField(
@@ -624,12 +624,12 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
               decoration: InputDecoration(
                 hintText: 'student1@example.com\nstudent2@example.com',
                 hintStyle: TextStyle(
-                  color: theme.colorScheme.onSurface.withOpacity(0.3),
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
                 ),
                 border: const OutlineInputBorder(),
                 enabledBorder: OutlineInputBorder(
                   borderSide: BorderSide(
-                    color: theme.colorScheme.onSurface.withOpacity(0.3),
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
                   ),
                 ),
                 focusedBorder: OutlineInputBorder(
@@ -647,7 +647,7 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
             child: Text(
               'Cancel',
               style: TextStyle(
-                color: theme.colorScheme.onSurface.withOpacity(0.7),
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
               ),
             ),
           ),
@@ -704,7 +704,7 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
         ),
         content: Text(
           'Are you sure you want to remove ${student.name} from this lab?',
-          style: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.7)),
+          style: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.7)),
         ),
         actions: [
           TextButton(
@@ -712,7 +712,7 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
             child: Text(
               'Cancel',
               style: TextStyle(
-                  color: theme.colorScheme.onSurface.withOpacity(0.7)),
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.7)),
             ),
           ),
           TextButton(
@@ -760,7 +760,7 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
             Text(
               'Enter instructor emails (one per line):',
               style: TextStyle(
-                  color: theme.colorScheme.onSurface.withOpacity(0.7)),
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.7)),
             ),
             const SizedBox(height: 8),
             TextField(
@@ -770,12 +770,12 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
               decoration: InputDecoration(
                 hintText: 'instructor1@example.com\ninstructor2@example.com',
                 hintStyle: TextStyle(
-                  color: theme.colorScheme.onSurface.withOpacity(0.3),
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
                 ),
                 border: const OutlineInputBorder(),
                 enabledBorder: OutlineInputBorder(
                   borderSide: BorderSide(
-                    color: theme.colorScheme.onSurface.withOpacity(0.3),
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
                   ),
                 ),
                 focusedBorder: OutlineInputBorder(
@@ -791,7 +791,7 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
             Text(
               'Note: Instructors will receive an email invitation to join the lab.',
               style: TextStyle(
-                color: theme.colorScheme.onSurface.withOpacity(0.5),
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                 fontSize: 12,
               ),
             ),
@@ -803,7 +803,7 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
             child: Text(
               'Cancel',
               style: TextStyle(
-                  color: theme.colorScheme.onSurface.withOpacity(0.7)),
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.7)),
             ),
           ),
           ElevatedButton(
@@ -823,8 +823,8 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
                 if (dialogContext.mounted) {
                   Navigator.pop(dialogContext);
                   ScaffoldMessenger.of(dialogContext).showSnackBar(
-                    SnackBar(
-                      content: const Text('Instructors added successfully'),
+                    const SnackBar(
+                      content: Text('Instructors added successfully'),
                       backgroundColor: Colors.green,
                     ),
                   );
@@ -870,7 +870,7 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
         ),
         content: Text(
           'Are you sure you want to remove ${instructor.name} from this lab?',
-          style: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.7)),
+          style: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.7)),
         ),
         actions: [
           TextButton(
@@ -878,7 +878,7 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
             child: Text(
               'Cancel',
               style: TextStyle(
-                  color: theme.colorScheme.onSurface.withOpacity(0.7)),
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.7)),
             ),
           ),
           TextButton(
