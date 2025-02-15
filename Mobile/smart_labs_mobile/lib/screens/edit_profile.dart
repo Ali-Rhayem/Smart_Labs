@@ -236,8 +236,8 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                         : theme.colorScheme.primary,
                     padding: const EdgeInsets.symmetric(vertical: 15),
                     disabledBackgroundColor: isDark
-                        ? const Color(0xFFFFEB00).withOpacity(0.5)
-                        : theme.colorScheme.primary.withOpacity(0.5),
+                        ? const Color(0xFFFFEB00).withValues(alpha: 0.5)
+                        : theme.colorScheme.primary.withValues(alpha: 0.5),
                   ),
                   child: _isLoading
                       ? CircularProgressIndicator(
