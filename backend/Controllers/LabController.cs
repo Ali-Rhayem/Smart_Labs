@@ -598,8 +598,8 @@ namespace backend.Controllers
                 );
         }
 
-        // POST: api/lab/5/analyze
-        [HttpPost("{id}/analyze")]
+        // GET: api/lab/5/analyze
+        [HttpGet("{id}/analyze")]
         [Authorize(Roles = "instructor, admin")]
         public async Task<ActionResult> AnalyzeLab(int id)
         {
