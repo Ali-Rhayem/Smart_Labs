@@ -53,6 +53,11 @@ public class UserService
             .Find(user => user.Id == id).Project<User>(projection).FirstOrDefaultAsync();
     }
 
+    public async Task<User?> GetWholeUserById(int id)
+    {
+        return await _users.Find(user => user.Id == id).FirstOrDefaultAsync();
+    }
+
     public async Task<OneOf<User, ErrorMessage>> UpdateUser(int id, UpdateUser updatedFields)
     {
         var updateDefinition = new List<UpdateDefinition<UpdateUser>>();
