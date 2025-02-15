@@ -141,8 +141,8 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
                     borderRadius: BorderRadius.circular(8),
                   ),
                   disabledBackgroundColor: isDark
-                      ? const Color(0xFFFFEB00).withOpacity(0.5)
-                      : theme.colorScheme.primary.withOpacity(0.5),
+                      ? const Color(0xFFFFEB00).withValues(alpha: 0.5)
+                      : theme.colorScheme.primary.withValues(alpha: 0.5),
                 ),
                 child: _isLoading
                     ? SizedBox(
@@ -187,7 +187,7 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
       style: TextStyle(color: theme.colorScheme.onSurface),
       decoration: InputDecoration(
         labelText: label,
-        labelStyle: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.7)),
+        labelStyle: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.7)),
         filled: true,
         fillColor: isDark ? const Color(0xFF1C1C1C) : theme.colorScheme.surface,
         border: OutlineInputBorder(
@@ -195,7 +195,7 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
           borderSide: BorderSide(
             color: isDark
                 ? Colors.white24
-                : theme.colorScheme.onSurface.withOpacity(0.2),
+                : theme.colorScheme.onSurface.withValues(alpha: 0.2),
           ),
         ),
         enabledBorder: OutlineInputBorder(
@@ -203,7 +203,7 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
           borderSide: BorderSide(
             color: isDark
                 ? Colors.white24
-                : theme.colorScheme.onSurface.withOpacity(0.2),
+                : theme.colorScheme.onSurface.withValues(alpha: 0.2),
           ),
         ),
         focusedBorder: OutlineInputBorder(
