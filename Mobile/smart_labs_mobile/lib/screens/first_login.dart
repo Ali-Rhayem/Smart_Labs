@@ -59,42 +59,31 @@ class _FirstLoginScreenState extends ConsumerState<FirstLoginScreen> {
     setState(() => _isLoading = true);
 
     try {
-      // Update password
-      // final passwordResponse = await _apiService.put('/User/change-password', {
-      //   'currentPassword': '12343', // Default password
-      //   'newPassword': _newPasswordController.text,
-      // });
-
-      // if (!passwordResponse['success']) {
-      //   throw Exception(passwordResponse['message'] ?? 'Failed to change password');
-      // }
-
-      // Update profile
       final user = ref.read(userProvider);
       if (user == null) throw Exception('User not found');
 
-      // final response = await _apiService.put('/User/update', {
-      //   'id': user.id,
-      //   'email': user.email,
-      //   'name': _nameController.text,
-      //   'role': user.role,
-      //   'password': _newPasswordController.text,
-      //   'major': _selectedMajor,
-      //   'faculty': _selectedFaculty,
-      //   'image': _base64Image,
-      //   'isFirstLogin': false,
-      // });
+      final response = await _apiService.post('/User/firstlogin', {
+        'id': user.id,
+        'name': _nameController.text,
+        'password': _newPasswordController.text,
+        'confirmPassword': _confirmPasswordController.text,
+        'major': _selectedMajor,
+        'faculty': _selectedFaculty,
+        'image': _base64Image,
+        'first_login': false,
+        'email': user.email,
+      });
 
       if (!mounted) return;
 
-      // if (response['success']) {
+      if (response['success']) {
       // Update user provider and navigate to main screen
       final updatedUser = user.copyWith(
-        // name: _nameController.text,
-        // major: _selectedMajor,
-        // faculty: _selectedFaculty,
-        // imageUrl: response['data']['image'],
-        isFirstLogin: false,
+        name: _nameController.text,
+        major: _selectedMajor,
+        faculty: _selectedFaculty,
+        imageUrl: response['data']['image'],
+        firstLogin: false,
       );
       ref.read(userProvider.notifier).setUser(updatedUser);
 
@@ -103,9 +92,9 @@ class _FirstLoginScreenState extends ConsumerState<FirstLoginScreen> {
       } else {
         Navigator.pushReplacementNamed(context, '/studentMain');
       }
-      // } else {
-      //   throw Exception(response['message'] ?? 'Failed to update profile');
-      // }
+      } else {
+        throw Exception(response['message'] ?? 'Failed to update profile');
+      }
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
