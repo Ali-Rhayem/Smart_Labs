@@ -465,6 +465,9 @@ public class LabService
     {
         var result = new Dictionary<string, object>();
         var sessions = await _sessionService.GetSessionsOfLabAsync(lab_id);
+        if (sessions == null || sessions.Count == 0)
+            return result;
+
         int total_attendance = 0;
         List<int> total_attendance_bysession = [];
 
@@ -562,7 +565,7 @@ public class LabService
                 person.PPE_compliance[ppe.Key] /= people_attandance[person.Id];
             }
         }
-
+        int sessions_count = sessions.Count == 0 ? sessions.Count : 1;
         // save the result in the dictionary
         result["total_attendance"] = total_attendance /= sessions.Count;
         result["total_attendance_bytime"] = total_attendance_bysession;
