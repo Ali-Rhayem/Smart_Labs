@@ -249,18 +249,18 @@ class _EditLabScreenState extends ConsumerState<EditLabScreen> {
       decoration: InputDecoration(
         labelText: label,
         labelStyle:
-            TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.7)),
+            TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.7)),
         filled: true,
         fillColor: isDark ? const Color(0xFF1C1C1C) : theme.colorScheme.surface,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
           borderSide:
-              BorderSide(color: theme.colorScheme.onSurface.withOpacity(0.2)),
+              BorderSide(color: theme.colorScheme.onSurface.withValues(alpha: 0.2)),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
           borderSide:
-              BorderSide(color: theme.colorScheme.onSurface.withOpacity(0.2)),
+              BorderSide(color: theme.colorScheme.onSurface.withValues(alpha: 0.2)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
@@ -270,45 +270,6 @@ class _EditLabScreenState extends ConsumerState<EditLabScreen> {
         ),
       ),
     );
-  }
-
-  Future<void> _selectTime(bool isStartTime) async {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
-    final picked = await showTimePicker(
-      context: context,
-      initialTime: isStartTime ? _startTime : _endTime,
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: isDark
-                ? const ColorScheme.dark(
-                    primary: Color(0xFFFFFF00),
-                    onPrimary: Colors.black,
-                    surface: Color(0xFF1C1C1C),
-                    onSurface: Colors.white,
-                  )
-                : ColorScheme.light(
-                    primary: theme.colorScheme.primary,
-                    onPrimary: theme.colorScheme.onPrimary,
-                    surface: theme.colorScheme.surface,
-                    onSurface: theme.colorScheme.onSurface,
-                  ),
-          ),
-          child: child!,
-        );
-      },
-    );
-    if (picked != null) {
-      setState(() {
-        if (isStartTime) {
-          _startTime = picked;
-        } else {
-          _endTime = picked;
-        }
-      });
-    }
   }
 
   void _addSchedule() {
@@ -357,13 +318,13 @@ class _EditLabScreenState extends ConsumerState<EditLabScreen> {
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                   borderSide: BorderSide(
-                    color: theme.colorScheme.onSurface.withOpacity(0.2),
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.2),
                   ),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                   borderSide: BorderSide(
-                    color: theme.colorScheme.onSurface.withOpacity(0.2),
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.2),
                   ),
                 ),
                 focusedBorder: OutlineInputBorder(
@@ -381,7 +342,7 @@ class _EditLabScreenState extends ConsumerState<EditLabScreen> {
               hint: Text(
                 'Select Room',
                 style: TextStyle(
-                  color: theme.colorScheme.onSurface.withOpacity(0.7),
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                 ),
               ),
               items: rooms.map((room) {
@@ -430,13 +391,13 @@ class _EditLabScreenState extends ConsumerState<EditLabScreen> {
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                   borderSide: BorderSide(
-                    color: theme.colorScheme.onSurface.withOpacity(0.2),
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.2),
                   ),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                   borderSide: BorderSide(
-                    color: theme.colorScheme.onSurface.withOpacity(0.2),
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.2),
                   ),
                 ),
                 focusedBorder: OutlineInputBorder(
