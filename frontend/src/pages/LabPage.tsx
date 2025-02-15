@@ -118,21 +118,56 @@ const LabPage: React.FC = () => {
 	const handleAddStudent = async (emails: string[]) => {
 		try {
 			const students_ids = await labService.addStudents(lab.id, emails);
-			queryClient.invalidateQueries({
-				queryKey: ["labs", `${user?.role}`, user?.id],
-			});
 			setLab((prev: any) => ({
 				...prev,
 				students: [...prev.students, ...students_ids],
 			}));
+			queryClient.invalidateQueries({
+				queryKey: ["labs", `${user?.role}`, user?.id],
+			});
 			queryClient.invalidateQueries({
 				queryKey: ["labStudents", lab.id],
 			});
 			setAlertMessage("Students added successfully");
 			setSeverity("success");
 			setOpenSnackbar(true);
-		} catch (err) {
-			setAlertMessage("Failed to add students");
+		} catch (err: any) {
+			let message = "Failed to add students";
+			if (err?.response?.data?.errors) {
+				message = err.response.data.errors;
+			}
+			setAlertMessage(message);
+			setSeverity("error");
+			setOpenSnackbar(true);
+		}
+	};
+
+	const handleAddInstructor = async (emails: string[]) => {
+		try {
+			const instructors_ids = await labService.addInstructors(
+				lab.id,
+				emails
+			);
+			setLab((prev: any) => ({
+				...prev,
+				instructors: [...prev.instructors, ...instructors_ids],
+			}));
+			queryClient.invalidateQueries({
+				queryKey: ["labs", `${user?.role}`, user?.id],
+			});
+			queryClient.invalidateQueries({
+				queryKey: ["labInstructors", lab.id],
+			});
+			setAlertMessage("Instructors added successfully");
+			setSeverity("success");
+			setOpenSnackbar(true);
+		} catch (err: any) {
+			let message = "Failed to add instructors";
+			if (err?.response?.data?.errors) {
+				message = err.response.data.errors;
+			}
+			console.log(err);
+			setAlertMessage(message);
 			setSeverity("error");
 			setOpenSnackbar(true);
 		}
@@ -355,7 +390,7 @@ const LabPage: React.FC = () => {
 					students={students}
 					isLoading={usersLoading}
 					canManage={canManageLab}
-					onAddInstructor={() => {}}
+					onAddInstructor={handleAddInstructor}
 					onAddStudent={handleAddStudent}
 					onRemoveInstructor={handleRemoveInstructor}
 					onRemoveStudent={handleRemoveStudent}
