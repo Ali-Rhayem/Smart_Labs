@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:smart_labs_mobile/controllers/edit_profile_controller.dart';
 import 'package:smart_labs_mobile/models/faculty_model.dart';
+import 'package:smart_labs_mobile/providers/lab_instructor_provider.dart';
+import 'package:smart_labs_mobile/providers/lab_provider.dart';
+import 'package:smart_labs_mobile/providers/lab_student_provider.dart';
 import 'package:smart_labs_mobile/widgets/edit_profile_widgets.dart';
 import '../models/user_model.dart';
 import '../providers/user_provider.dart';
 import '../providers/faculty_provider.dart';
 import 'dart:io';
-
 class EditProfileScreen extends ConsumerStatefulWidget {
   final User user;
 
@@ -49,46 +51,64 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   Future<void> _saveChanges() async {
     setState(() => _isLoading = true);
 
-    final response = await _controller.saveChanges(
-      formKey: _formKey,
-      email: _emailController.text,
-      name: _nameController.text,
-      selectedMajor: _selectedMajor,
-      selectedFaculty: _selectedFaculty,
-      base64Image: _base64Image,
-      currentUser: widget.user,
-    );
-
-    if (response['success']) {
-      final updatedUser = User(
-        id: widget.user.id,
-        name: _nameController.text,
+    try {
+      final response = await _controller.saveChanges(
+        formKey: _formKey,
         email: _emailController.text,
-        imageUrl: response['data']['image'] ?? widget.user.imageUrl,
-        role: widget.user.role,
-        major: _selectedMajor ?? widget.user.major,
-        faculty: _selectedFaculty ?? widget.user.faculty,
-        faceIdentityVector: widget.user.faceIdentityVector,
-        firstLogin: widget.user.firstLogin,
+        name: _nameController.text,
+        selectedMajor: _selectedMajor,
+        selectedFaculty: _selectedFaculty,
+        base64Image: _base64Image,
+        currentUser: widget.user,
       );
 
-      if (_imageFile != null) {
-        imageCache.clear();
-        imageCache.clearLiveImages();
+      if (response['success']) {
+        final userDetails = response['data'];
+        final updatedUser = User(
+          id: widget.user.id,
+          name: _nameController.text,
+          email: _emailController.text,
+          imageUrl: userDetails['image'] ?? widget.user.imageUrl,
+          role: widget.user.role,
+          major: _selectedMajor ?? widget.user.major,
+          faculty: _selectedFaculty ?? widget.user.faculty,
+          faceIdentityVector: widget.user.faceIdentityVector,
+          firstLogin: widget.user.firstLogin,
+        );
+
+        if (_imageFile != null) {
+          imageCache.clear();
+          imageCache.clearLiveImages();
+        }
+
+        // Update the user in the provider
+        ref.read(userProvider.notifier).setUser(updatedUser);
+
+        // Refresh all lab-related data
+        final labProviders = ref.read(labsProvider);
+        if (labProviders is AsyncData) {
+          for (final lab in labProviders.value!) {
+            // Refresh students and instructors for each lab
+            ref.refresh(labStudentsProvider(lab.labId));
+            ref.refresh(labInstructorsProvider(lab.labId));
+          }
+        }
+
+        if (!mounted) return;
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Profile updated successfully')),
+        );
+        Navigator.pop(context);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text(response['message'] ?? 'Failed to update profile')),
+        );
       }
-
-      ref.read(userProvider.notifier).setUser(updatedUser);
-
-      if (!mounted) return;
-
+    } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Profile updated successfully')),
-      );
-      Navigator.pop(context);
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content: Text(response['message'] ?? 'Failed to update profile')),
+        SnackBar(content: Text('Error: ${e.toString()}')),
       );
     }
 
