@@ -237,7 +237,7 @@ public class LabService
 
     }
 
-    public async Task<Boolean> AddStudentToLabAsync(int labId, List<String> emails)
+    public async Task<List<int>> AddStudentToLabAsync(int labId, List<String> emails)
     {
         foreach (var email in emails)
         {
@@ -246,7 +246,7 @@ public class LabService
             {
                 bool create_student = _labHelper.CreateStudentIfNotExists(email);
                 if (!create_student)
-                    return false;
+                    return [];
             }
         }
         List<int> studentsId = [];
@@ -258,7 +258,7 @@ public class LabService
         var updateDefinition = Builders<Lab>.Update.PushEach(lab => lab.Students, studentsId);
         var result = await _labs.UpdateOneAsync(lab => lab.Id == labId, updateDefinition);
 
-        return result.ModifiedCount > 0;
+        return result.ModifiedCount > 0 ? studentsId : [];
     }
 
     public async Task<Boolean> AddInstructorToLabAsync(int labId, int[] instructorIds)
