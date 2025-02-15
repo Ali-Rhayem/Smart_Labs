@@ -151,11 +151,35 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
                     elevation: isDark ? 0 : 1,
                     child: student.faculty == null && student.major == null
                         ? ListTile(
-                            leading: student.imageUrl != null &&
-                                    student.imageUrl!.isNotEmpty
+                            leading: (student.imageUrl != null &&
+                                    student.imageUrl!.isNotEmpty)
                                 ? CircleAvatar(
-                                    backgroundImage: NetworkImage(
-                                      '${dotenv.env['IMAGE_BASE_URL']}/${student.imageUrl}',
+                                    radius: 24,
+                                    backgroundColor: theme.colorScheme.primary,
+                                    child: ClipOval(
+                                      child: Image.network(
+                                        '${dotenv.env['IMAGE_BASE_URL']}/${student.imageUrl}',
+                                        width: 48,
+                                        height: 48,
+                                        fit: BoxFit.cover,
+                                        // The errorBuilder lets us handle 404 or other loading issues
+                                        errorBuilder:
+                                            (context, error, stackTrace) {
+                                          return Container(
+                                            color: theme.colorScheme.primary,
+                                            alignment: Alignment.center,
+                                            child: Text(
+                                              student.name[0].toUpperCase(),
+                                              style: TextStyle(
+                                                color: isDark
+                                                    ? Colors.black
+                                                    : Colors.white,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                      ),
                                     ),
                                   )
                                 : CircleAvatar(
@@ -199,11 +223,36 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
                               dividerColor: Colors.transparent,
                             ),
                             child: ExpansionTile(
-                              leading: student.imageUrl != null &&
-                                      student.imageUrl!.isNotEmpty
+                              leading: (student.imageUrl != null &&
+                                      student.imageUrl!.isNotEmpty)
                                   ? CircleAvatar(
-                                      backgroundImage: NetworkImage(
-                                        '${dotenv.env['IMAGE_BASE_URL']}/${student.imageUrl}',
+                                      radius: 24,
+                                      backgroundColor:
+                                          theme.colorScheme.primary,
+                                      child: ClipOval(
+                                        child: Image.network(
+                                          '${dotenv.env['IMAGE_BASE_URL']}/${student.imageUrl}',
+                                          width: 48,
+                                          height: 48,
+                                          fit: BoxFit.cover,
+                                          // The errorBuilder lets us handle 404 or other loading issues
+                                          errorBuilder:
+                                              (context, error, stackTrace) {
+                                            return Container(
+                                              color: theme.colorScheme.primary,
+                                              alignment: Alignment.center,
+                                              child: Text(
+                                                student.name[0].toUpperCase(),
+                                                style: TextStyle(
+                                                  color: isDark
+                                                      ? Colors.black
+                                                      : Colors.white,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                            );
+                                          },
+                                        ),
                                       ),
                                     )
                                   : CircleAvatar(
@@ -357,10 +406,35 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
                     child: instructor.faculty == null &&
                             instructor.major == null
                         ? ListTile(
-                            leading: instructor.imageUrl != null
+                            leading: (instructor.imageUrl != null &&
+                                    instructor.imageUrl!.isNotEmpty)
                                 ? CircleAvatar(
-                                    backgroundImage: NetworkImage(
-                                      '${dotenv.env['IMAGE_BASE_URL']}/${instructor.imageUrl}',
+                                    radius: 24,
+                                    backgroundColor: theme.colorScheme.primary,
+                                    child: ClipOval(
+                                      child: Image.network(
+                                        '${dotenv.env['IMAGE_BASE_URL']}/${instructor.imageUrl}',
+                                        width: 48,
+                                        height: 48,
+                                        fit: BoxFit.cover,
+                                        // The errorBuilder lets us handle 404 or other loading issues
+                                        errorBuilder:
+                                            (context, error, stackTrace) {
+                                          return Container(
+                                            color: theme.colorScheme.primary,
+                                            alignment: Alignment.center,
+                                            child: Text(
+                                              instructor.name[0].toUpperCase(),
+                                              style: TextStyle(
+                                                color: isDark
+                                                    ? Colors.black
+                                                    : Colors.white,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                      ),
                                     ),
                                   )
                                 : CircleAvatar(
@@ -405,10 +479,37 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
                               dividerColor: Colors.transparent,
                             ),
                             child: ExpansionTile(
-                              leading: instructor.imageUrl != null
+                              leading: (instructor.imageUrl != null &&
+                                      instructor.imageUrl!.isNotEmpty)
                                   ? CircleAvatar(
-                                      backgroundImage: NetworkImage(
-                                        '${dotenv.env['IMAGE_BASE_URL']}/${instructor.imageUrl}',
+                                      radius: 24,
+                                      backgroundColor:
+                                          theme.colorScheme.primary,
+                                      child: ClipOval(
+                                        child: Image.network(
+                                          '${dotenv.env['IMAGE_BASE_URL']}/${instructor.imageUrl}',
+                                          width: 48,
+                                          height: 48,
+                                          fit: BoxFit.cover,
+                                          // The errorBuilder lets us handle 404 or other loading issues
+                                          errorBuilder:
+                                              (context, error, stackTrace) {
+                                            return Container(
+                                              color: theme.colorScheme.primary,
+                                              alignment: Alignment.center,
+                                              child: Text(
+                                                instructor.name[0]
+                                                    .toUpperCase(),
+                                                style: TextStyle(
+                                                  color: isDark
+                                                      ? Colors.black
+                                                      : Colors.white,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                            );
+                                          },
+                                        ),
                                       ),
                                     )
                                   : CircleAvatar(
