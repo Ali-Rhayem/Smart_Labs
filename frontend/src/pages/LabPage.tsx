@@ -81,11 +81,27 @@ const LabPage: React.FC = () => {
 	const handleRemoveInstructor = async (user: User) => {
 		try {
 			await labService.removeInstructor(lab.id, user.id);
+			queryClient.invalidateQueries({
+				queryKey: ["labs", `${user?.role}`, user?.id],
+			});
+			setLab((prev: any) => ({
+				...prev,
+				instructors: prev.instructors.filter(
+					(id: number) => id !== user.id
+				),
+			}));
+			queryClient.invalidateQueries({
+				queryKey: ["labInstructors", lab.id],
+			});
 			setAlertMessage("Instructor removed successfully");
 			setSeverity("success");
 			setOpenSnackbar(true);
-		} catch (err) {
-			setAlertMessage("Failed to remove instructor");
+		} catch (err: any) {
+			let message = "Failed to remove instructor";
+			if (err?.response?.data?.errors) {
+				message = err.response.data.errors;
+			}
+			setAlertMessage(message);
 			setSeverity("error");
 			setOpenSnackbar(true);
 		}
@@ -97,7 +113,6 @@ const LabPage: React.FC = () => {
 			queryClient.invalidateQueries({
 				queryKey: ["labs", `${user?.role}`, user?.id],
 			});
-			// remove student from lab state
 			setLab((prev: any) => ({
 				...prev,
 				students: prev.students.filter((id: number) => id !== user.id),
@@ -108,8 +123,12 @@ const LabPage: React.FC = () => {
 			setAlertMessage("Student removed successfully");
 			setSeverity("success");
 			setOpenSnackbar(true);
-		} catch (err) {
-			setAlertMessage("Failed to remove student");
+		} catch (err: any) {
+			let message = "Failed to remove student";
+			if (err?.response?.data?.errors) {
+				message = err.response.data.errors;
+			}
+			setAlertMessage(message);
 			setSeverity("error");
 			setOpenSnackbar(true);
 		}
