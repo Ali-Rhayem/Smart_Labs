@@ -200,7 +200,7 @@ class _AnnouncementsTabState extends ConsumerState<AnnouncementsTab> {
                                   formatDateTime(announcement.time),
                                   style: TextStyle(
                                     color: theme.colorScheme.onSurface
-                                        .withOpacity(0.5),
+                                        .withValues(alpha: 0.5),
                                     fontSize: 12,
                                   ),
                                 ),
@@ -244,7 +244,7 @@ class _AnnouncementsTabState extends ConsumerState<AnnouncementsTab> {
                   decoration: InputDecoration(
                     hintText: 'Write an announcement...',
                     hintStyle: TextStyle(
-                      color: theme.colorScheme.onSurface.withOpacity(0.5),
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                     ),
                     filled: true,
                     fillColor: isDark
