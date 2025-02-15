@@ -187,8 +187,8 @@ class ProfileScreen extends ConsumerWidget {
                         boxShadow: [
                           BoxShadow(
                             color: isDark
-                                ? const Color(0xFF000000).withOpacity(0.3)
-                                : const Color(0xFF4A6FA5).withOpacity(0.2),
+                                ? const Color(0xFF000000).withValues(alpha: 0.3)
+                                : const Color(0xFF4A6FA5).withValues(alpha: 0.2),
                             blurRadius: 8,
                             offset: const Offset(0, 2),
                           ),
@@ -239,9 +239,9 @@ class ProfileScreen extends ConsumerWidget {
                                 boxShadow: [
                                   BoxShadow(
                                     color: isDark
-                                        ? kNeonYellow.withOpacity(0.4)
+                                        ? kNeonYellow.withValues(alpha: 0.4)
                                         : const Color(0xFFFFB156)
-                                            .withOpacity(0.4),
+                                            .withValues(alpha: 0.4),
                                     blurRadius: 8,
                                     spreadRadius: 2,
                                   ),
@@ -257,8 +257,8 @@ class ProfileScreen extends ConsumerWidget {
                                           child: Container(
                                             width: 4,
                                             height: 4,
-                                            decoration: BoxDecoration(
-                                              color: const Color(0xFF3C3C3C),
+                                            decoration: const BoxDecoration(
+                                              color: Color(0xFF3C3C3C),
                                               shape: BoxShape.circle,
                                             ),
                                           ),
@@ -269,8 +269,8 @@ class ProfileScreen extends ConsumerWidget {
                                           child: Container(
                                             width: 6,
                                             height: 6,
-                                            decoration: BoxDecoration(
-                                              color: const Color(0xFF3C3C3C),
+                                            decoration: const BoxDecoration(
+                                              color: Color(0xFF3C3C3C),
                                               shape: BoxShape.circle,
                                             ),
                                           ),
@@ -287,7 +287,7 @@ class ProfileScreen extends ConsumerWidget {
                                           boxShadow: [
                                             BoxShadow(
                                               color: const Color(0xFFFFB156)
-                                                  .withOpacity(0.3),
+                                                  .withValues(alpha: 0.3),
                                               blurRadius: 4,
                                               spreadRadius: 2,
                                             ),
