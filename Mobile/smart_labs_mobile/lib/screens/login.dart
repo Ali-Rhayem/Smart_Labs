@@ -276,13 +276,13 @@ class _LoginPageState extends ConsumerState<LoginPage> {
           imageUrl: userDetails['image'],
           role: role!,
           faceIdentityVector: userDetails['faceIdentityVector'],
-          isFirstLogin: true,
+          firstLogin: userDetails['first_login'],
         );
 
         ref.read(userProvider.notifier).setUser(user);
         await ref.read(labsProvider.notifier).fetchLabs();
 
-        if (user.isFirstLogin) {
+        if (user.firstLogin) {
           Navigator.pushReplacementNamed(context, '/firstLogin');
         } else {
           await prefs.setBool('isFirstLogin', false);
