@@ -461,4 +461,119 @@ public class LabService
         return await _labs.Find(l => l.Room == room && l.EndLab == false).ToListAsync();
     }
 
+    public async Task<Dictionary<string, object>> AnalyzeLabAsync(int lab_id)
+    {
+        var result = new Dictionary<string, object>();
+        var sessions = await _sessionService.GetSessionsOfLabAsync(lab_id);
+        int total_attendance = 0;
+        List<int> total_attendance_bysession = [];
+
+        var ppe_compliance = new Dictionary<string, int>();
+        Dictionary<string, List<int>> ppe_compliance_bysesions = [];
+        Dictionary<string, int> count_of_ppe = [];
+
+        int total_ppe_compliance = 0;
+        List<int> total_ppe_compliance_bysession = [];
+
+        List<ObjectResultDTO> people = [];
+        Dictionary<int, int> people_attandance = [];
+        List<object> people_bysession = [];
+        // loop over all sessions
+        foreach (var session in sessions)
+        {
+            total_attendance += session.TotalAttendance;
+            total_attendance_bysession.Add(session.TotalAttendance);
+            // loop over all ppe in the session
+            foreach (var ppe in session.TotalPPECompliance)
+            {
+                if (ppe_compliance.ContainsKey(ppe.Key))
+                {
+                    ppe_compliance[ppe.Key] += ppe.Value;
+                    ppe_compliance_bysesions[ppe.Key].Add(ppe.Value);
+                    count_of_ppe[ppe.Key] += 1;
+                }
+                else
+                {
+                    ppe_compliance[ppe.Key] = ppe.Value;
+                    ppe_compliance_bysesions[ppe.Key] = [ppe.Value];
+                    count_of_ppe[ppe.Key] = 1;
+                }
+            }
+            total_ppe_compliance += session.TotalPPECompliance.Sum(ppe => ppe.Value) / session.TotalPPECompliance.Count;
+            total_ppe_compliance_bysession.Add(session.TotalPPECompliance.Sum(ppe => ppe.Value) / session.TotalPPECompliance.Count);
+            // loop over all people in the session
+            foreach (var person in session.Result)
+            {
+                // check if the person is already in the people list
+                if (people.Any(p => p.Id == person.Id))
+                {
+                    people_attandance[person.Id] += 1;
+                    var p = people.Find(p => p.Id == person.Id);
+                    var p_bytime = people_bysession.Find(p => ((dynamic)p).Id == person.Id);
+                    p!.Attendance_percentage += person.Attendance_percentage;
+                    ((dynamic)p_bytime!).Attendance_percentage.Add(person.Attendance_percentage);
+                    foreach (var ppe in person.PPE_compliance)
+                    {
+                        if (p.PPE_compliance.ContainsKey(ppe.Key))
+                        {
+                            p.PPE_compliance[ppe.Key] += ppe.Value;
+                            ((dynamic)p_bytime!).PPE_compliance[ppe.Key].Add(ppe.Value);
+                        }
+                        else
+                        {
+                            p.PPE_compliance[ppe.Key] = ppe.Value;
+                            ((dynamic)p_bytime!).PPE_compliance[ppe.Key] = new List<int> { ppe.Value };
+                        }
+                    }
+                }
+                else
+                {
+                    people.Add(person);
+                    people_attandance[person.Id] = 1;
+                    var temp_ppe_compliance = new Dictionary<string, List<int>>();
+                    foreach (var ppe in person.PPE_compliance)
+                    {
+                        temp_ppe_compliance[ppe.Key] = [ppe.Value];
+                    }
+                    var p = new
+                    {
+                        Id = person.Id,
+                        Name = person.Name,
+                        user = person.User,
+                        Attendance_percentage = new List<int> { person.Attendance_percentage },
+                        PPE_compliance = temp_ppe_compliance
+                    };
+                    people_bysession.Add(p);
+                }
+            }
+        }
+
+        // calculate the average of the ppe compliance
+        foreach (var ppe in ppe_compliance)
+        {
+            ppe_compliance[ppe.Key] /= count_of_ppe[ppe.Key];
+        }
+        // calculate the average of people attendance and ppe compliance
+        foreach (var person in people)
+        {
+            person.Attendance_percentage /= sessions.Count;
+            foreach (var ppe in person.PPE_compliance)
+            {
+                person.PPE_compliance[ppe.Key] /= people_attandance[person.Id];
+            }
+        }
+
+        // save the result in the dictionary
+        result["total_attendance"] = total_attendance /= sessions.Count;
+        result["total_attendance_bytime"] = total_attendance_bysession;
+        result["total_ppe_compliance"] = total_ppe_compliance /= sessions.Count;
+        result["total_ppe_compliance_bytime"] = total_ppe_compliance_bysession;
+        result["ppe_compliance"] = ppe_compliance;
+        result["ppe_compliance_bytime"] = ppe_compliance_bysesions;
+        result["people"] = people;
+        result["people_bytime"] = people_bysession;
+
+        return result;
+    }
+
 }
