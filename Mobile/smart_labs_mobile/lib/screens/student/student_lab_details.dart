@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:smart_labs_mobile/models/lab_model.dart';
 import 'package:smart_labs_mobile/providers/lab_provider.dart';
-import 'package:smart_labs_mobile/widgets/instructor/analytics_tab.dart';
 import 'package:smart_labs_mobile/widgets/student/announcement/student_announcements_tab.dart';
 import 'package:smart_labs_mobile/widgets/student/session/student_sessions_tab.dart';
 import 'package:smart_labs_mobile/widgets/student/student_lab_header.dart';
@@ -36,7 +35,7 @@ class LabDetailScreen extends ConsumerWidget {
         ),
       ),
       data: (currentLab) => DefaultTabController(
-        length: 4,
+        length: 3,
         child: Scaffold(
           appBar: AppBar(
             backgroundColor:
@@ -81,7 +80,6 @@ class LabDetailScreen extends ConsumerWidget {
                   tabs: const [
                     Tab(text: 'Sessions'),
                     Tab(text: 'People'),
-                    Tab(text: 'Analytics'),
                     Tab(text: 'Announcements'),
                   ],
                 ),
@@ -91,7 +89,6 @@ class LabDetailScreen extends ConsumerWidget {
                   children: [
                     SessionsTab(lab: lab),
                     PeopleTab(lab: currentLab),
-                    const AnalyticsTab(),
                     StudentAnnouncementsTab(lab: currentLab),
                   ],
                 ),
