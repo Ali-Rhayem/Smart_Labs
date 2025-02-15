@@ -37,7 +37,7 @@ class LabHeader extends StatelessWidget {
           Text(
             lab.description,
             style: TextStyle(
-              color: theme.colorScheme.onSurface.withOpacity(0.7),
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
               fontSize: 16,
             ),
           ),
@@ -49,7 +49,7 @@ class LabHeader extends StatelessWidget {
               Text(
                 'Lab Code: ${lab.labCode}',
                 style: TextStyle(
-                  color: theme.colorScheme.onSurface.withOpacity(0.7),
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                   fontSize: 14,
                 ),
               ),
@@ -86,7 +86,7 @@ class LabHeader extends StatelessWidget {
                   Text(
                     '${schedule.startTime} - ${schedule.endTime}',
                     style: TextStyle(
-                      color: theme.colorScheme.onSurface.withOpacity(0.7),
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                       fontSize: 14,
                     ),
                   ),
