@@ -13,12 +13,11 @@ from dotenv import load_dotenv
 load_dotenv()
 
 topic = os.getenv("ANALYSIS_TOPIC")
-ROOM = 'B-201'
 
 consumer = KafkaConsumer(
     topic,
     bootstrap_servers=os.getenv("BOOTSTRAP_SERVERS"),
-    group_id=ROOM,
+    group_id=os.getenv("MODEL_GROUP"),
     auto_offset_reset='latest',
     enable_auto_commit=True,
     value_deserializer=lambda x: x.decode('utf-8'),
