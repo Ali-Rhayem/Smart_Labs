@@ -261,7 +261,7 @@ public class LabService
         return result.ModifiedCount > 0 ? studentsId : [];
     }
 
-    public async Task<Boolean> AddInstructorToLabAsync(int labId, int[] instructorIds)
+    public async Task<Boolean> AddInstructorToLabAsync(int labId, List<int> instructorIds)
     {
         var updateDefinition = Builders<Lab>.Update.PushEach(lab => lab.Instructors, instructorIds);
         var result = await _labs.UpdateOneAsync(lab => lab.Id == labId, updateDefinition);
