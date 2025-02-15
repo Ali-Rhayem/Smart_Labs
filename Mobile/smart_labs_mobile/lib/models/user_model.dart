@@ -8,7 +8,7 @@ class User {
   final String? imageUrl;
   final String role;
   final List<dynamic>? faceIdentityVector;
-  final bool isFirstLogin;
+  final bool firstLogin;
 
   User({
     required this.id,
@@ -20,7 +20,7 @@ class User {
     this.imageUrl,
     required this.role,
     this.faceIdentityVector,
-    required this.isFirstLogin,
+    required this.firstLogin,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
@@ -31,9 +31,8 @@ class User {
       major: json['major'],
       faculty: json['faculty'],
       imageUrl: json['image'],
-      role: json['role'] ??
-          '',
-      isFirstLogin: json['isFirstLogin'] ?? false,
+      role: json['role'] ?? '',
+      firstLogin: json['first_login'] ?? true,
     );
   }
 
@@ -43,7 +42,7 @@ class User {
     String? major,
     String? faculty,
     String? imageUrl,
-    bool? isFirstLogin,
+    bool? firstLogin,
   }) {
     return User(
       id: id,
@@ -53,8 +52,8 @@ class User {
       major: major ?? this.major,
       faculty: faculty ?? this.faculty,
       imageUrl: imageUrl ?? this.imageUrl,
-      isFirstLogin: isFirstLogin ?? this.isFirstLogin,
       faceIdentityVector: faceIdentityVector,
+      firstLogin: firstLogin ?? this.firstLogin,
     );
   }
 }
