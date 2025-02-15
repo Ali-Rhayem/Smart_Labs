@@ -7,6 +7,7 @@ import random
 import threading
 import sys
 import os
+import subprocess
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -31,16 +32,28 @@ def get_random_image():
     if not images:
         raise ValueError("No image files found in the specified folder.")
     
-    return os.path.join(folder_path, random.choice(images))
+    # return os.path.join(folder_path, random.choice(images))
+    return os.path.join("./image.jpg")
 
 def take_image_from_camera():
     try:
-        capture_command = "sudo rpicam-still --timeout 100 -o ~/Desktop/image.jpg --vflip"
+        # Generate timestamp for filename
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        # Create images directory if it doesn't exist
+        output_dir = os.path.expanduser("~/Desktop/images")
+        os.makedirs(output_dir, exist_ok=True)
+        # Create output path with timestamp
+        output_path = f"~/Desktop/images/image_{timestamp}.jpg"
+        # Build capture command
+        capture_command = f"sudo rpicam-still --timeout 100 -o {output_path} --vflip"
+        
+        time.sleep(0.2)
         subprocess.run(capture_command, shell=True, check=True)
-        return "~/Desktop/image.jpg"
+        return output_path
     except subprocess.CalledProcessError as e:
         print(f"Failed to capture image: {e}")
         return None
+    
 # Create a KafkaProducer instance to be reused.
 producer = KafkaProducer(
     bootstrap_servers=os.getenv("BOOTSTRAP_SERVERS"),
@@ -56,6 +69,7 @@ def produce_image(command_data):
     image_path = get_random_image()
     # image_path = take_image_from_camera()
     command_data["encoding"] = images_to_base64(image_path)
+    command_data["image_path"] = image_path
     command_data["time"] = datetime.datetime.now(datetime.UTC).strftime("%H:%M:%S")
     future = producer.send(os.getenv("ANALYSIS_TOPIC"), value=command_data)
     try:
