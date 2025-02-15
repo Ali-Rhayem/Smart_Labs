@@ -69,7 +69,7 @@ class _AnnouncementCommentsScreenState
               borderRadius: BorderRadius.circular(12),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.2),
+                  color: Colors.black.withValues(alpha: 0.2),
                   blurRadius: 10,
                   offset: const Offset(0, 4),
                 ),
@@ -95,7 +95,7 @@ class _AnnouncementCommentsScreenState
                     Text(
                       formatDateTime(widget.announcement.time),
                       style: TextStyle(
-                        color: theme.colorScheme.onSurface.withOpacity(0.7),
+                        color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                         fontSize: 14,
                       ),
                     ),
@@ -122,7 +122,7 @@ class _AnnouncementCommentsScreenState
                           Container(
                             width: 2,
                             height: 100,
-                            color: accentColor.withOpacity(0.5),
+                            color: accentColor.withValues(alpha: 0.5),
                             margin: const EdgeInsets.only(left: 11),
                           ),
                         ],
@@ -139,7 +139,7 @@ class _AnnouncementCommentsScreenState
                                 width: 12,
                                 height: 2,
                                 margin: const EdgeInsets.only(top: 20),
-                                color: accentColor.withOpacity(0.5),
+                                color: accentColor.withValues(alpha: 0.5),
                               ),
                               Expanded(
                                 child: Container(
@@ -205,7 +205,7 @@ class _AnnouncementCommentsScreenState
                                                 style: TextStyle(
                                                   color: theme
                                                       .colorScheme.onSurface
-                                                      .withOpacity(0.6),
+                                                      .withValues(alpha: 0.6),
                                                   fontSize: 12,
                                                 ),
                                               ),
@@ -235,7 +235,7 @@ class _AnnouncementCommentsScreenState
                   isDark ? const Color(0xFF2C2C2C) : theme.colorScheme.surface,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.2),
+                  color: Colors.black.withValues(alpha: 0.2),
                   blurRadius: 10,
                   offset: const Offset(0, -4),
                 ),
@@ -252,7 +252,7 @@ class _AnnouncementCommentsScreenState
                     decoration: InputDecoration(
                       hintText: 'Write a comment...',
                       hintStyle: TextStyle(
-                        color: theme.colorScheme.onSurface.withOpacity(0.5),
+                        color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                       ),
                       filled: true,
                       fillColor: isDark
