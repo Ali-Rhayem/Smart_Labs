@@ -229,7 +229,7 @@ namespace backend.Controllers
 
         // POST: api/user/resetPassword
         [HttpPost("resetPassword")]
-        [Authorize]
+        [AllowAnonymous]
         public async Task<ActionResult> ResetPassword([FromBody] JsonElement body)
         {
             var email = body.GetProperty("email").GetString();
@@ -243,14 +243,7 @@ namespace backend.Controllers
             if (user == null)
                 return NotFound(new { errors = "User not found." });
 
-            // check if user is the current user
-            var userIdClaim = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier);
-            if (userIdClaim == null || user.Id != int.Parse(userIdClaim.Value))
-            {
-                return Unauthorized(new { errors = "Invalid user." });
-            }
-
-            // generate a random password
+            // reset the user's password
             var result = await _userService.ResetPasswordAsync(user.Id);
 
             if (!result)
