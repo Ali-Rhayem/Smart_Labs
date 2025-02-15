@@ -193,7 +193,7 @@ namespace backend.Controllers
             if (userIdClaim == null)
                 return Unauthorized(new { errors = "Invalid user." });
 
-            var user = await _userService.GetUserById(int.Parse(userIdClaim.Value));
+            var user = await _userService.GetWholeUserById(int.Parse(userIdClaim.Value));
             if (user == null)
                 return Unauthorized(new { errors = "Invalid user." });
 
