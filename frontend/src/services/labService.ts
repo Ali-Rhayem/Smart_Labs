@@ -30,7 +30,10 @@ export const labService = {
 	addStudents: (id: number, emails: string[]) =>
 		smart_labs.postAPI<number[], string[]>(`/lab/${id}/students`, emails),
 
-	removeStudent: (labId: number, studentId: number) => 
+	addInstructors: (id: number, emails: string[]) =>
+		smart_labs.postAPI<number[], string[]>(`/lab/${id}/instructors`, emails),
+
+	removeStudent: (labId: number, studentId: number) =>
 		smart_labs.deleteAPI<void>(`/lab/${labId}/students/${studentId}`),
 
 	deleteLab: (id: number) => smart_labs.deleteAPI<void>(`/lab/${id}`),
