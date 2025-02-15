@@ -6,6 +6,7 @@ import 'package:smart_labs_mobile/services/auth_service.dart';
 import 'package:smart_labs_mobile/utils/secure_storage.dart';
 import 'package:smart_labs_mobile/providers/lab_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:smart_labs_mobile/screens/forgot_password.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
@@ -160,7 +161,13 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         // Forgot Password
                         TextButton(
                           onPressed: () {
-                            // TODO: Implement forgot password navigation
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    const ForgotPasswordScreen(),
+                              ),
+                            );
                           },
                           style: TextButton.styleFrom(
                             foregroundColor:
