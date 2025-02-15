@@ -58,7 +58,7 @@ try:
                     class_id = int(bbox.cls)
                     class_name = results[0].names[class_id].lower()
 
-                    if confidence < 0.5:
+                    if confidence < 0.7:
                         continue
 
                     obj = {
@@ -159,7 +159,7 @@ try:
                         person_objs[index]["gloves"].append(object_bbox)
 
             # Optionally, draw objects on the image.
-            draw_objects(image, person_objs)
+            # draw_objects(image, person_objs)
 
             people = []
             # pprint(person_objs)
