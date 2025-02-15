@@ -313,9 +313,9 @@ namespace backend.Controllers
             var result = await _labService.AddInstructorToLabAsync(labId, instructorIds);
 
             if (!result)
-                return NotFound();
+                return NotFound(new { errors = "Instructors not added." });
 
-            return NoContent();
+            return Ok(instructorIds);
         }
 
         // DELETE: api/lab/{labId}/instructors/{instructorId}
