@@ -23,10 +23,10 @@ public class Sessions
     public List<ObjectResult> Result { get; set; } = [];
 
     [BsonElement("total_attendance")]
-    public decimal TotalAttendance { get; set; }
+    public int TotalAttendance { get; set; }
 
     [BsonElement("total_ppe_compliance")]
-    public Dictionary<string, decimal> TotalPPECompliance { get; set; } = [];
+    public Dictionary<string, int> TotalPPECompliance { get; set; } = [];
 
     [BsonElement("outputs")]
     public List<Output> Outputs { get; set; } = [];
@@ -37,7 +37,7 @@ public class Sessions
     [BsonElement("ppe_compliance_bytime")]
     public Dictionary<string, List<int>> PPE_compliance_bytime { get; set; } = [];
 
-    [BsonElement("total_ppe_compliance_bytime")] 
+    [BsonElement("total_ppe_compliance_bytime")]
     public List<int> Total_ppe_compliance_bytime { get; set; } = [];
 
 
@@ -50,9 +50,9 @@ public class ObjectResult
     [BsonElement("name")]
     public string? Name { get; set; }
     [BsonElement("attendance_percentage")]
-    public decimal Attendance_percentage { get; set; }
+    public int Attendance_percentage { get; set; }
     [BsonElement("ppe_compliance")]
-    public Dictionary<string, decimal> PPE_compliance { get; set; } = [];
+    public Dictionary<string, int> PPE_compliance { get; set; } = [];
 }
 
 public class Output
@@ -87,9 +87,9 @@ public class SessionsDTO
 
     public List<ObjectResultDTO> Result { get; set; } = [];
 
-    public decimal TotalAttendance { get; set; }
+    public int TotalAttendance { get; set; }
 
-    public Dictionary<string, decimal> TotalPPECompliance { get; set; } = [];
+    public Dictionary<string, int> TotalPPECompliance { get; set; } = [];
 
     private List<Output> Outputs { get; set; } = [];
     public List<int> Total_attendance_bytime { get; set; } = [];
@@ -102,6 +102,6 @@ public class ObjectResultDTO
     public int Id { get; set; }
     public string? Name { get; set; }
     public required UserDTO User { get; set; }
-    public decimal Attendance_percentage { get; set; }
-    public Dictionary<string, decimal> PPE_compliance { get; set; } = [];
+    public int Attendance_percentage { get; set; }
+    public Dictionary<string, int> PPE_compliance { get; set; } = [];
 }
