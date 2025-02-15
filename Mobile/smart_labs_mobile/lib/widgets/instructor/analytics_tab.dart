@@ -27,7 +27,6 @@ class AnalyticsTab extends ConsumerWidget {
           child: CircularProgressIndicator(),
         ),
         error: (error, stack) {
-          print('Error loading analytics: $error');
           return SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
             child: SizedBox(
@@ -44,7 +43,6 @@ class AnalyticsTab extends ConsumerWidget {
           );
         },
         data: (analytics) {
-          print('Received analytics data: ${analytics.totalAttendance}');
           return SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.all(16),
@@ -174,7 +172,7 @@ class AnalyticsTab extends ConsumerWidget {
         Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
+            color: color.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Icon(icon, color: color),
@@ -186,7 +184,7 @@ class AnalyticsTab extends ConsumerWidget {
             Text(
               title,
               style: TextStyle(
-                color: theme.colorScheme.onSurface.withOpacity(0.7),
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                 fontSize: 14,
               ),
             ),
@@ -231,7 +229,7 @@ class AnalyticsTab extends ConsumerWidget {
         const SizedBox(height: 8),
         LinearProgressIndicator(
           value: value / 100,
-          backgroundColor: theme.colorScheme.onSurface.withOpacity(0.1),
+          backgroundColor: theme.colorScheme.onSurface.withValues(alpha: 0.1),
           valueColor: AlwaysStoppedAnimation(
               isDark ? kNeonAccent : theme.colorScheme.primary),
           minHeight: 8,
@@ -273,7 +271,7 @@ class AnalyticsTab extends ConsumerWidget {
         subtitle: Text(
           'Attendance: ${student.attendancePercentage}%',
           style: TextStyle(
-            color: theme.colorScheme.onSurface.withOpacity(0.7),
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
           ),
         ),
         children: [
