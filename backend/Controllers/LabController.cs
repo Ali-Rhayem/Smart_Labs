@@ -237,10 +237,10 @@ namespace backend.Controllers
 
             var result = await _labService.AddStudentToLabAsync(labId, emails);
 
-            if (!result)
-                return NotFound();
+            if (result.Count == 0)
+                return NotFound(new { errors = "No students added." });
 
-            return NoContent();
+            return Ok(result);
         }
 
         // DELETE: api/lab/{labId}/students/{studentId}
