@@ -151,6 +151,19 @@ public class UserService
 
     public async Task<User?> FirstLoginAsync(FirstLogin firstLogin)
     {
+        var image = firstLogin.Image;
+        var imageType = image!.Split(';')[0].Split('/')[1];
+        var imageBytes = Convert.FromBase64String(image.Split(',')[1]);
+        var currentDirectory = AppContext.BaseDirectory;
+        var directoryPath = Path.Combine(currentDirectory, "wwwroot", "medi");
+        if (!Directory.Exists(directoryPath))
+        {
+            Directory.CreateDirectory(directoryPath);
+        }
+        var image_path = $"medi/{firstLogin.Id}.{imageType}";
+        var SaveimagePath = Path.Combine(directoryPath, $"{firstLogin.Id}.{imageType}");
+        await File.WriteAllBytesAsync(SaveimagePath, imageBytes);
+
         var user = await GetUserById(firstLogin.Id);
         var newUser = new User
         {
@@ -160,7 +173,7 @@ public class UserService
             Password = firstLogin.Password,
             Major = firstLogin.Major,
             Faculty = firstLogin.Faculty,
-            Image = firstLogin.Image,
+            Image = image_path,
             Role = user.Role,
             First_login = false
         };
@@ -172,7 +185,7 @@ public class UserService
             .Set(u => u.Password, firstLogin.Password)
             .Set(u => u.Major, firstLogin.Major)
             .Set(u => u.Faculty, firstLogin.Faculty)
-            .Set(u => u.Image, firstLogin.Image);
+            .Set(u => u.Image, image_path);
 
         var result = await _users.UpdateOneAsync(u => u.Id == firstLogin.Id, update);
         return result.IsAcknowledged ? newUser : null;
