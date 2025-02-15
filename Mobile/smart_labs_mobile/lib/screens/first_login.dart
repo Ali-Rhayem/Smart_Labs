@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:smart_labs_mobile/controllers/edit_profile_controller.dart';
 import 'package:smart_labs_mobile/models/faculty_model.dart';
+import 'package:smart_labs_mobile/models/user_model.dart';
 import 'package:smart_labs_mobile/widgets/edit_profile_widgets.dart';
 import 'package:smart_labs_mobile/providers/faculty_provider.dart';
 import 'package:smart_labs_mobile/providers/user_provider.dart';
@@ -53,6 +54,23 @@ class _FirstLoginScreenState extends ConsumerState<FirstLoginScreen> {
     });
   }
 
+  String _getMimeType(String filePath) {
+    final extension = filePath.split('.').last.toLowerCase();
+    switch (extension) {
+      case 'png':
+        return 'image/png';
+      case 'jpg':
+      case 'jpeg':
+        return 'image/jpeg';
+      case 'gif':
+        return 'image/gif';
+      case 'webp':
+        return 'image/webp';
+      default:
+        return 'image/jpeg';
+    }
+  }
+
   Future<void> _submitForm() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -69,7 +87,9 @@ class _FirstLoginScreenState extends ConsumerState<FirstLoginScreen> {
         'confirmPassword': _confirmPasswordController.text,
         'major': _selectedMajor,
         'faculty': _selectedFaculty,
-        'image': _base64Image,
+        'image': _base64Image != null && _imageFile != null
+            ? 'data:${_getMimeType(_imageFile!.path)};base64,$_base64Image'
+            : "",
         'first_login': false,
         'email': user.email,
       });
@@ -77,21 +97,34 @@ class _FirstLoginScreenState extends ConsumerState<FirstLoginScreen> {
       if (!mounted) return;
 
       if (response['success']) {
-      // Update user provider and navigate to main screen
-      final updatedUser = user.copyWith(
-        name: _nameController.text,
-        major: _selectedMajor,
-        faculty: _selectedFaculty,
-        imageUrl: response['data']['image'],
-        firstLogin: false,
-      );
-      ref.read(userProvider.notifier).setUser(updatedUser);
+        final userResponse = await _apiService.get('/User/${user.id}');
 
-      if (user.role == 'instructor') {
-        Navigator.pushReplacementNamed(context, '/instructorMain');
-      } else {
-        Navigator.pushReplacementNamed(context, '/studentMain');
-      }
+        if (!userResponse['success']) {
+          throw Exception(
+              userResponse['message'] ?? 'Failed to fetch updated user data');
+        }
+
+        final userDetails = userResponse['data'];
+        final updatedUser = User(
+          id: userDetails['id'],
+          name: userDetails['name'],
+          email: userDetails['email'],
+          password: '',
+          major: userDetails['major'],
+          faculty: userDetails['faculty'],
+          imageUrl: userDetails['image'],
+          role: user.role,
+          faceIdentityVector: userDetails['faceIdentityVector'],
+          firstLogin: false,
+        );
+
+        ref.read(userProvider.notifier).setUser(updatedUser);
+
+        if (user.role == 'instructor') {
+          Navigator.pushReplacementNamed(context, '/instructorMain');
+        } else {
+          Navigator.pushReplacementNamed(context, '/studentMain');
+        }
       } else {
         throw Exception(response['message'] ?? 'Failed to update profile');
       }
