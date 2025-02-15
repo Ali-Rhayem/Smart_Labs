@@ -62,7 +62,7 @@ class SessionDetailScreen extends StatelessWidget {
                 : LinearGradient(
                     colors: [
                       theme.colorScheme.surface,
-                      theme.colorScheme.surface.withOpacity(0.9)
+                      theme.colorScheme.surface.withValues(alpha: 0.9)
                     ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
@@ -70,7 +70,7 @@ class SessionDetailScreen extends StatelessWidget {
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.1),
+                color: Colors.black.withValues(alpha: 0.1),
                 blurRadius: 10,
                 offset: const Offset(0, 4),
               ),
@@ -88,7 +88,7 @@ class SessionDetailScreen extends StatelessWidget {
                       decoration: BoxDecoration(
                         color:
                             (isDark ? kNeonAccent : theme.colorScheme.primary)
-                                .withOpacity(0.1),
+                                .withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Icon(
@@ -148,7 +148,7 @@ class SessionDetailScreen extends StatelessWidget {
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
                     color: (isDark ? kNeonAccent : theme.colorScheme.primary)
-                        .withOpacity(0.1),
+                        .withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(
@@ -185,7 +185,7 @@ class SessionDetailScreen extends StatelessWidget {
                           : LinearGradient(
                               colors: [
                                 theme.colorScheme.surface,
-                                theme.colorScheme.surface.withOpacity(0.9)
+                                theme.colorScheme.surface.withValues(alpha: 0.9)
                               ],
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
@@ -194,12 +194,12 @@ class SessionDetailScreen extends StatelessWidget {
                       border: Border.all(
                         color:
                             (isDark ? kNeonAccent : theme.colorScheme.primary)
-                                .withOpacity(0),
+                                .withValues(alpha: 0),
                         width: 2,
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
+                          color: Colors.black.withValues(alpha: 0.1),
                           blurRadius: 8,
                           offset: const Offset(0, 2),
                         ),
@@ -249,7 +249,7 @@ class SessionDetailScreen extends StatelessWidget {
                         child: Text(
                           'Attendance: ${data.attendancePercentage}%',
                           style: TextStyle(
-                            color: theme.colorScheme.onSurface.withOpacity(0.7),
+                            color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                             fontSize: 14,
                           ),
                         ),
@@ -312,7 +312,7 @@ class SessionDetailScreen extends StatelessWidget {
             Text(
               label,
               style: TextStyle(
-                color: theme.colorScheme.onSurface.withOpacity(0.8),
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
                 fontSize: 15,
                 letterSpacing: 0.3,
               ),
@@ -320,10 +320,10 @@ class SessionDetailScreen extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                color: percentageColor.withOpacity(0.15),
+                color: percentageColor.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
-                  color: percentageColor.withOpacity(0.5),
+                  color: percentageColor.withValues(alpha: 0.5),
                   width: 1,
                 ),
               ),
