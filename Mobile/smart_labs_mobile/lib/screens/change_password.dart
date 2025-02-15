@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:smart_labs_mobile/main.dart';
 import 'package:smart_labs_mobile/services/api_service.dart';
 
 class ChangePasswordScreen extends ConsumerStatefulWidget {
@@ -34,9 +35,10 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
     setState(() => _isLoading = true);
 
     try {
-      final response = await _apiService.put('/User/change-password', {
-        'currentPassword': _currentPasswordController.text,
-        'newPassword': _newPasswordController.text,
+      final response = await _apiService.post('/User/changePassword', {
+        'old_password': _currentPasswordController.text,
+        'new_password': _newPasswordController.text,
+        'confirm_password': _confirmPasswordController.text,
       });
 
       if (!mounted) return;
