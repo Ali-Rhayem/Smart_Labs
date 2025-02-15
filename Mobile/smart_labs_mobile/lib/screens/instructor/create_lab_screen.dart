@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
+import 'package:smart_labs_mobile/controllers/create_lab_controller.dart';
 import 'package:smart_labs_mobile/models/lab_schedule.dart';
-import 'package:smart_labs_mobile/providers/lab_provider.dart';
-import 'package:smart_labs_mobile/services/api_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:smart_labs_mobile/utils/date_time_utils.dart';
+import 'package:smart_labs_mobile/widgets/lab/custom_text_field.dart';
+import 'package:smart_labs_mobile/widgets/lab/room_dropdown.dart';
+import 'package:smart_labs_mobile/widgets/lab/semester_dropdown.dart';
 import 'package:smart_labs_mobile/widgets/lab_schedules_list.dart';
 import 'package:smart_labs_mobile/widgets/lab_student_input.dart';
 import 'package:smart_labs_mobile/widgets/ppe_dropdwon.dart';
-import 'package:smart_labs_mobile/widgets/time_selectors.dart';
 import 'package:smart_labs_mobile/widgets/week_day_selector.dart';
-import 'package:smart_labs_mobile/providers/room_provider.dart';
-import 'package:smart_labs_mobile/providers/semester_provider.dart';
+
+import '../../widgets/time_selectors.dart';
 
 var logger = Logger();
 // TODO: add error display message
@@ -32,11 +32,11 @@ class _CreateLabScreenState extends ConsumerState<CreateLabScreen> {
   late TextEditingController _roomController;
   late TextEditingController _semesterController;
   final List<LabSchedule> _schedules = [];
+  final _controller = CreateLabController();
 
   int _selectedWeekday = DateTime.now().weekday;
   TimeOfDay _startTime = TimeOfDay.now();
   TimeOfDay _endTime = TimeOfDay.now();
-  final ApiService _apiService = ApiService();
 
   final List<String> _selectedPPE = [];
   final List<String> _selectedStudents = [];
@@ -94,7 +94,7 @@ class _CreateLabScreenState extends ConsumerState<CreateLabScreen> {
                 ),
               ),
               const SizedBox(height: 10),
-              _buildTextField(
+              CustomTextField(
                 controller: _labNameController,
                 label: 'Name',
                 validator: (value) =>
@@ -110,7 +110,7 @@ class _CreateLabScreenState extends ConsumerState<CreateLabScreen> {
                 ),
               ),
               const SizedBox(height: 10),
-              _buildTextField(
+              CustomTextField(
                 controller: _labCodeController,
                 label: 'Code',
                 validator: (value) =>
@@ -126,7 +126,7 @@ class _CreateLabScreenState extends ConsumerState<CreateLabScreen> {
                 ),
               ),
               const SizedBox(height: 10),
-              _buildTextField(
+              CustomTextField(
                 controller: _descriptionController,
                 label: 'Description',
                 maxLines: 3,
@@ -164,8 +164,16 @@ class _CreateLabScreenState extends ConsumerState<CreateLabScreen> {
                 label: 'Lab Schedule',
                 startTime: _startTime,
                 endTime: _endTime,
-                onSelectStartTime: () => _selectTime(true),
-                onSelectEndTime: () => _selectTime(false),
+                onSelectStartTime: (picked) {
+                  setState(() {
+                    _startTime = picked;
+                  });
+                },
+                onSelectEndTime: (picked) {
+                  setState(() {
+                    _endTime = picked;
+                  });
+                },
               ),
               const SizedBox(height: 16),
               LabSchedulesList(
@@ -197,7 +205,14 @@ class _CreateLabScreenState extends ConsumerState<CreateLabScreen> {
                 ),
               ),
               const SizedBox(height: 10),
-              _buildRoomDropdown(),
+              RoomDropdown(
+                controller: _roomController,
+                onChanged: (value) {
+                  setState(() {
+                    _roomController.text = value ?? '';
+                  });
+                },
+              ),
               const SizedBox(height: 16),
               const Text(
                 'Semester',
@@ -208,7 +223,14 @@ class _CreateLabScreenState extends ConsumerState<CreateLabScreen> {
                 ),
               ),
               const SizedBox(height: 10),
-              _buildSemesterDropdown(),
+              SemesterDropdown(
+                selectedSemesterId: _selectedSemesterId,
+                onChanged: (value) {
+                  setState(() {
+                    _selectedSemesterId = value ?? 0;
+                  });
+                },
+              ),
               const SizedBox(height: 16),
               SizedBox(
                 width: double.infinity,
@@ -243,295 +265,33 @@ class _CreateLabScreenState extends ConsumerState<CreateLabScreen> {
     );
   }
 
-  Widget _buildTextField({
-    required TextEditingController controller,
-    required String label,
-    int maxLines = 1,
-    String? Function(String?)? validator,
-  }) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
-    return TextFormField(
-      controller: controller,
-      validator: validator,
-      maxLines: maxLines,
-      style: TextStyle(color: theme.colorScheme.onSurface),
-      decoration: InputDecoration(
-        labelText: label,
-        labelStyle:
-            TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.7)),
-        filled: true,
-        fillColor: isDark ? const Color(0xFF1C1C1C) : theme.colorScheme.surface,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide:
-              BorderSide(color: theme.colorScheme.onSurface.withOpacity(0.2)),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide:
-              BorderSide(color: theme.colorScheme.onSurface.withOpacity(0.2)),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide(
-            color: isDark ? const Color(0xFFFFFF00) : theme.colorScheme.primary,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Future<void> _selectTime(bool isStartTime) async {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
-    final picked = await showTimePicker(
-      context: context,
-      initialTime: isStartTime ? _startTime : _endTime,
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: isDark
-                ? const ColorScheme.dark(
-                    primary: Color(0xFFFFFF00),
-                    onPrimary: Colors.black,
-                    surface: Color(0xFF1C1C1C),
-                    onSurface: Colors.white,
-                  )
-                : ColorScheme.light(
-                    primary: theme.colorScheme.primary,
-                    onPrimary: theme.colorScheme.onPrimary,
-                    surface: theme.colorScheme.surface,
-                    onSurface: theme.colorScheme.onSurface,
-                  ),
-          ),
-          child: child!,
-        );
+  void _addSchedule() {
+    _controller.addSchedule(
+      selectedWeekday: _selectedWeekday,
+      startTime: _startTime,
+      endTime: _endTime,
+      onScheduleAdded: (schedule) {
+        setState(() {
+          _schedules.add(schedule);
+        });
       },
     );
-    if (picked != null) {
-      setState(() {
-        if (isStartTime) {
-          _startTime = picked;
-        } else {
-          _endTime = picked;
-        }
-      });
-    }
-  }
-
-  void _addSchedule() {
-    setState(() {
-      _schedules.add(
-        LabSchedule(
-          dayOfWeek: getWeekdayName(_selectedWeekday),
-          startTime: formatTimeToHHMM(_startTime),
-          endTime: formatTimeToHHMM(_endTime),
-        ),
-      );
-    });
   }
 
   Future<void> _submitForm() async {
-    if (_formKey.currentState?.validate() ?? false) {
-      if (_selectedPPE.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please select required PPE')),
-        );
-        return;
-      }
-      if (_selectedStudents.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please add at least one student')),
-        );
-        return;
-      }
-      if (_schedules.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please add at least one schedule')),
-        );
-        return;
-      }
-
-      final labData = {
-        "lab": {
-          "labCode": _labCodeController.text,
-          "labName": _labNameController.text,
-          "schedule": _schedules.map((s) => s.toJson()).toList(),
-          "description": _descriptionController.text,
-          "endLab": false,
-          "room": _roomController.text,
-          "PPE": _selectedPPEIds,
-          "semesterId": _selectedSemesterId,
-        },
-        "student_Emails": _selectedStudents
-      };
-
-      try {
-        final response = await _apiService.post('/Lab', labData);
-        if (response['success']) {
-          if (mounted) {
-            await ref.read(labsProvider.notifier).fetchLabs();
-            Navigator.pop(context);
-          }
-        } else {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                  content: Text(response['message'] ?? 'Failed to create lab')),
-            );
-          }
-        }
-      } catch (e) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to create lab: $e')),
-          );
-        }
-      }
-    }
-  }
-
-  Widget _buildRoomDropdown() {
-    return Consumer(
-      builder: (context, ref, child) {
-        final theme = Theme.of(context);
-        final isDark = theme.brightness == Brightness.dark;
-        final roomsAsync = ref.watch(roomsProvider);
-
-        return roomsAsync.when(
-          loading: () => CircularProgressIndicator(
-            color: isDark ? const Color(0xFFFFFF00) : theme.colorScheme.primary,
-          ),
-          error: (error, stack) => Text(
-            'Error: $error',
-            style: TextStyle(color: theme.colorScheme.error),
-          ),
-          data: (rooms) => DropdownButtonFormField<String>(
-            value: _roomController.text.isEmpty ? null : _roomController.text,
-            decoration: InputDecoration(
-              filled: true,
-              fillColor:
-                  isDark ? const Color(0xFF1C1C1C) : theme.colorScheme.surface,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(
-                  color: isDark
-                      ? Colors.white24
-                      : theme.colorScheme.onSurface.withOpacity(0.2),
-                ),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(
-                  color: isDark
-                      ? Colors.white24
-                      : theme.colorScheme.onSurface.withOpacity(0.2),
-                ),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(
-                  color: isDark
-                      ? const Color(0xFFFFFF00)
-                      : theme.colorScheme.primary,
-                ),
-              ),
-            ),
-            dropdownColor:
-                isDark ? const Color(0xFF1C1C1C) : theme.colorScheme.surface,
-            style: TextStyle(color: theme.colorScheme.onSurface),
-            hint: Text(
-              'Select Room',
-              style: TextStyle(
-                color: theme.colorScheme.onSurface.withOpacity(0.7),
-              ),
-            ),
-            items: [
-              ...rooms.map((room) {
-                return DropdownMenuItem(
-                  value: room.name,
-                  child: Text(room.name),
-                );
-              }).toList(),
-            ],
-            onChanged: (value) {
-              setState(() {
-                _roomController.text = value ?? '';
-              });
-            },
-            validator: (value) => value == null ? 'Please select a room' : null,
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildSemesterDropdown() {
-    return Consumer(
-      builder: (context, ref, child) {
-        final theme = Theme.of(context);
-        final isDark = theme.brightness == Brightness.dark;
-        final semestersAsync = ref.watch(semestersProvider);
-
-        return semestersAsync.when(
-          loading: () => CircularProgressIndicator(
-            color: isDark ? const Color(0xFFFFFF00) : theme.colorScheme.primary,
-          ),
-          error: (error, stack) => Text(
-            'Error: $error',
-            style: TextStyle(color: theme.colorScheme.error),
-          ),
-          data: (semesters) => DropdownButtonFormField<int>(
-            value: _selectedSemesterId,
-            decoration: InputDecoration(
-              filled: true,
-              fillColor:
-                  isDark ? const Color(0xFF1C1C1C) : theme.colorScheme.surface,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(
-                  color: isDark
-                      ? Colors.white24
-                      : theme.colorScheme.onSurface.withOpacity(0.2),
-                ),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(
-                  color: isDark
-                      ? Colors.white24
-                      : theme.colorScheme.onSurface.withOpacity(0.2),
-                ),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(
-                  color: isDark
-                      ? const Color(0xFFFFFF00)
-                      : theme.colorScheme.primary,
-                ),
-              ),
-            ),
-            dropdownColor:
-                isDark ? const Color(0xFF1C1C1C) : theme.colorScheme.surface,
-            style: TextStyle(color: theme.colorScheme.onSurface),
-            items: semesters.map((semester) {
-              return DropdownMenuItem(
-                value: semester.id,
-                child: Text(semester.name),
-              );
-            }).toList(),
-            onChanged: (value) {
-              setState(() {
-                _selectedSemesterId = value ?? 0;
-              });
-            },
-          ),
-        );
-      },
+    await _controller.handleSubmission(
+      ref: ref,
+      context: context,
+      formKey: _formKey,
+      selectedPPE: _selectedPPE,
+      selectedStudents: _selectedStudents,
+      schedules: _schedules,
+      labCode: _labCodeController.text,
+      labName: _labNameController.text,
+      description: _descriptionController.text,
+      room: _roomController.text,
+      selectedPPEIds: _selectedPPEIds,
+      selectedSemesterId: _selectedSemesterId,
     );
   }
 }
