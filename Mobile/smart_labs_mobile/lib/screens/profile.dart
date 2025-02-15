@@ -60,12 +60,29 @@ class ProfileScreen extends ConsumerWidget {
             Center(
               child: CircleAvatar(
                 radius: 50,
-                backgroundImage: user.imageUrl != null
-                    ? NetworkImage(
-                        '${dotenv.env['IMAGE_BASE_URL']}/${user.imageUrl}')
-                    : const NetworkImage('https://picsum.photos/200'),
-                onBackgroundImageError: (_, __) =>
-                    const NetworkImage('https://picsum.photos/200'),
+                backgroundColor: theme.colorScheme.primary,
+                child: ClipOval(
+                  child: Image.network(
+                    '${dotenv.env['IMAGE_BASE_URL']}/${user.imageUrl}',
+                    width: 100,
+                    height: 100,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        color: theme.colorScheme.primary,
+                        alignment: Alignment.center,
+                        child: Text(
+                          user.name[0].toUpperCase(),
+                          style: TextStyle(
+                            color: isDark ? Colors.black : Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 32,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
               ),
             ),
             const SizedBox(height: 16),
