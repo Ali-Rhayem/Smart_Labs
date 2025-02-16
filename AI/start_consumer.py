@@ -81,17 +81,42 @@ def produce_image(command_data):
         print("Failed to send image:", e)
 
 def periodic_producer(command_data):
-    """
-    Produce an image every 10 seconds while the producing_event flag is set.
-    The sleep is done in short intervals (1 sec) so that it can be terminated promptly.
-    """
+    try:
+        # Parse end_time from command_data
+        end_time_str = command_data["end_time"]
+        end_time = datetime.datetime.strptime(end_time_str, "%H:%M").time()
+    except KeyError:
+        print("Missing 'end_time' in command_data.")
+        return
+    except ValueError:
+        print(f"Invalid 'end_time' format: {end_time_str}. Expected 'HH:MM:SS'.")
+        return
+
     while producing_event.is_set():
+        # Check if current time is past end_time
+        current_time = datetime.datetime.now().time()
+        if current_time >= end_time:
+            print(f"Current time {current_time} has reached or passed end time {end_time}. Stopping periodic production.")
+            producing_event.clear()
+            break
+
+        # Produce an image
         produce_image(command_data)
-        # Wait 10 seconds total, but check every second if the event is still set.
-        for _ in range(2):
+
+        # Wait for 10 seconds, checking every second if we need to stop
+        for _ in range(10):
             if not producing_event.is_set():
                 break
             time.sleep(1)
+
+    # After exiting the loop, send one final image
+    # Update the global flag
+    global is_started
+    is_started = False
+    print("Periodic production stopped due to end time reached.")
+    print("Received 'end' command. Sending final image and terminating process.")
+    command_data["command"] = "end"
+    produce_image(command_data)
 
 # Set up the consumer.
 topic = os.getenv("RECORDING_TOPIC")
@@ -117,12 +142,12 @@ try:
             print("Ignoring message for another room:", data["room"])
             continue
         
-        current_time = datetime.datetime.now().strftime("%H:%M:")
-        current_time = datetime.strptime(current_time, "%H:%M:")
+        current_time_str = datetime.datetime.now().strftime("%H:%M")
+        current_time = datetime.datetime.strptime(current_time_str, "%H:%M")
         start_time_str = data["start_time"]
-        start_time = datetime.strptime(start_time_str, "%H:%M:")
+        start_time = datetime.datetime.strptime(start_time_str, "%H:%M")
         end_time_str = data["end_time"]
-        end_time = datetime.strptime(end_time_str, "%H:%M:")
+        end_time = datetime.datetime.strptime(end_time_str, "%H:%M")
         
         start_time = start_time - datetime.timedelta(minutes=5)
         
