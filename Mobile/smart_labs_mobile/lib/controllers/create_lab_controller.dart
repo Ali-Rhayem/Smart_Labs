@@ -110,7 +110,9 @@ class CreateLabController {
       selectedStudents: selectedStudents,
       schedules: schedules,
       context: context,
-    )) return;
+    )) {
+      return;
+    }
 
     try {
       final response = await submitForm(
