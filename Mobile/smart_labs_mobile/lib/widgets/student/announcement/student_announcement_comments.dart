@@ -127,7 +127,7 @@ class _AnnouncementCommentsScreenState
               borderRadius: BorderRadius.circular(12),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
+                  color: Colors.black.withValues(alpha: 0.1),
                   blurRadius: 10,
                   offset: const Offset(0, 4),
                 ),
@@ -157,7 +157,7 @@ class _AnnouncementCommentsScreenState
                     Text(
                       formatDateTime(widget.announcement.time),
                       style: TextStyle(
-                        color: theme.colorScheme.onSurface.withOpacity(0.7),
+                        color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                         fontSize: 14,
                       ),
                     ),
@@ -186,7 +186,7 @@ class _AnnouncementCommentsScreenState
                             color: (isDark
                                     ? kNeonAccent
                                     : theme.colorScheme.primary)
-                                .withOpacity(0.5),
+                                .withValues(alpha: 0.5),
                             margin: const EdgeInsets.only(left: 11),
                           ),
                         ],
@@ -206,7 +206,7 @@ class _AnnouncementCommentsScreenState
                                 color: (isDark
                                         ? kNeonAccent
                                         : theme.colorScheme.primary)
-                                    .withOpacity(0.5),
+                                    .withValues(alpha: 0.5),
                               ),
                               Expanded(
                                 child: Container(
@@ -267,7 +267,7 @@ class _AnnouncementCommentsScreenState
                                             formatDateTime(comment.time),
                                             style: TextStyle(
                                               color: theme.colorScheme.onSurface
-                                                  .withOpacity(0.5),
+                                                  .withValues(alpha: 0.5),
                                               fontSize: 12,
                                             ),
                                           ),
@@ -294,7 +294,7 @@ class _AnnouncementCommentsScreenState
                   isDark ? const Color(0xFF1C1C1C) : theme.colorScheme.surface,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
+                  color: Colors.black.withValues(alpha: 0.1),
                   offset: const Offset(0, -2),
                   blurRadius: 10,
                 ),
@@ -309,7 +309,7 @@ class _AnnouncementCommentsScreenState
                     decoration: InputDecoration(
                       hintText: 'Add a comment...',
                       hintStyle: TextStyle(
-                        color: theme.colorScheme.onSurface.withOpacity(0.5),
+                        color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                       ),
                       filled: true,
                       fillColor:
@@ -317,13 +317,13 @@ class _AnnouncementCommentsScreenState
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(25),
                         borderSide: BorderSide(
-                          color: theme.colorScheme.onSurface.withOpacity(0.1),
+                          color: theme.colorScheme.onSurface.withValues(alpha: 0.1),
                         ),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(25),
                         borderSide: BorderSide(
-                          color: theme.colorScheme.onSurface.withOpacity(0.1),
+                          color: theme.colorScheme.onSurface.withValues(alpha: 0.1),
                         ),
                       ),
                       focusedBorder: OutlineInputBorder(
