@@ -77,12 +77,12 @@ class LabNotifier extends StateNotifier<AsyncValue<List<Lab>>> {
           }
         }
 
-        final ppeIds = (labsData[0]['ppe'] as List<dynamic>? ?? [])
-            .map((e) => e.toString())
-            .toList();
-        final ppeNames = ppeIds.map((id) => ppeIdToName[id] ?? id).toList();
-
         final labs = labsData.map((lab) {
+          final ppeIds = (lab['ppe'] as List<dynamic>? ?? [])
+              .map((e) => e.toString())
+              .toList();
+          final ppeNames = ppeIds.map((id) => ppeIdToName[id] ?? id).toList();
+
           final semesterId = lab['semesterID'].toString();
 
           return Lab(
@@ -207,6 +207,28 @@ class LabNotifier extends StateNotifier<AsyncValue<List<Lab>>> {
       } else {
         return response;
       }
+    } catch (e) {
+      return {
+        'success': false,
+        'message': e.toString(),
+      };
+    }
+  }
+
+  Future<Map<String, dynamic>> deleteLab(String labId) async {
+    try {
+      // Make the API call first
+      final response = await _apiService.delete('/Lab/$labId');
+
+      if (response['success']) {
+        // Only update the state if the API call was successful
+        state.whenData((labs) {
+          state =
+              AsyncValue.data(labs.where((lab) => lab.labId != labId).toList());
+        });
+      }
+
+      return response;
     } catch (e) {
       return {
         'success': false,
