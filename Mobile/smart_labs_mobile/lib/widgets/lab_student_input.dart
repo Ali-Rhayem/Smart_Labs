@@ -57,7 +57,7 @@ class LabStudentInputState extends State<LabStudentInput> {
                 decoration: InputDecoration(
                   hintText: 'Enter student ID',
                   hintStyle: TextStyle(
-                    color: theme.colorScheme.onSurface.withOpacity(0.5),
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                   ),
                   filled: true,
                   fillColor: isDark
