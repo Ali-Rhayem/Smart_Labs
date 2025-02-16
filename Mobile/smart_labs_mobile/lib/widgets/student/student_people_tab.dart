@@ -48,7 +48,7 @@ class PeopleTab extends ConsumerWidget {
               child: Text(
                 'Error: $error',
                 style: TextStyle(
-                  color: theme.colorScheme.onBackground.withOpacity(0.7),
+                  color: theme.colorScheme.onBackground.withValues(alpha: 0.7),
                 ),
               ),
             ),
@@ -58,7 +58,7 @@ class PeopleTab extends ConsumerWidget {
                   child: Text(
                     'No students enrolled',
                     style: TextStyle(
-                      color: theme.colorScheme.onBackground.withOpacity(0.7),
+                      color: theme.colorScheme.onBackground.withValues(alpha: 0.7),
                       fontSize: 16,
                     ),
                   ),
@@ -120,7 +120,7 @@ class PeopleTab extends ConsumerWidget {
                               student.email,
                               style: TextStyle(
                                 color: theme.colorScheme.onSurface
-                                    .withOpacity(0.7),
+                                    .withValues(alpha: 0.7),
                               ),
                             ),
                           )
@@ -161,7 +161,7 @@ class PeopleTab extends ConsumerWidget {
                                 student.email,
                                 style: TextStyle(
                                   color: theme.colorScheme.onSurface
-                                      .withOpacity(0.7),
+                                      .withValues(alpha: 0.7),
                                 ),
                               ),
                               shape: RoundedRectangleBorder(
@@ -233,7 +233,7 @@ class PeopleTab extends ConsumerWidget {
               child: Text(
                 'Error: $error',
                 style: TextStyle(
-                  color: theme.colorScheme.onBackground.withOpacity(0.7),
+                  color: theme.colorScheme.onBackground.withValues(alpha: 0.7),
                 ),
               ),
             ),
@@ -243,7 +243,7 @@ class PeopleTab extends ConsumerWidget {
                   child: Text(
                     'No instructors enrolled',
                     style: TextStyle(
-                      color: theme.colorScheme.onBackground.withOpacity(0.7),
+                      color: theme.colorScheme.onBackground.withValues(alpha: 0.7),
                       fontSize: 16,
                     ),
                   ),
@@ -304,7 +304,7 @@ class PeopleTab extends ConsumerWidget {
                         subtitle: Text(
                           instructor.email,
                           style: TextStyle(
-                            color: theme.colorScheme.onSurface.withOpacity(0.7),
+                            color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                           ),
                         ),
                         shape: RoundedRectangleBorder(
