@@ -20,6 +20,7 @@ data = {
             "ppe_arr": ["gloves", "goggles"],
             "session_id": 4,
             "lab_id": 6,
+            "room": "B-103",
         }
 
 future = producer.send(topic, value=data)
