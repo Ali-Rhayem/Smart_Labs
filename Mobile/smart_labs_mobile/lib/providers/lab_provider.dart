@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:smart_labs_mobile/models/lab_model.dart';
 import 'package:smart_labs_mobile/models/lab_schedule.dart';
+import 'package:smart_labs_mobile/models/ppe_model.dart';
 import 'package:smart_labs_mobile/services/api_service.dart';
 import 'package:smart_labs_mobile/utils/secure_storage.dart';
 
@@ -27,61 +28,74 @@ class LabNotifier extends StateNotifier<AsyncValue<List<Lab>>> {
         return;
       }
 
-      // Determine the correct endpoint
       final endpoint = role == 'instructor'
           ? '/Lab/instructor/$userId'
           : '/Lab/student/$userId';
 
-      // Make the GET request
       final response = await _apiService.get(endpoint);
-      // Check server response
+
       if (response['success']) {
         final List<dynamic> labsData = response['data'];
-        // Map each lab JSON to a Dart object
+
+        // Get all unique PPE IDs from all labs
+        final allPPEIds = labsData
+            .expand((lab) => (lab['ppe'] as List<dynamic>? ?? []))
+            .map((e) => e.toString())
+            .toSet()
+            .toList();
+
+        // Fetch PPE names if there are any PPE IDs
+        Map<String, String> ppeIdToName = {};
+        if (allPPEIds.isNotEmpty) {
+          final ppeResponse = await _apiService.postRaw(
+              '/PPE/list', allPPEIds.map(int.parse).toList());
+          if (ppeResponse['success']) {
+            final ppeList =
+                (ppeResponse['data'] as List).map((ppe) => PPE.fromJson(ppe));
+            for (var ppe in ppeList) {
+              ppeIdToName[ppe.id.toString()] = ppe.name;
+            }
+          }
+        }
+
         final labs = labsData.map((lab) {
-          // Safely extract the `schedule` array
-          // If you only need the first schedule's time:
+          final ppeIds = (lab['ppe'] as List<dynamic>? ?? [])
+              .map((e) => e.toString())
+              .toList();
+          final ppeNames = ppeIds.map((id) => ppeIdToName[id] ?? id).toList();
 
-          // Convert ppe, instructors, students to readable formats
-          final ppeList = lab['ppe'] as List<dynamic>? ?? [];
-          final instructorsList = lab['instructors'] as List<dynamic>? ?? [];
-          final studentsList = lab['students'] as List<dynamic>? ?? [];
-
-          // Build the Lab model
           return Lab(
             labId: lab['id'].toString(),
             labCode: lab['labCode'],
             labName: lab['labName'],
             description: lab['description'],
-            ppe: ppeList.join(', '), // e.g., "Goggles, Gloves"
-            instructors: instructorsList.map((s) => s.toString()).toList(),
-            students: studentsList.map((s) => s.toString()).toList(),
+            ppeIds: ppeIds,
+            ppeNames: ppeNames,
+            instructors: (lab['instructors'] as List<dynamic>? ?? [])
+                .map((s) => s.toString())
+                .toList(),
+            students: (lab['students'] as List<dynamic>? ?? [])
+                .map((s) => s.toString())
+                .toList(),
             schedule: (lab['schedule'] as List<dynamic>)
-                .map((schedule) => LabSchedule(
-                      dayOfWeek: schedule['dayOfWeek'],
-                      startTime: schedule['startTime'],
-                      endTime: schedule['endTime'],
-                    ))
+                .map((schedule) => LabSchedule.fromJson(schedule))
                 .toList(),
             report: lab['report'] ?? 'N/A',
             semesterId: lab['semesterID'].toString(),
-            sessions: [], // or map your entire schedule if needed
+            sessions: [],
             started: lab['started'],
             room: lab['room'],
           );
         }).toList();
 
-        // Update state with success
         state = AsyncValue.data(labs);
       } else {
-        // Server says success = false
         state = AsyncValue.error(
           response['message'] ?? 'Failed to fetch labs',
           StackTrace.empty,
         );
       }
     } catch (e, stack) {
-      // Catch any other errors
       state = AsyncValue.error(e, stack);
     }
   }
@@ -118,7 +132,12 @@ class LabNotifier extends StateNotifier<AsyncValue<List<Lab>>> {
           labCode: labData['labCode'],
           labName: labData['labName'],
           description: labData['description'],
-          ppe: (labData['ppe'] as List<dynamic>? ?? []).join(', '),
+          ppeIds: (labData['ppe'] as List<dynamic>? ?? [])
+              .map((e) => e.toString())
+              .toList(),
+          ppeNames: (labData['ppe'] as List<dynamic>? ?? [])
+              .map((e) => e.toString())
+              .toList(),
           instructors: (labData['instructors'] as List<dynamic>? ?? [])
               .map((s) => s.toString())
               .toList(),
