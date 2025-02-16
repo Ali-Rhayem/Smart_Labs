@@ -37,20 +37,22 @@ class LabNotifier extends StateNotifier<AsyncValue<List<Lab>>> {
       if (response['success']) {
         final List<dynamic> labsData = response['data'];
 
-        // Get all semester IDs
+        // Get all semester IDs (excluding 0 or empty)
         final semesterIds = labsData
             .map((lab) => lab['semesterID'].toString())
+            .where((id) => id != '0' && id.isNotEmpty)
             .toSet()
             .toList();
 
         // Fetch all semesters in one request
-        final semesterResponse = await _apiService.get('/Semester');
         Map<String, String> semesterIdToName = {};
-
-        if (semesterResponse['success']) {
-          final List<dynamic> semestersData = semesterResponse['data'];
-          for (var semester in semestersData) {
-            semesterIdToName[semester['id'].toString()] = semester['name'];
+        if (semesterIds.isNotEmpty) {
+          final semesterResponse = await _apiService.get('/Semester');
+          if (semesterResponse['success']) {
+            final List<dynamic> semestersData = semesterResponse['data'];
+            for (var semester in semestersData) {
+              semesterIdToName[semester['id'].toString()] = semester['name'];
+            }
           }
         }
 
@@ -101,7 +103,9 @@ class LabNotifier extends StateNotifier<AsyncValue<List<Lab>>> {
                 .toList(),
             report: lab['report'] ?? 'N/A',
             semesterId: semesterId,
-            semesterName: semesterIdToName[semesterId] ?? 'Unknown Semester',
+            semesterName: semesterId == '0' || semesterId.isEmpty
+                ? 'No Semester'
+                : semesterIdToName[semesterId] ?? 'Unknown Semester',
             sessions: [],
             started: lab['started'],
             room: lab['room'],
@@ -138,16 +142,17 @@ class LabNotifier extends StateNotifier<AsyncValue<List<Lab>>> {
         final labData = response['data'];
         final semesterId = labData['semesterID'].toString();
 
-        // Fetch semester name
-        final semesterResponse = await _apiService.get('/Semester');
-        String semesterName = 'Unknown Semester';
-
-        if (semesterResponse['success']) {
-          final List<dynamic> semestersData = semesterResponse['data'];
-          for (var semester in semestersData) {
-            if (semester['id'].toString() == semesterId) {
-              semesterName = semester['name'];
-              break;
+        // Only fetch semester name if semesterId is valid
+        String semesterName = 'No Semester';
+        if (semesterId != '0' && semesterId.isNotEmpty) {
+          final semesterResponse = await _apiService.get('/Semester');
+          if (semesterResponse['success']) {
+            final List<dynamic> semestersData = semesterResponse['data'];
+            for (var semester in semestersData) {
+              if (semester['id'].toString() == semesterId) {
+                semesterName = semester['name'];
+                break;
+              }
             }
           }
         }
