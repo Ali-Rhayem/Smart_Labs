@@ -1,5 +1,5 @@
 import { smart_labs } from "../utils/axios";
-import { Lab, CreateLabDto } from "../types/lab";
+import { Lab, CreateLabDto, UpdateLabDto } from "../types/lab";
 import { User } from "../types/user";
 import { AnnouncementDTO } from "../types/announcements";
 
@@ -31,7 +31,10 @@ export const labService = {
 		smart_labs.postAPI<number[], string[]>(`/lab/${id}/students`, emails),
 
 	addInstructors: (id: number, emails: string[]) =>
-		smart_labs.postAPI<number[], string[]>(`/lab/${id}/instructors`, emails),
+		smart_labs.postAPI<number[], string[]>(
+			`/lab/${id}/instructors`,
+			emails
+		),
 
 	removeStudent: (labId: number, studentId: number) =>
 		smart_labs.deleteAPI<void>(`/lab/${labId}/students/${studentId}`),
@@ -41,6 +44,6 @@ export const labService = {
 
 	deleteLab: (id: number) => smart_labs.deleteAPI<void>(`/lab/${id}`),
 
-	updateLab: (id: number, data: Partial<CreateLabDto>) =>
-		smart_labs.putAPI<Lab, Partial<CreateLabDto>>(`/lab/${id}`, data),
+	updateLab: (id: number, data: UpdateLabDto) =>
+		smart_labs.putAPI<Lab, UpdateLabDto>(`/lab/${id}`, data),
 };
