@@ -192,7 +192,7 @@ const LabPage: React.FC = () => {
 		}
 	};
 
-	const handleEditLab = async (data: Partial<UpdateLabDto>) => {
+	const handleEditLab = async (data: UpdateLabDto) => {
 		try {
 			await labService.updateLab(lab.id, data);
 			queryClient.invalidateQueries({
@@ -203,10 +203,15 @@ const LabPage: React.FC = () => {
 			setSeverity("success");
 			setOpenSnackbar(true);
 			setEditModalOpen(false);
-		} catch (err) {
-			setAlertMessage("Failed to update lab");
+		} catch (err: any) {
+			let message = "Failed to update lab";
+			if (err?.response?.data?.errors) {
+				message = err.response.data.errors;
+			}
+			setAlertMessage(message);
 			setSeverity("error");
 			setOpenSnackbar(true);
+			setEditModalOpen(false);
 		}
 	};
 
