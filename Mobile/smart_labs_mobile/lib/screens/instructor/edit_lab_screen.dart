@@ -224,6 +224,29 @@ class _EditLabScreenState extends ConsumerState<EditLabScreen> {
                   ),
                 ),
               ),
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () => _showDeleteConfirmation(context, ref),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: const Text(
+                    'Delete Lab',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
             ],
           ),
         ),
@@ -247,19 +270,19 @@ class _EditLabScreenState extends ConsumerState<EditLabScreen> {
       style: TextStyle(color: theme.colorScheme.onSurface),
       decoration: InputDecoration(
         labelText: label,
-        labelStyle:
-            TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.7)),
+        labelStyle: TextStyle(
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.7)),
         filled: true,
         fillColor: isDark ? const Color(0xFF1C1C1C) : theme.colorScheme.surface,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide:
-              BorderSide(color: theme.colorScheme.onSurface.withValues(alpha: 0.2)),
+          borderSide: BorderSide(
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.2)),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide:
-              BorderSide(color: theme.colorScheme.onSurface.withValues(alpha: 0.2)),
+          borderSide: BorderSide(
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.2)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
@@ -546,5 +569,72 @@ class _EditLabScreenState extends ConsumerState<EditLabScreen> {
     final setA = Set.from(a);
     final setB = Set.from(b);
     return setA.difference(setB).isEmpty && setB.difference(setA).isEmpty;
+  }
+
+  Future<void> _showDeleteConfirmation(
+      BuildContext context, WidgetRef ref) async {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    final shouldDelete = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext dialogContext) => AlertDialog(
+        backgroundColor:
+            isDark ? const Color(0xFF1C1C1C) : theme.colorScheme.surface,
+        title: Text(
+          'Delete Lab',
+          style: TextStyle(color: theme.colorScheme.onSurface),
+        ),
+        content: Text(
+          'Are you sure you want to delete this lab? This action cannot be undone.',
+          style: TextStyle(
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.7)),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text(
+              'Cancel',
+              style: TextStyle(
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.7)),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+
+    if (shouldDelete == true) {
+      try {
+        if (!context.mounted) return;
+
+        // Show loading indicator
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Deleting lab...')),
+        );
+
+        final response =
+            await ref.read(labsProvider.notifier).deleteLab(widget.lab.labId);
+
+        if (!context.mounted) return;
+
+        if (response['success']) {
+          Navigator.of(context).popUntil((route) => route.isFirst);
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+                content: Text(response['message'] ?? 'Failed to delete lab')),
+          );
+        }
+      } catch (e) {
+        if (!context.mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $e')),
+        );
+      }
+    }
   }
 }
