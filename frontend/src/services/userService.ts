@@ -11,5 +11,5 @@ export const userService = {
 	editUser: (id: number, user: any) =>
 		smart_labs.putAPI<User, UpdateUserDto>(`/user/${id}`, user),
 
-	removeUser: (id: number) => smart_labs.deleteAPI(`/user/${id}`),
+	deleteUser: (id: number) => smart_labs.deleteAPI(`/user/${id}`),
 };
