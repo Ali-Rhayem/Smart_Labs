@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:smart_labs_mobile/providers/lab_provider.dart';
+import 'package:smart_labs_mobile/providers/semester_provider.dart';
 import 'package:smart_labs_mobile/widgets/lab_card.dart';
 import 'package:smart_labs_mobile/widgets/search_and_filter_header.dart';
 
@@ -14,6 +15,7 @@ class StudentLabsScreen extends ConsumerStatefulWidget {
 class _StudentLabsScreenState extends ConsumerState<StudentLabsScreen> {
   static const Color kNeonAccent = Color(0xFFFFFF00);
   String _searchQuery = '';
+  String? _selectedSemesterId;
 
   @override
   void initState() {
@@ -73,8 +75,16 @@ class _StudentLabsScreenState extends ConsumerState<StudentLabsScreen> {
                 ),
                 data: (labs) {
                   final filteredLabs = labs.where((lab) {
-                    return lab.labName.toLowerCase().contains(_searchQuery) ||
-                        lab.labCode.toLowerCase().contains(_searchQuery);
+                    // Text search filter
+                    final matchesSearch =
+                        lab.labName.toLowerCase().contains(_searchQuery) ||
+                            lab.labCode.toLowerCase().contains(_searchQuery);
+
+                    // Semester filter
+                    final matchesSemester = _selectedSemesterId == null ||
+                        lab.semesterId == _selectedSemesterId;
+
+                    return matchesSearch && matchesSemester;
                   }).toList();
 
                   if (filteredLabs.isEmpty) {
@@ -116,31 +126,108 @@ class _StudentLabsScreenState extends ConsumerState<StudentLabsScreen> {
     showDialog(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          backgroundColor: isDarkMode ? const Color(0xFF212121) : Colors.white,
-          title: Text(
-            'Filter Options',
-            style: TextStyle(
-              color: isDarkMode ? Colors.white : Colors.black87,
-            ),
-          ),
-          content: Text(
-            'Filter labs by date, instructor, etc.',
-            style: TextStyle(
-              color: isDarkMode ? Colors.white70 : Colors.black54,
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text(
-                'Close',
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              backgroundColor:
+                  isDarkMode ? const Color(0xFF212121) : Colors.white,
+              title: Text(
+                'Filter Labs',
                 style: TextStyle(
-                  color: isDarkMode ? kNeonAccent : Colors.blue,
+                  color: isDarkMode ? Colors.white : Colors.black87,
                 ),
               ),
-            )
-          ],
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Semester',
+                    style: TextStyle(
+                      color: isDarkMode ? Colors.white : Colors.black87,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Consumer(
+                    builder: (context, ref, child) {
+                      final semestersAsync = ref.watch(semestersProvider);
+                      return semestersAsync.when(
+                        loading: () => CircularProgressIndicator(
+                          color: isDarkMode ? kNeonAccent : Colors.blue,
+                        ),
+                        error: (error, stack) => Text('Error: $error'),
+                        data: (semesters) => DropdownButtonFormField<String>(
+                          value: _selectedSemesterId,
+                          decoration: InputDecoration(
+                            filled: true,
+                            fillColor: isDarkMode
+                                ? const Color(0xFF2C2C2C)
+                                : Colors.grey[50],
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          items: [
+                            const DropdownMenuItem(
+                              value: null,
+                              child: Text('All Semesters'),
+                            ),
+                            ...semesters.map((semester) {
+                              return DropdownMenuItem(
+                                value: semester.id.toString(),
+                                child: Text(semester.name),
+                              );
+                            }),
+                          ],
+                          onChanged: (value) {
+                            setState(() => _selectedSemesterId = value);
+                          },
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    setState(() {
+                      _selectedSemesterId = null;
+                    });
+                    this.setState(() {});
+                    Navigator.of(context).pop();
+                  },
+                  child: Text(
+                    'Reset',
+                    style: TextStyle(
+                      color: isDarkMode ? Colors.white70 : Colors.black54,
+                    ),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: Text(
+                    'Cancel',
+                    style: TextStyle(
+                      color: isDarkMode ? Colors.white70 : Colors.black54,
+                    ),
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    this.setState(() {});
+                    Navigator.of(context).pop();
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: isDarkMode ? kNeonAccent : Colors.blue,
+                    foregroundColor: isDarkMode ? Colors.black : Colors.white,
+                  ),
+                  child: const Text('Apply'),
+                ),
+              ],
+            );
+          },
         );
       },
     );
