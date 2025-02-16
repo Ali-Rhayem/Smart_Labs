@@ -13,6 +13,8 @@ interface DeleteConfirmDialogProps {
 	onConfirm: () => void;
 	title?: string;
 	message?: string;
+	submitLabel?: string;
+	submitColor?: string;
 }
 
 const DeleteConfirmDialog: React.FC<DeleteConfirmDialogProps> = ({
@@ -21,6 +23,8 @@ const DeleteConfirmDialog: React.FC<DeleteConfirmDialogProps> = ({
 	onConfirm,
 	title = "Confirm Delete",
 	message = "Are you sure you want to delete this item?",
+	submitLabel = "Delete",
+	submitColor = "var(--color-danger)",
 }) => {
 	return (
 		<Dialog
@@ -62,14 +66,17 @@ const DeleteConfirmDialog: React.FC<DeleteConfirmDialogProps> = ({
 				<Button
 					onClick={onConfirm}
 					sx={{
-						bgcolor: "var(--color-danger)",
-						color: "white",
+						bgcolor: submitColor,
+						color:
+							submitLabel == "Delete"
+								? "white"
+								: "var(--color-text-button)",
 						"&:hover": {
-							bgcolor: "rgb(from var(--color-danger) r g b / 0.8)",
+							bgcolor: `rgb(from ${submitColor} r g b / 0.8)`,
 						},
 					}}
 				>
-					Delete
+					{submitLabel}
 				</Button>
 			</DialogActions>
 		</Dialog>
