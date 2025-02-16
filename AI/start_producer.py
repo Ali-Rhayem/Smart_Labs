@@ -16,13 +16,13 @@ topic = os.getenv("RECORDING_TOPIC")
 images_folder = "./test_images"
 
 data = {
-    "command": "end",
-    "ppe_arr": ["gloves", "goggles"],
-    "session_id": 4,
-    "lab_id": 6,
+    "command": "start",
+    "ppe_arr": [ "goggles","helmet"],
+    "session_id": 7,
+    "lab_id": 7,
     "room": "B-103",
-    "start_time": datetime.datetime.now(datetime.timezone.utc).replace(hour=18, minute=0, second=0, microsecond=0).strftime("%H:%M:%S"),
-    "end_time": datetime.datetime.now(datetime.timezone.utc).replace(hour=22, minute=0, second=0, microsecond=0).strftime("%H:%M:%S"),
+    "start_time": datetime.datetime.now(datetime.timezone.utc).replace(hour=00, minute=10, second=0, microsecond=0).strftime("%H:%M"),
+    "end_time": datetime.datetime.now(datetime.timezone.utc).replace(hour=00, minute=59, second=0, microsecond=0).strftime("%H:%M"),
 }
 
 future = producer.send(topic, value=data)
