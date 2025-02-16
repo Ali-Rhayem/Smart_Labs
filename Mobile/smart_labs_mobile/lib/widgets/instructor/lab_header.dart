@@ -47,12 +47,12 @@ class LabHeader extends StatelessWidget {
             Icons.code,
             'Lab Code: ${lab.labCode}',
           ),
-          if (lab.semesterId.isNotEmpty) ...[
+          if (lab.semesterId.isNotEmpty && lab.semesterId != '0') ...[
             const SizedBox(height: 8),
             _buildInfoRow(
               context,
               Icons.calendar_today,
-              'Semester: ${lab.semesterId}',
+              'Semester: ${lab.semesterName}',
             ),
           ],
           if (lab.ppeNames.isNotEmpty) ...[
