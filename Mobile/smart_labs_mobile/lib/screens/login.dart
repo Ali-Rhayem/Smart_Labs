@@ -7,6 +7,8 @@ import 'package:smart_labs_mobile/utils/secure_storage.dart';
 import 'package:smart_labs_mobile/providers/lab_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:smart_labs_mobile/screens/forgot_password.dart';
+import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
+import 'package:smart_labs_mobile/utils/snackbar_helper.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
@@ -48,7 +50,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       shape: BoxShape.circle,
                       color: isDark
                           ? Colors.white10
-                          : theme.colorScheme.primary.withOpacity(0.1),
+                          : theme.colorScheme.primary.withValues(alpha: 0.1),
                     ),
                     child: Icon(
                       Icons.biotech_rounded,
@@ -289,6 +291,13 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         ref.read(userProvider.notifier).setUser(user);
         await ref.read(labsProvider.notifier).fetchLabs();
 
+        showTopSnackBar(
+          context: context,
+          title: 'Success',
+          message: 'Login successful',
+          contentType: ContentType.success,
+        );
+
         if (user.firstLogin) {
           Navigator.pushReplacementNamed(context, '/firstLogin');
         } else {
@@ -300,16 +309,19 @@ class _LoginPageState extends ConsumerState<LoginPage> {
           }
         }
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content:
-                Text(userResult['message'] ?? 'Failed to fetch user details'),
-          ),
+        showTopSnackBar(
+          context: context,
+          title: 'Error',
+          message: userResult['message'] ?? 'Failed to fetch user details',
+          contentType: ContentType.failure,
         );
       }
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(result['message'])),
+      showTopSnackBar(
+        context: context,
+        title: 'Error',
+        message: result['message'],
+        contentType: ContentType.failure,
       );
     }
 
