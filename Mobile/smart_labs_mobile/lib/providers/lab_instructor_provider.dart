@@ -23,6 +23,8 @@ class LabInstructorsNotifier extends StateNotifier<AsyncValue<List<User>>> {
       if (response['success'] != false) {
         final List<dynamic> data = response['data'];
         final instructors = data
+            .where(
+                (json) => json != null && json['id'] != null && json['id'] != 0)
             .map((json) => User(
                   id: json['id'],
                   name: json['name'],
