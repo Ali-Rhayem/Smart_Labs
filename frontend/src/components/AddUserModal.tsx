@@ -51,14 +51,10 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
 	const handleSubmit = () => {
 		const newErrors: Record<string, string> = {};
 		if (!formData.name) newErrors.name = "Name is required";
-		if (!formData.email) {
-			newErrors.email = "Email is required";
-		} else if (!validateEmail(formData.email)) {
+		if (!formData.email) newErrors.email = "Email is required";
+		else if (!validateEmail(formData.email))
 			newErrors.email = "Please enter a valid email address";
-		}
 		if (!formData.password) newErrors.password = "Password is required";
-		if (!formData.faculty) newErrors.faculty = "Faculty is required";
-		if (!formData.major) newErrors.major = "Major is required";
 		if (!formData.role) newErrors.role = "Role is required";
 
 		if (Object.keys(newErrors).length > 0) {
@@ -387,7 +383,10 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
 				</Box>
 			</DialogContent>
 			<DialogActions>
-				<Button onClick={handleClose} sx={{ color: "var(--color-text)" }}>
+				<Button
+					onClick={handleClose}
+					sx={{ color: "var(--color-text)" }}
+				>
 					Cancel
 				</Button>
 				<Button
