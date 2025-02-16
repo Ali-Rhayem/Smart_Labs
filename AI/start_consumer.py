@@ -33,8 +33,8 @@ def get_random_image():
     if not images:
         raise ValueError("No image files found in the specified folder.")
     
-    # return os.path.join(folder_path, random.choice(images))
-    return os.path.join("./image.jpg")
+    return os.path.join(folder_path, random.choice(images))
+    # return os.path.join("./image.jpg")
 
 def take_image_from_camera():
     try:
@@ -70,7 +70,7 @@ def produce_image(command_data):
     image_path = get_random_image()
     # image_path = take_image_from_camera()
     command_data["encoding"] = images_to_base64(image_path)
-    command_data["image_name"] = image_path.split("/")[-1]
+    command_data["image_name"] = os.path.basename(image_path)
     command_data["time"] = datetime.datetime.now(datetime.UTC).strftime("%H:%M:%S")
     future = producer.send(os.getenv("ANALYSIS_TOPIC"), value=command_data)
     try:
@@ -113,12 +113,20 @@ try:
         print("Message received in camera")
         data = json.loads(msg.value)
         
-        if data["room"] != os.getenv("ROOM"):
+        if data["room"] != os.getenv("ROOM_GROUP"):
             print("Ignoring message for another room:", data["room"])
             continue
         
         current_time = datetime.datetime.now().strftime("%H:%M:")
-        if current_time < data["start_time"] or current_time > data["end_time"]:
+        current_time = datetime.strptime(current_time, "%H:%M:")
+        start_time_str = data["start_time"]
+        start_time = datetime.strptime(start_time_str, "%H:%M:")
+        end_time_str = data["end_time"]
+        end_time = datetime.strptime(end_time_str, "%H:%M:")
+        
+        start_time = start_time - datetime.timedelta(minutes=5)
+        
+        if current_time < start_time or current_time > end_time:
             print("Ignoring message outside of the time range.")
             continue
         
@@ -143,13 +151,13 @@ try:
             
             print("Received 'end' command. Sending final image and terminating process.")
             # Send one final image.
-            produce_image(data)
             # Stop periodic production.
             producing_event.clear()
             if periodic_thread is not None:
                 periodic_thread.join()
                 periodic_thread = None
-            # Break out of the consumer loop to terminate the program.
+
+            produce_image(data)
         
         else:
             print("Unknown command received:", command)
