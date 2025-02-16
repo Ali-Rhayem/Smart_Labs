@@ -57,7 +57,7 @@ class _StudentAnnouncementsTabState extends ConsumerState<StudentAnnouncementsTa
                 child: Text(
                   'Error: $error',
                   style: TextStyle(
-                    color: theme.colorScheme.onBackground.withOpacity(0.7),
+                    color: theme.colorScheme.onBackground.withValues(alpha: 0.7),
                   ),
                 ),
               ),
@@ -151,7 +151,7 @@ class _StudentAnnouncementsTabState extends ConsumerState<StudentAnnouncementsTa
                                   formatDateTime(announcement.time),
                                   style: TextStyle(
                                     color: theme.colorScheme.onSurface
-                                        .withOpacity(0.5),
+                                        .withValues(alpha: 0.5),
                                     fontSize: 12,
                                   ),
                                 ),
