@@ -8,12 +8,8 @@ export interface Comment {
 }
 
 export interface Announcement {
-	id: number;
-	sender: number;
 	message: string;
 	files: string[];
-	time: Date;
-	comments: Comment[];
 }
 
 export interface AnnouncementDTO {
