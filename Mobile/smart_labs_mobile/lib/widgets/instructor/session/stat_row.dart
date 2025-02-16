@@ -8,6 +8,9 @@ class StatRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     // Extract percentage value and convert to double
     final percentage = double.tryParse(value.replaceAll('%', '')) ?? 0.0;
 
@@ -29,7 +32,7 @@ class StatRow extends StatelessWidget {
         Text(
           label,
           style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.8),
+            color: theme.colorScheme.onSurface.withOpacity(0.8),
             fontSize: 15,
             letterSpacing: 0.3,
           ),
@@ -37,10 +40,10 @@ class StatRow extends StatelessWidget {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(
-            color: percentageColor.withValues(alpha: 0.15),
+            color: percentageColor.withOpacity(0.15),
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: percentageColor.withValues(alpha: 0.5),
+              color: percentageColor.withOpacity(0.5),
               width: 1,
             ),
           ),
