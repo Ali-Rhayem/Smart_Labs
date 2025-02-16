@@ -14,6 +14,6 @@ export const notificationService = {
 	deleteNotification: (id: number) =>
 		smart_labs.putAPI(`/notification/mark-as-deleted/${id}`, {}),
 
-	deleteAllNotifications: (id: number) =>
+	deleteAllNotifications: () =>
 		smart_labs.putAPI(`/notification/mark-all-as-deleted`, {}),
 };
