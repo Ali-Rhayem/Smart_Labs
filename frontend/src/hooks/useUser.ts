@@ -8,3 +8,11 @@ export const useUserDetails = (id: number) => {
 		staleTime: 30 * 60 * 1000,
 	});
 };
+
+export const useUsers = () => {
+	return useQuery({
+		queryKey: ["Users"],
+		queryFn: () => userService.getUsers(),
+		staleTime: 30 * 60 * 1000,
+	});
+};
