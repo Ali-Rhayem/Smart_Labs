@@ -1,6 +1,14 @@
 import { smart_labs } from "../utils/axios";
-import { Room } from "../types/room";
+import { Room, RoomDTO } from "../types/room";
 
 export const roomService = {
 	getRooms: () => smart_labs.getAPI<Room[]>(`/room`),
+
+	createRoom: (room: Room) =>
+		smart_labs.postAPI<Room, RoomDTO>(`/room`, room),
+
+	updateRoom: (room: Room) =>
+		smart_labs.putAPI<Room, RoomDTO>(`/room/${room.name}`, room),
+
+	deleteRoom: (name: string) => smart_labs.deleteAPI<Room>(`/room/${name}`),
 };
