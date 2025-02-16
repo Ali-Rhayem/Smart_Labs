@@ -46,7 +46,7 @@ class SessionsTab extends ConsumerWidget {
                 child: Text(
                   'Error: $error',
                   style: TextStyle(
-                    color: theme.colorScheme.onBackground.withOpacity(0.7),
+                    color: theme.colorScheme.onBackground.withValues(alpha: 0.7),
                   ),
                 ),
               ),
@@ -60,7 +60,7 @@ class SessionsTab extends ConsumerWidget {
                           'No sessions available.',
                           style: TextStyle(
                             color:
-                                theme.colorScheme.onBackground.withOpacity(0.7),
+                                theme.colorScheme.onBackground.withValues(alpha: 0.7),
                             fontSize: 16,
                           ),
                         ),
