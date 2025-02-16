@@ -112,6 +112,16 @@ try:
     for msg in consumer:
         print("Message received in camera")
         data = json.loads(msg.value)
+        
+        if data["room"] != os.getenv("ROOM"):
+            print("Ignoring message for another room:", data["room"])
+            continue
+        
+        current_time = datetime.datetime.now().strftime("%H:%M:")
+        if current_time < data["start_time"] or current_time > data["end_time"]:
+            print("Ignoring message outside of the time range.")
+            continue
+        
         command = data.get("command")
         
         if command == "start":
