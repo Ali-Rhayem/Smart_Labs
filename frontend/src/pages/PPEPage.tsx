@@ -11,6 +11,7 @@ import {
 	Paper,
 	IconButton,
 	Typography,
+	Skeleton,
 } from "@mui/material";
 import { useAllPPEs } from "../hooks/usePPE";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -96,6 +97,50 @@ const PPEPage: React.FC = () => {
 			setShowAlert(true);
 		},
 	});
+
+	const renderLoadingSkeleton = () => (
+		<Box sx={{ p: 2 }}>
+			{[1, 2, 3].map((n) => (
+				<Paper
+					key={n}
+					sx={{
+						mb: 2,
+						p: 2,
+						backgroundColor: "var(--color-card)",
+						color: "var(--color-text)",
+					}}
+				>
+					<Box sx={{ display: "flex", alignItems: "center" }}>
+						<Box sx={{ flex: 1 }}>
+							<Skeleton
+								variant="text"
+								width="30%"
+								sx={{ bgcolor: "var(--color-card-hover)" }}
+							/>
+						</Box>
+						<Box sx={{ display: "flex", gap: 1 }}>
+							<Skeleton
+								variant="circular"
+								width={32}
+								height={32}
+								sx={{ bgcolor: "var(--color-card-hover)" }}
+							/>
+							<Skeleton
+								variant="circular"
+								width={32}
+								height={32}
+								sx={{ bgcolor: "var(--color-card-hover)" }}
+							/>
+						</Box>
+					</Box>
+				</Paper>
+			))}
+		</Box>
+	);
+
+	if (isLoading) {
+		return renderLoadingSkeleton();
+	}
 
 	return (
 		<Box sx={{ p: 3 }}>
