@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useRef } from "react";
 import {
 	Box,
 	Card,
@@ -22,6 +22,9 @@ import { imageUrl } from "../config/config";
 import CommentIcon from "@mui/icons-material/Comment";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { announcementService } from "../services/announcementService";
+import { Announcement } from "../types/announcements";
 
 interface AnnouncementsTabProps {
 	labId: number;
@@ -37,6 +40,9 @@ const AnnouncementsTab: React.FC<AnnouncementsTabProps> = ({ labId }) => {
 	const [expandedComments, setExpandedComments] = useState<{
 		[key: number]: boolean;
 	}>({});
+	const [files, setFiles] = useState<File[]>([]);
+	const fileInputRef = useRef<HTMLInputElement>(null);
+	const queryClient = useQueryClient();
 	const isInstructor = user?.role === "instructor";
 
 	const handleCommentChange = (announcementId: number, value: string) => {
@@ -123,6 +129,42 @@ const AnnouncementsTab: React.FC<AnnouncementsTabProps> = ({ labId }) => {
 			))}
 		</Box>
 	);
+
+	const sendAnnouncementMutation = useMutation({
+		mutationFn: (announcement: Announcement) =>
+			announcementService.sendAnnouncement(labId, announcement),
+		onSuccess: () => {
+			queryClient.invalidateQueries({
+				queryKey: ["labAnnouncements", labId],
+			});
+			setMessage("");
+			setFiles([]);
+		},
+		onError: (error) => {
+			console.error("Failed to send announcement:", error);
+		},
+	});
+
+	const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+		if (event.target.files) {
+			setFiles(Array.from(event.target.files));
+		}
+	};
+
+	const handleSendAnnouncement = async () => {
+		if (!message.trim()) return;
+
+		const formData = new FormData();
+		files.forEach((file) => {
+			formData.append("files", file);
+		});
+		formData.append("message", message);
+
+		await sendAnnouncementMutation.mutateAsync({
+			message,
+			files: [],
+		} as Announcement);
+	};
 
 	return (
 		<Box sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
@@ -364,6 +406,14 @@ const AnnouncementsTab: React.FC<AnnouncementsTabProps> = ({ labId }) => {
 						bgcolor: "var(--color-card)",
 					}}
 				>
+					<input
+						type="file"
+						multiple
+						ref={fileInputRef}
+						onChange={handleFileSelect}
+						style={{ display: "none" }}
+					/>
+
 					<TextField
 						fullWidth
 						multiline
@@ -401,26 +451,50 @@ const AnnouncementsTab: React.FC<AnnouncementsTabProps> = ({ labId }) => {
 							justifyContent: "space-between",
 						}}
 					>
-						<Button
-							variant="outlined"
+						<Box
 							sx={{
-								color: "var(--color-primary)",
-								borderColor: "var(--color-primary)",
+								display: "flex",
+								gap: 1,
+								alignItems: "center",
 							}}
-							startIcon={<AttachFileIcon />}
 						>
-							Attach Files
-						</Button>
+							<Button
+								variant="outlined"
+								onClick={() => fileInputRef.current?.click()}
+								sx={{
+									color: "var(--color-primary)",
+									borderColor: "var(--color-primary)",
+								}}
+								startIcon={<AttachFileIcon />}
+							>
+								Attach Files
+							</Button>
+							{files.length > 0 && (
+								<Typography
+									variant="caption"
+									color="var(--color-text-secondary)"
+								>
+									{files.length} file(s) selected
+								</Typography>
+							)}
+						</Box>
+
 						<Button
 							variant="contained"
+							onClick={handleSendAnnouncement}
+							disabled={
+								!message.trim() ||
+								sendAnnouncementMutation.isPending
+							}
 							sx={{
 								backgroundColor: "var(--color-primary)",
 								color: "var(--color-text-button)",
 							}}
 							endIcon={<SendIcon />}
-							disabled={!message.trim()}
 						>
-							Announce
+							{sendAnnouncementMutation.isPending
+								? "Sending..."
+								: "Announce"}
 						</Button>
 					</Box>
 				</Paper>
