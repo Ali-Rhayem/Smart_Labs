@@ -37,7 +37,7 @@ class SemesterDropdown extends ConsumerWidget {
             borderSide: BorderSide(
               color: isDark
                   ? Colors.white24
-                  : theme.colorScheme.onSurface.withOpacity(0.2),
+                  : theme.colorScheme.onSurface.withValues(alpha: 0.2),
             ),
           ),
           enabledBorder: OutlineInputBorder(
@@ -45,7 +45,7 @@ class SemesterDropdown extends ConsumerWidget {
             borderSide: BorderSide(
               color: isDark
                   ? Colors.white24
-                  : theme.colorScheme.onSurface.withOpacity(0.2),
+                  : theme.colorScheme.onSurface.withValues(alpha: 0.2),
             ),
           ),
           focusedBorder: OutlineInputBorder(
