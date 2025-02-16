@@ -24,6 +24,9 @@ import DeleteConfirmDialog from "../components/DeleteConfirmDialog";
 import ErrorAlert from "../components/ErrorAlertProps";
 import { PPE } from "../types/ppe";
 import ErrorIcon from "@mui/icons-material/Error";
+import TableSortLabel from '@mui/material/TableSortLabel';
+
+type Order = 'asc' | 'desc';
 
 const PPEPage: React.FC = () => {
 	const { data: ppes = [], isLoading, error } = useAllPPEs();
@@ -34,6 +37,7 @@ const PPEPage: React.FC = () => {
 	const [alertMessage, setAlertMessage] = useState("");
 	const [severity, setSeverity] = useState<"error" | "success">("success");
 	const [showAlert, setShowAlert] = useState(false);
+	const [order, setOrder] = useState<Order>('asc');
 
 	const queryClient = useQueryClient();
 
@@ -98,6 +102,18 @@ const PPEPage: React.FC = () => {
 			setShowAlert(true);
 		},
 	});
+
+	const handleRequestSort = () => {
+		setOrder(order === 'asc' ? 'desc' : 'asc');
+	};
+
+	const sortedPPEs = React.useMemo(() => {
+		return [...ppes].sort((a, b) => {
+			return order === 'asc' 
+				? a.name.localeCompare(b.name)
+				: b.name.localeCompare(a.name);
+		});
+	}, [ppes, order]);
 
 	const renderLoadingSkeleton = () => (
 		<Box sx={{ p: 2 }}>
@@ -253,7 +269,22 @@ const PPEPage: React.FC = () => {
 									fontWeight: "bold",
 								}}
 							>
-								PPE Name
+								<TableSortLabel
+									active={true}
+									direction={order}
+									onClick={handleRequestSort}
+									sx={{
+										color: 'var(--color-text) !important',
+										'& .MuiTableSortLabel-icon': {
+											color: 'var(--color-text-secondary) !important',
+										},
+										'&.Mui-active': {
+											color: 'var(--color-text) !important',
+										},
+									}}
+								>
+									PPE Name
+								</TableSortLabel>
 							</TableCell>
 							<TableCell
 								align="right"
@@ -267,7 +298,7 @@ const PPEPage: React.FC = () => {
 						</TableRow>
 					</TableHead>
 					<TableBody>
-						{ppes.map((ppe) => (
+						{sortedPPEs.map((ppe) => (
 							<TableRow key={ppe.id}>
 								<TableCell sx={{ color: "var(--color-text)" }}>
 									{ppe.name}
