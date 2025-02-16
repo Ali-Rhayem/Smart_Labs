@@ -23,9 +23,10 @@ import AddItemModal from "../components/AddItemModal";
 import DeleteConfirmDialog from "../components/DeleteConfirmDialog";
 import ErrorAlert from "../components/ErrorAlertProps";
 import { PPE } from "../types/ppe";
+import ErrorIcon from "@mui/icons-material/Error";
 
 const PPEPage: React.FC = () => {
-	const { data: ppes = [], isLoading } = useAllPPEs();
+	const { data: ppes = [], isLoading, error } = useAllPPEs();
 	const [openAddDialog, setOpenAddDialog] = useState(false);
 	const [editingPPE, setEditingPPE] = useState<PPE | null>(null);
 	const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -137,6 +138,75 @@ const PPEPage: React.FC = () => {
 			))}
 		</Box>
 	);
+
+	if (error) {
+		return (
+			<Box
+				sx={{
+					p: 3,
+					display: "flex",
+					flexDirection: "column",
+					alignItems: "center",
+					gap: 2,
+				}}
+			>
+				<ErrorIcon sx={{ fontSize: 60, color: "var(--color-danger)" }} />
+				<Typography variant="h6" sx={{ color: "var(--color-text)" }}>
+					Failed to load PPEs
+				</Typography>
+				<Button
+					onClick={() =>
+						queryClient.invalidateQueries({ queryKey: ["allPPEs"] })
+					}
+					sx={{
+						color: "var(--color-primary)",
+						"&:hover": {
+							bgcolor: "rgb(from var(--color-primary) r g b / 0.08)",
+						},
+					}}
+				>
+					Retry
+				</Button>
+			</Box>
+		);
+	}
+
+	if (!isLoading && ppes.length === 0) {
+		return (
+			<Box
+				sx={{
+					p: 3,
+					display: "flex",
+					flexDirection: "column",
+					alignItems: "center",
+					gap: 2,
+				}}
+			>
+				<Box sx={{ textAlign: "center", mb: 3 }}>
+					<Typography variant="h6" sx={{ color: "var(--color-text)" }}>
+						No PPEs found
+					</Typography>
+					<Typography
+						variant="body2"
+						sx={{ color: "var(--color-text-secondary)" }}
+					>
+						Start by adding a new PPE
+					</Typography>
+				</Box>
+				<Button
+					variant="contained"
+					startIcon={<AddIcon />}
+					onClick={() => setOpenAddDialog(true)}
+					sx={{
+						bgcolor: "var(--color-primary)",
+						color: "var(--color-text-button)",
+					}}
+				>
+					Add PPE
+				</Button>
+			</Box>
+		);
+	}
 
 	if (isLoading) {
 		return renderLoadingSkeleton();
