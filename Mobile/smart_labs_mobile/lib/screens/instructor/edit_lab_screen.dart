@@ -53,9 +53,8 @@ class _EditLabScreenState extends ConsumerState<EditLabScreen> {
     _schedules = List.from(widget.lab.schedule);
     _selectedSemesterId = int.parse(widget.lab.semesterId);
 
-    // Initialize selected PPE IDs from the lab's PPE string
-    final ppeList = widget.lab.ppe.split(', ');
-    _selectedPPEIds.addAll(ppeList.where((ppe) => ppe.isNotEmpty));
+    // Initialize selected PPE IDs from the lab's ppeIds
+    _selectedPPEIds.addAll(widget.lab.ppeIds);
   }
 
   @override
@@ -458,9 +457,7 @@ class _EditLabScreenState extends ConsumerState<EditLabScreen> {
           !_areSchedulesEqual(_schedules, widget.lab.schedule);
 
       // Check if PPE changed
-      final originalPPEList =
-          widget.lab.ppe.split(', ').where((ppe) => ppe.isNotEmpty).toList();
-      bool hasPPEChanges = !_areListsEqual(_selectedPPEIds, originalPPEList);
+      bool hasPPEChanges = !_areListsEqual(_selectedPPEIds, widget.lab.ppeIds);
 
       if (!hasLabChanges && !hasPPEChanges) {
         if (mounted) {
