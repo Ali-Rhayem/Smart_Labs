@@ -14,5 +14,7 @@ export const userService = {
 	deleteUser: (id: number) => smart_labs.deleteAPI(`/user/${id}`),
 
 	resetPassword: (email: string) =>
-		smart_labs.postAPI<never, string>(`/user/resetPassword`, email),
+		smart_labs.postAPI<never, object>(`/user/resetPassword`, {
+			email: email,
+		}),
 };
