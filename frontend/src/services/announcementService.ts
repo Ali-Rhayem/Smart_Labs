@@ -25,4 +25,13 @@ export const announcementService = {
 
 	deleteAnnouncement: (lab_id: number, announcement_id: number) =>
 		smart_labs.deleteAPI(`/lab/${lab_id}/announcement/${announcement_id}`),
+
+	deleteComment: (
+		lab_id: number,
+		announcement_id: number,
+		comment_id: number
+	) =>
+		smart_labs.deleteAPI(
+			`/lab/${lab_id}/announcement/${announcement_id}/comment/${comment_id}`
+		),
 };
