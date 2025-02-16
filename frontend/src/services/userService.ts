@@ -6,7 +6,8 @@ export const userService = {
 
 	getUsers: () => smart_labs.getAPI<User[]>(`/user`),
 
-	addUser: (id: number, user: any) => smart_labs.postAPI(`/user/${id}`, user),
+	createUser: (user: any) =>
+		smart_labs.postAPI(`/user`, user),
 
 	editUser: (id: number, user: any) =>
 		smart_labs.putAPI<User, UpdateUserDto>(`/user/${id}`, user),
