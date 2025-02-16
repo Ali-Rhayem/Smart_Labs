@@ -66,6 +66,14 @@ class AnalyticsTab extends ConsumerWidget {
       LabAnalytics analytics, bool isDark, ThemeData theme) {
     return Card(
       color: isDark ? const Color(0xFF1C1C1C) : theme.colorScheme.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(
+          color: isDark ? Colors.white12 : Colors.black12,
+          width: 1,
+        ),
+      ),
+      elevation: isDark ? 0 : 1,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -84,7 +92,7 @@ class AnalyticsTab extends ConsumerWidget {
               'Total Attendance',
               '${analytics.totalAttendance}%',
               Icons.people,
-              isDark ? kNeonAccent : theme.colorScheme.primary,
+              _getPercentageColor(analytics.totalAttendance),
               isDark,
               theme,
             ),
@@ -93,7 +101,7 @@ class AnalyticsTab extends ConsumerWidget {
               'Overall PPE Compliance',
               '${analytics.totalPPECompliance}%',
               Icons.health_and_safety,
-              isDark ? kNeonAccent : theme.colorScheme.primary,
+              _getPercentageColor(analytics.totalPPECompliance),
               isDark,
               theme,
             ),
@@ -107,6 +115,14 @@ class AnalyticsTab extends ConsumerWidget {
       LabAnalytics analytics, bool isDark, ThemeData theme) {
     return Card(
       color: isDark ? const Color(0xFF1C1C1C) : theme.colorScheme.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(
+          color: isDark ? Colors.white12 : Colors.black12,
+          width: 1,
+        ),
+      ),
+      elevation: isDark ? 0 : 1,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -129,6 +145,7 @@ class AnalyticsTab extends ConsumerWidget {
                   entry.value.toDouble(),
                   isDark,
                   theme,
+                  _getPercentageColor(entry.value),
                 ),
               ),
             ),
@@ -142,6 +159,14 @@ class AnalyticsTab extends ConsumerWidget {
       LabAnalytics analytics, bool isDark, ThemeData theme) {
     return Card(
       color: isDark ? const Color(0xFF1C1C1C) : theme.colorScheme.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(
+          color: isDark ? Colors.white12 : Colors.black12,
+          width: 1,
+        ),
+      ),
+      elevation: isDark ? 0 : 1,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -202,8 +227,8 @@ class AnalyticsTab extends ConsumerWidget {
     );
   }
 
-  Widget _buildProgressBar(
-      String label, double value, bool isDark, ThemeData theme) {
+  Widget _buildProgressBar(String label, double value, bool isDark,
+      ThemeData theme, Color percentageColor) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -220,7 +245,7 @@ class AnalyticsTab extends ConsumerWidget {
             Text(
               '${value.toStringAsFixed(1)}%',
               style: TextStyle(
-                color: isDark ? kNeonAccent : theme.colorScheme.primary,
+                color: percentageColor,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -229,9 +254,8 @@ class AnalyticsTab extends ConsumerWidget {
         const SizedBox(height: 8),
         LinearProgressIndicator(
           value: value / 100,
-          backgroundColor: theme.colorScheme.onSurface.withValues(alpha: 0.1),
-          valueColor: AlwaysStoppedAnimation(
-              isDark ? kNeonAccent : theme.colorScheme.primary),
+          backgroundColor: theme.colorScheme.onSurface.withOpacity(0.1),
+          valueColor: AlwaysStoppedAnimation(percentageColor),
           minHeight: 8,
           borderRadius: BorderRadius.circular(4),
         ),
@@ -242,9 +266,23 @@ class AnalyticsTab extends ConsumerWidget {
   Widget _buildStudentCard(
       StudentAnalytics student, bool isDark, ThemeData theme) {
     return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      color: isDark ? const Color(0xFF262626) : theme.colorScheme.surface,
+      margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 10),
+      color: isDark ? const Color(0xFF1C1C1C) : theme.colorScheme.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(
+          color: isDark ? Colors.white12 : Colors.black12,
+          width: 1,
+        ),
+      ),
+      elevation: isDark ? 0 : 1,
       child: ExpansionTile(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        collapsedShape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
         leading: CircleAvatar(
           backgroundImage: student.user.image != null
               ? NetworkImage(
@@ -287,6 +325,7 @@ class AnalyticsTab extends ConsumerWidget {
                       entry.value.toDouble(),
                       isDark,
                       theme,
+                      _getPercentageColor(entry.value),
                     ),
                   ),
                 ),
@@ -296,5 +335,17 @@ class AnalyticsTab extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  Color _getPercentageColor(num percentage) {
+    if (percentage >= 90) {
+      return Colors.green[400]!;
+    } else if (percentage >= 70) {
+      return Colors.yellow[600]!;
+    } else if (percentage >= 50) {
+      return Colors.orange;
+    } else {
+      return Colors.red[400]!;
+    }
   }
 }
