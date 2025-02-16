@@ -37,7 +37,7 @@ class LabHeader extends StatelessWidget {
           Text(
             lab.description,
             style: TextStyle(
-              color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+              color: theme.colorScheme.onSurface.withOpacity(0.7),
               fontSize: 16,
             ),
           ),
@@ -114,7 +114,6 @@ class LabHeader extends StatelessWidget {
           const SizedBox(height: 8),
           ...lab.schedule.map((schedule) {
             String dayName = _getDayName(schedule.dayOfWeek);
-            // Format time to remove seconds
             String startTime = _formatTime(schedule.startTime);
             String endTime = _formatTime(schedule.endTime);
 
@@ -126,7 +125,7 @@ class LabHeader extends StatelessWidget {
                 '$dayName: $startTime - $endTime',
               ),
             );
-          })
+          }),
         ],
       ),
     );
@@ -145,7 +144,7 @@ class LabHeader extends StatelessWidget {
         Text(
           text,
           style: TextStyle(
-            color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+            color: theme.colorScheme.onSurface.withOpacity(0.7),
             fontSize: 14,
           ),
         ),
@@ -154,9 +153,8 @@ class LabHeader extends StatelessWidget {
   }
 
   String _formatTime(String time) {
-    // If time contains seconds (HH:mm:ss), remove them
     if (time.split(':').length > 2) {
-      return time.substring(0, 5); // Keep only HH:mm
+      return time.substring(0, 5);
     }
     return time;
   }
