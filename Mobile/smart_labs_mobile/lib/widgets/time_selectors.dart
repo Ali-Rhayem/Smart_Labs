@@ -80,7 +80,7 @@ class TimeSelectors extends StatelessWidget {
                     border: Border.all(
                       color: isDark
                           ? Colors.white24
-                          : theme.colorScheme.onSurface.withOpacity(0.2),
+                          : theme.colorScheme.onSurface.withValues(alpha: 0.2),
                     ),
                   ),
                   child: Column(
@@ -89,7 +89,7 @@ class TimeSelectors extends StatelessWidget {
                       Text(
                         'Start Time',
                         style: TextStyle(
-                          color: theme.colorScheme.onSurface.withOpacity(0.7),
+                          color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                           fontSize: 12,
                         ),
                       ),
@@ -147,7 +147,7 @@ class TimeSelectors extends StatelessWidget {
                     border: Border.all(
                       color: isDark
                           ? Colors.white24
-                          : theme.colorScheme.onSurface.withOpacity(0.2),
+                          : theme.colorScheme.onSurface.withValues(alpha: 0.2),
                     ),
                   ),
                   child: Column(
@@ -156,7 +156,7 @@ class TimeSelectors extends StatelessWidget {
                       Text(
                         'End Time',
                         style: TextStyle(
-                          color: theme.colorScheme.onSurface.withOpacity(0.7),
+                          color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                           fontSize: 12,
                         ),
                       ),
