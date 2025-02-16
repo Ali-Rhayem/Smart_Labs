@@ -168,7 +168,8 @@ class AuthService {
     }
   }
 
-   Future<List<Map<String, dynamic>>?> getUserNotifications(String userId) async {
+  Future<List<Map<String, dynamic>>?> getUserNotifications(
+      String userId) async {
     try {
       final response = await _apiService.get('/Notification/user/$userId');
 
