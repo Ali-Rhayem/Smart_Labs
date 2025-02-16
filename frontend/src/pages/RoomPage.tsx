@@ -25,9 +25,7 @@ import DeleteConfirmDialog from "../components/DeleteConfirmDialog";
 import ErrorAlert from "../components/ErrorAlertProps";
 import { Room } from "../types/room";
 import TableSortLabel from "@mui/material/TableSortLabel";
-import SearchIcon from "@mui/icons-material/Search";
-import InputAdornment from "@mui/material/InputAdornment";
-import TextField from "@mui/material/TextField";
+import SearchField from "../components/SearchField";
 
 type Order = "asc" | "desc";
 
@@ -255,43 +253,10 @@ const RoomPage: React.FC = () => {
 					Rooms
 				</Typography>
 
-				<TextField
-					placeholder="Search rooms..."
+				<SearchField
 					value={searchQuery}
 					onChange={(e) => setSearchQuery(e.target.value)}
-					size="small"
-					sx={{
-						flex: 1,
-						maxWidth: "400px",
-						borderRadius: "10px",
-						bgcolor: "var(--color-card)",
-						"& .MuiOutlinedInput-root": {
-							"& fieldset": {
-								borderColor: "var(--color-text-secondary)",
-								borderRadius: "10px",
-							},
-							"&:hover fieldset": {
-								borderColor: "var(--color-primary)",
-							},
-							"&.Mui-focused fieldset": {
-								borderColor: "var(--color-primary)",
-							},
-						},
-						"& .MuiInputBase-input": {
-							color: "var(--color-text)",
-						},
-					}}
-					InputProps={{
-						startAdornment: (
-							<InputAdornment position="start">
-								<SearchIcon
-									sx={{
-										color: "var(--color-text-secondary)",
-									}}
-								/>
-							</InputAdornment>
-						),
-					}}
+					placeholder="Search rooms..."
 				/>
 
 				<Button
