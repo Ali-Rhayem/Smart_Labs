@@ -2,9 +2,7 @@ import { UserDTO } from "./user";
 
 export interface Comment {
 	id: number;
-	userId: number;
-	content: string;
-	time: Date;
+	message: string;
 }
 
 export interface Announcement {
