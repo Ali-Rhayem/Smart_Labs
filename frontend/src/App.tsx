@@ -20,6 +20,7 @@ import FacultyPage from "./pages/FacultyPage";
 import PPEPage from "./pages/PPEPage";
 import SemesterPage from "./pages/SemesterPage";
 import RoomPage from "./pages/RoomPage";
+import UsersPage from "./pages/UsersPage";
 
 const queryClient = new QueryClient();
 
@@ -156,6 +157,14 @@ const App: React.FC = () => {
 							element={
 								<ProtectedRoute requiredRoles={["admin"]}>
 									<RoomPage />
+								</ProtectedRoute>
+							}
+						/>
+						<Route
+							path="/users"
+							element={
+								<ProtectedRoute requiredRoles={["admin"]}>
+									<UsersPage />
 								</ProtectedRoute>
 							}
 						/>
