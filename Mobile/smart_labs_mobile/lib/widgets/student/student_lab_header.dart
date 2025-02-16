@@ -59,6 +59,73 @@ class LabHeader extends StatelessWidget {
               ),
             ],
           ),
+          if (lab.semesterId.isNotEmpty && lab.semesterId != '0') ...[
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Icon(
+                  Icons.calendar_today,
+                  color: theme.colorScheme.onSurface,
+                  size: 18,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Semester: ${lab.semesterName}',
+                  style: TextStyle(
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
+          ],
+          if (lab.ppeNames.isNotEmpty) ...[
+            const SizedBox(height: 16),
+            Text(
+              'Required PPE',
+              style: TextStyle(
+                color: theme.colorScheme.onSurface,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: lab.ppeNames.map((ppeName) {
+                return Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: (isDark
+                            ? const Color(0xFFFFFF00)
+                            : theme.colorScheme.primary)
+                        .withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: isDark
+                          ? const Color(0xFFFFFF00)
+                          : theme.colorScheme.primary,
+                      width: 1,
+                    ),
+                  ),
+                  child: Text(
+                    ppeName.toUpperCase(),
+                    style: TextStyle(
+                      color: isDark
+                          ? const Color(0xFFFFFF00)
+                          : theme.colorScheme.primary,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+          ],
           const SizedBox(height: 16),
           Text(
             'Schedule',
