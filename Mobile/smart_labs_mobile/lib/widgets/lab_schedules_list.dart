@@ -39,7 +39,7 @@ class LabSchedulesList extends StatelessWidget {
                 subtitle: Text(
                   '${schedule.startTime} - ${schedule.endTime}',
                   style: TextStyle(
-                      color: theme.colorScheme.onSurface.withOpacity(0.7)),
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.7)),
                 ),
                 trailing: IconButton(
                   icon: const Icon(Icons.delete, color: Colors.red),
