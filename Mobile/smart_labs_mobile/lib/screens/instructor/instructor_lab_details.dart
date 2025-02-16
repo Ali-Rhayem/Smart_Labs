@@ -36,7 +36,7 @@ class InstructorLabDetailScreen extends ConsumerWidget {
         child: Text(
           'Error: $error',
           style: TextStyle(
-            color: theme.colorScheme.onBackground.withOpacity(0.7),
+            color: theme.colorScheme.onBackground.withValues(alpha: 0.7),
           ),
         ),
       ),
@@ -91,10 +91,10 @@ class InstructorLabDetailScreen extends ConsumerWidget {
                 ),
                 child: TabBar(
                   splashFactory: NoSplash.splashFactory,
-                  overlayColor: MaterialStateProperty.all(Colors.transparent),
+                  overlayColor: WidgetStateProperty.all(Colors.transparent),
                   labelColor: isDark ? kNeonAccent : theme.colorScheme.primary,
                   unselectedLabelColor:
-                      theme.colorScheme.onSurface.withOpacity(0.7),
+                      theme.colorScheme.onSurface.withValues(alpha: 0.7),
                   indicatorSize: TabBarIndicatorSize.tab,
                   indicatorColor:
                       isDark ? kNeonAccent : theme.colorScheme.primary,
