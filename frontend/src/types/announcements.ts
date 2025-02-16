@@ -1,7 +1,6 @@
 import { UserDTO } from "./user";
 
 export interface Comment {
-	id: number;
 	message: string;
 }
 
