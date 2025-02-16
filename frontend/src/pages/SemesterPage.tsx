@@ -342,6 +342,12 @@ const SemesterPage: React.FC = () => {
 									bgcolor: semester.currentSemester
 										? "rgb(from var(--color-primary) r g b / 0.1)"
 										: "inherit",
+									"&:hover": {
+										backgroundColor:
+											!semester.currentSemester
+												? "var(--color-card-hover)"
+												: "rgb(from var(--color-primary) r g b / 0.1)",
+									},
 								}}
 							>
 								<TableCell sx={{ color: "var(--color-text)" }}>
