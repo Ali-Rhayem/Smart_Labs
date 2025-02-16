@@ -14,6 +14,7 @@ class Lab {
   final List<LabSchedule> schedule;
   final String report;
   final String semesterId;
+  final String semesterName;
   final List<Session> sessions;
   final bool started;
 
@@ -30,6 +31,7 @@ class Lab {
     required this.schedule,
     required this.report,
     required this.semesterId,
+    required this.semesterName,
     required this.sessions,
     required this.started,
   });
