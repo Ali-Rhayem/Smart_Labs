@@ -35,6 +35,7 @@ import { imageUrl } from "../config/config";
 import AddUserModal from "../components/AddUserModal";
 import { useFaculties } from "../hooks/useFaculty";
 import EditUserModal from "../components/EditUserModal";
+import LockResetIcon from "@mui/icons-material/LockReset";
 
 type Order = "asc" | "desc";
 type OrderBy = "name" | "email" | "faculty" | "major" | "role";
@@ -54,6 +55,9 @@ const UsersPage: React.FC = () => {
 	const [showAlert, setShowAlert] = useState(false);
 	const [openAddDialog, setOpenAddDialog] = useState(false);
 	const [editingUser, setEditingUser] = useState<User | null>(null);
+	const [resetPasswordUser, setResetPasswordUser] = useState<User | null>(
+		null
+	);
 
 	const queryClient = useQueryClient();
 
@@ -136,6 +140,24 @@ const UsersPage: React.FC = () => {
 		},
 		onError: (error: any) => {
 			let message = "Failed to update user";
+			if (error.response?.data?.message)
+				message = error.response.data.message;
+			setAlertMessage(message);
+			setSeverity("error");
+			setShowAlert(true);
+		},
+	});
+
+	const resetPasswordMutation = useMutation({
+		mutationFn: (email: string) => userService.resetPassword(email),
+		onSuccess: () => {
+			setResetPasswordUser(null);
+			setAlertMessage("Password reset email sent successfully");
+			setSeverity("success");
+			setShowAlert(true);
+		},
+		onError: (error: any) => {
+			let message = "Failed to reset password";
 			if (error.response?.data?.message)
 				message = error.response.data.message;
 			setAlertMessage(message);
@@ -635,6 +657,21 @@ const UsersPage: React.FC = () => {
 									>
 										<EditIcon />
 									</IconButton>
+									<IconButton
+										onClick={() =>
+											setResetPasswordUser(user)
+										}
+										sx={{
+											color: "var(--color-text)",
+											"&:hover": {
+												color: "var(--color-primary)",
+												bgcolor:
+													"rgb(from var(--color-primary) r g b / 0.1)",
+											},
+										}}
+									>
+										<LockResetIcon />
+									</IconButton>
 								</TableCell>
 							</TableRow>
 						))}
@@ -681,6 +718,20 @@ const UsersPage: React.FC = () => {
 				}}
 				user={editingUser}
 				faculties={facultiesWithMajors}
+			/>
+
+			<DeleteConfirmDialog
+				open={Boolean(resetPasswordUser)}
+				onClose={() => setResetPasswordUser(null)}
+				onConfirm={() => {
+					if (resetPasswordUser) {
+						resetPasswordMutation.mutate(resetPasswordUser.email);
+					}
+				}}
+				title="Reset Password"
+				message={`Are you sure you want to reset password for ${resetPasswordUser?.name}?`}
+				submitLabel="Reset"
+				submitColor="var(--color-primary)"
 			/>
 		</Box>
 	);
