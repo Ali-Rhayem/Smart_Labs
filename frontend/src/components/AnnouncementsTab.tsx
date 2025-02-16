@@ -57,6 +57,12 @@ const AnnouncementsTab: React.FC<AnnouncementsTabProps> = ({ labId }) => {
 	const [severity, setSeverity] = useState<"error" | "success">("error");
 	const [showAlert, setShowAlert] = useState(false);
 
+	const [selectedCommentId, setSelectedCommentId] = useState<number | null>(
+		null
+	);
+	const [deleteCommentDialogOpen, setDeleteCommentDialogOpen] =
+		useState(false);
+
 	const handleCommentChange = (announcementId: number, value: string) => {
 		setCommentInputs((prev) => ({
 			...prev,
@@ -222,6 +228,35 @@ const AnnouncementsTab: React.FC<AnnouncementsTabProps> = ({ labId }) => {
 		},
 	});
 
+	const deleteCommentMutation = useMutation({
+		mutationFn: ({
+			announcementId,
+			commentId,
+		}: {
+			announcementId: number;
+			commentId: number;
+		}) =>
+			announcementService.deleteComment(labId, announcementId, commentId),
+		onSuccess: () => {
+			queryClient.invalidateQueries({
+				queryKey: ["labAnnouncements", labId],
+			});
+			setDeleteCommentDialogOpen(false);
+			setSelectedCommentId(null);
+			setAlertMessage("Comment deleted successfully");
+			setSeverity("success");
+			setShowAlert(true);
+		},
+		onError: (error: any) => {
+			let message = "Failed to delete comment";
+			if (error.response?.data?.errors)
+				message = error.response?.data?.errors;
+			setAlertMessage(message);
+			setSeverity("error");
+			setShowAlert(true);
+		},
+	});
+
 	const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
 		if (event.target.files) {
 			setFiles(Array.from(event.target.files));
@@ -253,6 +288,22 @@ const AnnouncementsTab: React.FC<AnnouncementsTabProps> = ({ labId }) => {
 			deleteAnnouncementMutation.mutate(selectedAnnouncementId);
 		}
 		setDeleteDialogOpen(false);
+	};
+
+	const handleDeleteComment = (announcementId: number, commentId: number) => {
+		setSelectedCommentId(commentId);
+		setSelectedAnnouncementId(announcementId);
+		setDeleteCommentDialogOpen(true);
+	};
+
+	const handleConfirmDeleteComment = () => {
+		if (selectedCommentId && selectedAnnouncementId) {
+			deleteCommentMutation.mutate({
+				announcementId: selectedAnnouncementId,
+				commentId: selectedCommentId,
+			});
+			setDeleteCommentDialogOpen(false);
+		}
 	};
 
 	return (
@@ -389,10 +440,10 @@ const AnnouncementsTab: React.FC<AnnouncementsTabProps> = ({ labId }) => {
 											sx={{ display: "flex", mb: 2 }}
 										>
 											<Avatar
-												src={`${imageUrl}/${announcement.user.image}`}
+												src={`${imageUrl}/${comment.user.image}`}
 												sx={{ width: 32, height: 32 }}
 											/>
-											<Box sx={{ ml: 1 }}>
+											<Box sx={{ ml: 1, flex: 1 }}>
 												<Box
 													sx={{
 														display: "flex",
@@ -419,6 +470,27 @@ const AnnouncementsTab: React.FC<AnnouncementsTabProps> = ({ labId }) => {
 													{comment.message}
 												</Typography>
 											</Box>
+											{(comment.user.id === user?.id ||
+												isInstructor) && (
+												<IconButton
+													onClick={() =>
+														handleDeleteComment(
+															announcement.id!,
+															comment.id!
+														)
+													}
+													sx={{
+														color: "var(--color-danger)",
+														p: 0.5,
+														"&:hover": {
+															bgcolor:
+																"rgb(from var(--color-danger) r g b / 0.08)",
+														},
+													}}
+												>
+													<DeleteIcon fontSize="small" />
+												</IconButton>
+											)}
 										</Box>
 									))}
 
@@ -610,6 +682,13 @@ const AnnouncementsTab: React.FC<AnnouncementsTabProps> = ({ labId }) => {
 				onConfirm={handleConfirmDelete}
 				title="Delete Announcement"
 				message="Are you sure you want to delete this announcement? This action cannot be undone."
+			/>
+			<DeleteConfirmDialog
+				open={deleteCommentDialogOpen}
+				onClose={() => setDeleteCommentDialogOpen(false)}
+				onConfirm={handleConfirmDeleteComment}
+				title="Delete Comment"
+				message="Are you sure you want to delete this comment?"
 			/>
 			<ErrorAlert
 				open={showAlert}
