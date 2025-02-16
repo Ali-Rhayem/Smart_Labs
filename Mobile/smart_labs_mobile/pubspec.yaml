@@ -27,6 +27,7 @@ dependencies:
   permission_handler: ^11.3.1
   device_info_plus: ^11.3.0
   file_picker: ^8.3.5
+  awesome_snackbar_content: ^0.1.5
 
 dev_dependencies:
   flutter_test:
