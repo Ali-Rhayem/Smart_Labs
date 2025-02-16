@@ -307,12 +307,12 @@ public class LabService
         return result.ModifiedCount > 0;
     }
 
-    public async Task<Boolean> SendAnnouncementToLabAsync(int id, Announcement announcement)
+    public async Task<AnnouncementDTO?> SendAnnouncementToLabAsync(int id, Announcement announcement)
     {
         var lab = await GetLabByIdAsync(id);
         if (lab == null)
         {
-            return false;
+            return null;
         }
         var last_announcement = lab.Announcements.OrderByDescending(a => a.Id).FirstOrDefault();
         announcement.Id = last_announcement == null ? 1 : last_announcement.Id + 1;
@@ -320,24 +320,41 @@ public class LabService
         var updateDefinition = Builders<Lab>.Update.Push(lab => lab.Announcements, announcement);
         var result = await _labs.UpdateOneAsync(lab => lab.Id == id, updateDefinition);
 
-        return result.ModifiedCount > 0;
+        AnnouncementDTO announcementDTO = new AnnouncementDTO
+        {
+            Id = announcement.Id,
+            user = (UserDTO)await _userService.GetUserById(announcement.Sender),
+            Message = announcement.Message,
+            Files = announcement.Files,
+            Time = announcement.Time,
+            Comments = []
+        };
+
+        return result.ModifiedCount > 0 ? announcementDTO : null;
     }
 
-    public async Task<Boolean> DeleteAnnouncementFromLabAsync(int lab_id, int announcementId)
+    public async Task<string> DeleteAnnouncementFromLabAsync(int lab_id, int announcementId, int user_id)
     {
+        // check if the user is the sender of the announcement
+        var lab = await GetLabByIdAsync(lab_id);
+        var announcement = lab.Announcements.Find(a => a.Id == announcementId);
+        if (announcement == null || announcement.Sender != user_id)
+        {
+            return "You are not the sender of the announcement";
+        }
         var updateDefinition = Builders<Lab>.Update.PullFilter(lab => lab.Announcements, announcement => announcement.Id == announcementId);
         var result = await _labs.UpdateOneAsync(lab => lab.Id == lab_id, updateDefinition);
 
-        return result.ModifiedCount > 0;
+        return result.ModifiedCount > 0 ? "success" : "Announcement not found";
     }
 
-    public async Task<Boolean> CommentOnAnnouncementAsync(int lab_id, int announcementId, Comment comment)
+    public async Task<CommentDTO?> CommentOnAnnouncementAsync(int lab_id, int announcementId, Comment comment)
     {
         var lab = await GetLabByIdAsync(lab_id);
         var announcement = lab.Announcements.Find(a => a.Id == announcementId);
         if (announcement == null)
         {
-            return false;
+            return null;
         }
         var last_comment = announcement.Comments.OrderByDescending(c => c.Id).FirstOrDefault();
         comment.Id = last_comment == null ? 1 : last_comment.Id + 1;
@@ -349,7 +366,15 @@ public class LabService
         };
         var result = await _labs.UpdateOneAsync(lab => lab.Id == lab_id, updateDefinition, new UpdateOptions { ArrayFilters = arrayFilters });
 
-        return result.ModifiedCount > 0;
+        CommentDTO commentDTO = new()
+        {
+            Id = comment.Id,
+            user = (UserDTO)await _userService.GetUserById(comment.Sender),
+            Message = comment.Message,
+            Time = comment.Time
+        };
+
+        return result.ModifiedCount > 0 ? commentDTO : null;
 
     }
 
@@ -422,8 +447,6 @@ public class LabService
         var currentTime = TimeOnly.FromDateTime(DateTime.Now.AddMinutes(-5));
         foreach (var labTime in lab.Schedule)
         {
-            Console.WriteLine(currentTime);
-            Console.WriteLine(labTime.StartTime);
             if (labTime.DayOfWeek == currentDay && labTime.StartTime <= currentTime && labTime.EndTime > currentTime)
             {
                 Sessions session = await _sessionService.CreateSessionAsync(lab_id);
@@ -431,8 +454,8 @@ public class LabService
                 var ppe_list = await _ppeService.GetListOfPPEsAsync(lab.PPE);
                 var ppe_names = ppe_list.Select(ppe => ppe.Name).ToList();
                 await _labs.UpdateOneAsync(l => l.Id == lab_id, updateDefinition);
-                var message = new { ppe_arr = ppe_names, session_id = session.Id, lab_id = lab_id, room = lab.Room, status = "start" };
-                await _kafkaProducer.ProduceAsync("Lab_rooms", JsonSerializer.Serialize(message));
+                var message = new { ppe_arr = ppe_names, session_id = session.Id, lab_id = lab_id, room = lab.Room, command = "start" };
+                await _kafkaProducer.ProduceAsync("recording_se", JsonSerializer.Serialize(message));
                 return session;
             }
         }
@@ -449,7 +472,7 @@ public class LabService
             return new ErrorMessage { StatusCode = 400, Message = "lab is not started" };
         }
 
-        await _kafkaProducer.ProduceAsync("Lab_rooms", JsonSerializer.Serialize(new { room = lab.Room, status = "end" }));
+        await _kafkaProducer.ProduceAsync("recording_se", JsonSerializer.Serialize(new { room = lab.Room, command = "end" }));
         var updateDefinition = Builders<Lab>.Update.Set(l => l.Started, false);
         await _labs.UpdateOneAsync(l => l.Id == lab_id, updateDefinition);
 
