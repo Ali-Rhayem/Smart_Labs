@@ -30,8 +30,9 @@ class LabDetailScreen extends ConsumerWidget {
       error: (error, stack) => Center(
         child: Text(
           'Error: $error',
-          style:
-              TextStyle(color: theme.colorScheme.onBackground.withOpacity(0.7)),
+          style: TextStyle(
+            color: theme.colorScheme.onBackground.withValues(alpha: 0.7),
+          ),
         ),
       ),
       data: (currentLab) => DefaultTabController(
@@ -72,7 +73,7 @@ class LabDetailScreen extends ConsumerWidget {
                   overlayColor: MaterialStateProperty.all(Colors.transparent),
                   labelColor: isDark ? kNeonAccent : theme.colorScheme.primary,
                   unselectedLabelColor:
-                      theme.colorScheme.onSurface.withOpacity(0.7),
+                      theme.colorScheme.onSurface.withValues(alpha: 0.7),
                   indicatorSize: TabBarIndicatorSize.tab,
                   indicatorColor:
                       isDark ? kNeonAccent : theme.colorScheme.primary,
