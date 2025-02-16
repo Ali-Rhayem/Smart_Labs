@@ -13,7 +13,6 @@ export interface User {
 
 export interface CreateUserDto extends Omit<User, "id" | "fcm_token"> {
 	password: string;
-	confirmPassword: string;
 }
 
 export interface UpdateUserDto
