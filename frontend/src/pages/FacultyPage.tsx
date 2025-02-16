@@ -14,6 +14,7 @@ import {
 	Typography,
 	Skeleton,
 	Card,
+	TableSortLabel,
 } from "@mui/material";
 import { useFaculties } from "../hooks/useFaculty";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -26,6 +27,9 @@ import DeleteConfirmDialog from "../components/DeleteConfirmDialog";
 import { faculty } from "../types/faculty";
 import AddItemModal from "../components/AddItemModal";
 import ErrorIcon from "@mui/icons-material/Error";
+
+type Order = "asc" | "desc";
+type OrderBy = "faculty" | "majors";
 
 const FacultyPage: React.FC = () => {
 	const { data: faculties = [], isLoading, error } = useFaculties();
@@ -51,6 +55,8 @@ const FacultyPage: React.FC = () => {
 	const [selectedFacultyForEdit, setSelectedFacultyForEdit] =
 		useState<faculty | null>(null);
 	const [expandedRows, setExpandedRows] = useState<number[]>([]);
+	const [order, setOrder] = useState<Order>("asc");
+	const [orderBy, setOrderBy] = useState<OrderBy>("faculty");
 
 	const queryClient = useQueryClient();
 
@@ -218,6 +224,25 @@ const FacultyPage: React.FC = () => {
 		);
 	};
 
+	const handleRequestSort = (property: OrderBy) => {
+		const isAsc = orderBy === property && order === "asc";
+		setOrder(isAsc ? "desc" : "asc");
+		setOrderBy(property);
+	};
+
+	const sortedFaculties = React.useMemo(() => {
+		return [...faculties].sort((a, b) => {
+			if (orderBy === "faculty") {
+				return order === "asc"
+					? a.faculty.localeCompare(b.faculty)
+					: b.faculty.localeCompare(a.faculty);
+			}
+			return order === "asc"
+				? a.major.length - b.major.length
+				: b.major.length - a.major.length;
+		});
+	}, [faculties, order, orderBy]);
+
 	const renderLoadingSkeleton = () => (
 		<Box sx={{ p: 2 }}>
 			{[1, 2, 3].map((n) => (
@@ -300,12 +325,15 @@ const FacultyPage: React.FC = () => {
 				</Typography>
 				<Button
 					onClick={() =>
-						queryClient.invalidateQueries({ queryKey: ["Faculties"] })
+						queryClient.invalidateQueries({
+							queryKey: ["Faculties"],
+						})
 					}
 					sx={{
 						color: "var(--color-primary)",
 						"&:hover": {
-							bgcolor: "rgb(from var(--color-primary) r g b / 0.08)",
+							bgcolor:
+								"rgb(from var(--color-primary) r g b / 0.08)",
 						},
 					}}
 				>
@@ -327,7 +355,10 @@ const FacultyPage: React.FC = () => {
 				}}
 			>
 				<Box sx={{ textAlign: "center", mb: 3 }}>
-					<Typography variant="h6" sx={{ color: "var(--color-text)" }}>
+					<Typography
+						variant="h6"
+						sx={{ color: "var(--color-text)" }}
+					>
 						No Faculties Found
 					</Typography>
 					<Typography
@@ -345,7 +376,8 @@ const FacultyPage: React.FC = () => {
 						bgcolor: "var(--color-primary)",
 						color: "var(--color-text-button)",
 						"&:hover": {
-							bgcolor: "rgb(from var(--color-primary) r g b / 0.8)",
+							bgcolor:
+								"rgb(from var(--color-primary) r g b / 0.8)",
 						},
 					}}
 				>
@@ -404,7 +436,27 @@ const FacultyPage: React.FC = () => {
 										"1px solid var(--color-text-secondary)",
 								}}
 							>
-								Faculty Name
+								<TableSortLabel
+									active={orderBy === "faculty"}
+									direction={
+										orderBy === "faculty" ? order : "asc"
+									}
+									onClick={() => handleRequestSort("faculty")}
+									sx={{
+										color: "var(--color-text)",
+										"& .MuiTableSortLabel-icon": {
+											color: "var(--color-text-secondary) !important",
+										},
+										"&.Mui-active": {
+											color: "var(--color-text)",
+										},
+										"&:hover": {
+											color: "var(--color-text)",
+										},
+									}}
+								>
+									Faculty Name
+								</TableSortLabel>
 							</TableCell>
 							<TableCell
 								sx={{
@@ -415,16 +467,45 @@ const FacultyPage: React.FC = () => {
 										"1px solid var(--color-text-secondary)",
 								}}
 							>
-								Majors
+								<TableSortLabel
+									active={orderBy === "majors"}
+									direction={
+										orderBy === "majors" ? order : "asc"
+									}
+									onClick={() => handleRequestSort("majors")}
+									sx={{
+										color: "var(--color-text)",
+										"& .MuiTableSortLabel-icon": {
+											color: "var(--color-text-secondary) !important",
+										},
+										"&.Mui-active": {
+											color: "var(--color-text)",
+										},
+										"&:hover": {
+											color: "var(--color-text)",
+										},
+									}}
+								>
+									Majors
+								</TableSortLabel>
 							</TableCell>
 							<TableCell
 								align="right"
 								sx={{
-									color: "var(--color-text)",
 									backgroundColor: "var(--color-background)",
 									fontWeight: "bold",
 									borderBottom:
 										"1px solid var(--color-text-secondary)",
+									color: "var(--color-text)",
+									"& .MuiTableSortLabel-icon": {
+										color: "var(--color-text-secondary) !important",
+									},
+									"&.Mui-active": {
+										color: "var(--color-text)",
+									},
+									"&:hover": {
+										color: "var(--color-text)",
+									},
 								}}
 							>
 								Actions
@@ -432,7 +513,7 @@ const FacultyPage: React.FC = () => {
 						</TableRow>
 					</TableHead>
 					<TableBody>
-						{faculties.map((faculty) => (
+						{sortedFaculties.map((faculty) => (
 							<React.Fragment key={faculty.id}>
 								<TableRow
 									onClick={() => handleRowClick(faculty.id)}
