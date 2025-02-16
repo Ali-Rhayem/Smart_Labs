@@ -115,7 +115,7 @@ class ApiService {
       } else {
         return {
           'success': false,
-          'message': body['message'] ?? 'Request failed',
+          'message': body['errors'] ?? 'Request failed',
           'statusCode': response.statusCode,
         };
       }
