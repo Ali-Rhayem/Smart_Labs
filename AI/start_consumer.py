@@ -10,6 +10,7 @@ import os
 import subprocess
 from dotenv import load_dotenv
 load_dotenv()
+is_started = False
 
 def images_to_base64(image_path):
     if not os.path.exists(image_path):
@@ -114,6 +115,7 @@ try:
         command = data.get("command")
         
         if command == "start":
+            is_started = True
             if not producing_event.is_set():
                 print("Starting periodic production...")
                 producing_event.set()
@@ -124,6 +126,11 @@ try:
                 print("Periodic production is already running.")
         
         elif command == "end":
+            if not is_started:
+                print("Ignoring 'end' command before 'start'.")
+                continue
+            is_started = False
+            
             print("Received 'end' command. Sending final image and terminating process.")
             # Send one final image.
             produce_image(data)
