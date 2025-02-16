@@ -25,6 +25,8 @@ import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { announcementService } from "../services/announcementService";
 import { Announcement, Comment } from "../types/announcements";
+import DeleteIcon from "@mui/icons-material/Delete";
+import DeleteConfirmDialog from "./DeleteConfirmDialog";
 
 interface AnnouncementsTabProps {
 	labId: number;
@@ -44,6 +46,11 @@ const AnnouncementsTab: React.FC<AnnouncementsTabProps> = ({ labId }) => {
 	const fileInputRef = useRef<HTMLInputElement>(null);
 	const queryClient = useQueryClient();
 	const isInstructor = user?.role === "instructor";
+
+	const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+	const [selectedAnnouncementId, setSelectedAnnouncementId] = useState<
+		number | null
+	>(null);
 
 	const handleCommentChange = (announcementId: number, value: string) => {
 		setCommentInputs((prev) => ({
@@ -174,6 +181,21 @@ const AnnouncementsTab: React.FC<AnnouncementsTabProps> = ({ labId }) => {
 		},
 	});
 
+	const deleteAnnouncementMutation = useMutation({
+		mutationFn: (announcementId: number) =>
+			announcementService.deleteAnnouncement(labId, announcementId),
+		onSuccess: () => {
+			queryClient.invalidateQueries({
+				queryKey: ["labAnnouncements", labId],
+			});
+			setDeleteDialogOpen(false);
+			setSelectedAnnouncementId(null);
+		},
+		onError: (error) => {
+			console.error("Failed to delete announcement:", error);
+		},
+	});
+
 	const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
 		if (event.target.files) {
 			setFiles(Array.from(event.target.files));
@@ -193,6 +215,17 @@ const AnnouncementsTab: React.FC<AnnouncementsTabProps> = ({ labId }) => {
 			message,
 			files: [],
 		} as Announcement);
+	};
+
+	const handleDeleteClick = (announcementId: number) => {
+		setSelectedAnnouncementId(announcementId);
+		setDeleteDialogOpen(true);
+	};
+
+	const handleConfirmDelete = () => {
+		if (selectedAnnouncementId) {
+			deleteAnnouncementMutation.mutate(selectedAnnouncementId);
+		}
 	};
 
 	return (
@@ -239,6 +272,24 @@ const AnnouncementsTab: React.FC<AnnouncementsTabProps> = ({ labId }) => {
 										)}
 									</Typography>
 								</Box>
+								{(isInstructor ||
+									announcement.user.id === user?.id) && (
+									<IconButton
+										onClick={() =>
+											handleDeleteClick(announcement.id!)
+										}
+										sx={{
+											ml: "auto",
+											color: "var(--color-danger)",
+											"&:hover": {
+												bgcolor:
+													"rgba(var(--color-danger-rgb), 0.08)",
+											},
+										}}
+									>
+										<DeleteIcon />
+									</IconButton>
+								)}
 							</Box>
 
 							{/* Announcement Content */}
@@ -528,6 +579,13 @@ const AnnouncementsTab: React.FC<AnnouncementsTabProps> = ({ labId }) => {
 					</Box>
 				</Paper>
 			)}
+			<DeleteConfirmDialog
+				open={deleteDialogOpen}
+				onClose={() => setDeleteDialogOpen(false)}
+				onConfirm={handleConfirmDelete}
+				title="Delete Announcement"
+				message="Are you sure you want to delete this announcement? This action cannot be undone."
+			/>
 		</Box>
 	);
 };
