@@ -27,6 +27,7 @@ import { announcementService } from "../services/announcementService";
 import { Announcement, Comment } from "../types/announcements";
 import DeleteIcon from "@mui/icons-material/Delete";
 import DeleteConfirmDialog from "./DeleteConfirmDialog";
+import ErrorAlert from "./ErrorAlertProps";
 
 interface AnnouncementsTabProps {
 	labId: number;
@@ -51,6 +52,10 @@ const AnnouncementsTab: React.FC<AnnouncementsTabProps> = ({ labId }) => {
 	const [selectedAnnouncementId, setSelectedAnnouncementId] = useState<
 		number | null
 	>(null);
+
+	const [alertMessage, setAlertMessage] = useState("");
+	const [severity, setSeverity] = useState<"error" | "success">("error");
+	const [showAlert, setShowAlert] = useState(false);
 
 	const handleCommentChange = (announcementId: number, value: string) => {
 		setCommentInputs((prev) => ({
@@ -152,9 +157,17 @@ const AnnouncementsTab: React.FC<AnnouncementsTabProps> = ({ labId }) => {
 			});
 			setMessage("");
 			setFiles([]);
+			setAlertMessage("Announcement sent successfully");
+			setSeverity("success");
+			setShowAlert(true);
 		},
-		onError: (error) => {
-			console.error("Failed to send announcement:", error);
+		onError: (error: any) => {
+			let message = "Failed to send announcement";
+			if (error.response?.data?.errors)
+				message = error.response?.data?.errors;
+			setAlertMessage(message);
+			setSeverity("error");
+			setShowAlert(true);
 		},
 	});
 
@@ -176,8 +189,13 @@ const AnnouncementsTab: React.FC<AnnouncementsTabProps> = ({ labId }) => {
 				queryKey: ["labAnnouncements", labId],
 			});
 		},
-		onError: (error) => {
-			console.error("Failed to send comment:", error);
+		onError: (error: any) => {
+			let message = "Failed to send comment";
+			if (error.response?.data?.errors)
+				message = error.response?.data?.errors;
+			setAlertMessage(message);
+			setSeverity("error");
+			setShowAlert(true);
 		},
 	});
 
@@ -190,9 +208,17 @@ const AnnouncementsTab: React.FC<AnnouncementsTabProps> = ({ labId }) => {
 			});
 			setDeleteDialogOpen(false);
 			setSelectedAnnouncementId(null);
+			setAlertMessage("Announcement deleted successfully");
+			setSeverity("success");
+			setShowAlert(true);
 		},
-		onError: (error) => {
-			console.error("Failed to delete announcement:", error);
+		onError: (error: any) => {
+			let message = "Failed to delete announcement";
+			if (error.response?.data?.errors)
+				message = error.response?.data?.errors;
+			setAlertMessage(message);
+			setSeverity("error");
+			setShowAlert(true);
 		},
 	});
 
@@ -226,6 +252,7 @@ const AnnouncementsTab: React.FC<AnnouncementsTabProps> = ({ labId }) => {
 		if (selectedAnnouncementId) {
 			deleteAnnouncementMutation.mutate(selectedAnnouncementId);
 		}
+		setDeleteDialogOpen(false);
 	};
 
 	return (
@@ -585,6 +612,12 @@ const AnnouncementsTab: React.FC<AnnouncementsTabProps> = ({ labId }) => {
 				onConfirm={handleConfirmDelete}
 				title="Delete Announcement"
 				message="Are you sure you want to delete this announcement? This action cannot be undone."
+			/>
+			<ErrorAlert
+				open={showAlert}
+				message={alertMessage}
+				severity={severity}
+				onClose={() => setShowAlert(false)}
 			/>
 		</Box>
 	);
