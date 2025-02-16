@@ -10,17 +10,33 @@ class OverallStatsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Container(
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF2C2C2C), Color(0xFF1C1C1C)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        gradient: isDark
+            ? const LinearGradient(
+                colors: [Color(0xFF2C2C2C), Color(0xFF1C1C1C)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              )
+            : LinearGradient(
+                colors: [
+                  theme.colorScheme.surface,
+                  theme.colorScheme.surface.withOpacity(0.95),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isDark ? Colors.white12 : Colors.black12,
+          width: 1,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.2),
+            color: Colors.black.withOpacity(isDark ? 0.3 : 0.1),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -36,20 +52,21 @@ class OverallStatsCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: kNeonAccent.withValues(alpha: 0.1),
+                    color: (isDark ? kNeonAccent : theme.colorScheme.primary)
+                        .withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.analytics_rounded,
-                    color: kNeonAccent,
+                    color: isDark ? kNeonAccent : theme.colorScheme.primary,
                     size: 24,
                   ),
                 ),
                 const SizedBox(width: 12),
-                const Text(
+                Text(
                   'Overall Statistics',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: theme.colorScheme.onSurface,
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 0.5,
@@ -58,10 +75,15 @@ class OverallStatsCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 24),
-            StatRow(label: 'Total Attendance', value: '${session.totalAttendance}%'),
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 12),
-              child: Divider(color: Colors.white12),
+            StatRow(
+              label: 'Total Attendance',
+              value: '${session.totalAttendance}%',
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              child: Divider(
+                color: theme.colorScheme.onSurface.withOpacity(0.1),
+              ),
             ),
             ...session.totalPPECompliance.entries.map(
               (entry) => Padding(
