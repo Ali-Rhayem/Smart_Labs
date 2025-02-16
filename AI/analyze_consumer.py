@@ -263,7 +263,7 @@ try:
                         total_ppe_compliance_bytime_temp = 0
                         for ppe in required_ppe:
                             ppe_compliance_bytime[ppe].append(round(temp_ppe_compliance_bytime[ppe] * 100 / analysis_per_x_images)) # Calculate Avg PPE Compliance by x images
-                            total_ppe_compliance_bytime_temp += temp_ppe_compliance_bytime[ppe] * 100 / analysis_per_x_images # Calculate Total PPE Compliance for each ppe
+                            total_ppe_compliance_bytime_temp += round(temp_ppe_compliance_bytime[ppe] * 100 / analysis_per_x_images) # Calculate Total PPE Compliance for each ppe
                         
                         total_ppe_compliance_bytime.append(round(total_ppe_compliance_bytime_temp / len(required_ppe)))
                         temp_ppe_compliance_bytime = {ppe: 0 for ppe in required_ppe}  
@@ -279,7 +279,7 @@ try:
                             result[student_id]["ppe_compliance"][ppe] = round(result[student_id]["ppe_compliance"][ppe] * 100 / images_per_student[student_id])
                             total_ppe_compliance[ppe] += round(result[student_id]["ppe_compliance"][ppe])
                             
-                    total_ppe_compliance[ppe] /= len(total_people_attended)
+                    total_ppe_compliance[ppe] = round(total_ppe_compliance[ppe]/ len(total_people_attended))
 
                 
                 
@@ -294,9 +294,10 @@ try:
                 
                 report = f"""
                 Lab Report - {date}
-                Lab ID: {lab_id}
-
+                
                 Total Attendance: {total_attendance}%
+                
+                Total PPE Compliance: {total_ppe_compliance}%
 
                 Individual Compliance:
                 """
