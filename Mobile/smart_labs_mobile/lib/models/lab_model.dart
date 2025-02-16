@@ -6,7 +6,8 @@ class Lab {
   final String labCode;
   final String labName;
   final String description;
-  final String ppe;
+  final List<String> ppeIds;
+  final List<String> ppeNames;
   final String? room;
   final List<String> instructors;
   final List<String> students;
@@ -21,7 +22,8 @@ class Lab {
     required this.labCode,
     required this.labName,
     required this.description,
-    required this.ppe,
+    required this.ppeIds,
+    required this.ppeNames,
     this.room,
     required this.instructors,
     required this.students,
