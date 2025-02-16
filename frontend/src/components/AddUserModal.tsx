@@ -43,10 +43,19 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
 	});
 	const [errors, setErrors] = useState<Record<string, string>>({});
 
+	const validateEmail = (email: string): boolean => {
+		const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+		return emailRegex.test(email);
+	};
+
 	const handleSubmit = () => {
 		const newErrors: Record<string, string> = {};
 		if (!formData.name) newErrors.name = "Name is required";
-		if (!formData.email) newErrors.email = "Email is required";
+		if (!formData.email) {
+			newErrors.email = "Email is required";
+		} else if (!validateEmail(formData.email)) {
+			newErrors.email = "Please enter a valid email address";
+		}
 		if (!formData.password) newErrors.password = "Password is required";
 		if (!formData.faculty) newErrors.faculty = "Faculty is required";
 		if (!formData.major) newErrors.major = "Major is required";
@@ -58,15 +67,24 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
 		}
 
 		onSubmit(formData);
+		resetForm();
+	};
+
+	const resetForm = () => {
 		setFormData({
 			name: "",
 			email: "",
 			password: "",
 			faculty: "",
 			major: "",
-			role: "student",
+			role: "student" as "student" | "instructor" | "admin",
 		});
 		setErrors({});
+	};
+
+	const handleClose = () => {
+		resetForm();
+		onClose();
 	};
 
 	const selectedFacultyMajors =
@@ -75,7 +93,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
 	return (
 		<Dialog
 			open={open}
-			onClose={onClose}
+			onClose={handleClose}
 			PaperProps={{
 				sx: {
 					bgcolor: "var(--color-background)",
@@ -369,7 +387,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
 				</Box>
 			</DialogContent>
 			<DialogActions>
-				<Button onClick={onClose} sx={{ color: "var(--color-text)" }}>
+				<Button onClick={handleClose} sx={{ color: "var(--color-text)" }}>
 					Cancel
 				</Button>
 				<Button
