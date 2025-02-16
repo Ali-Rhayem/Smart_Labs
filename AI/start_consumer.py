@@ -38,7 +38,7 @@ def get_random_image():
 def take_image_from_camera():
     try:
         # Generate timestamp for filename
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
         # Create images directory if it doesn't exist
         output_dir = os.path.expanduser("~/Desktop/images")
         os.makedirs(output_dir, exist_ok=True)
