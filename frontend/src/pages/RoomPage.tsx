@@ -25,6 +25,9 @@ import DeleteConfirmDialog from "../components/DeleteConfirmDialog";
 import ErrorAlert from "../components/ErrorAlertProps";
 import { Room } from "../types/room";
 import TableSortLabel from "@mui/material/TableSortLabel";
+import SearchIcon from "@mui/icons-material/Search";
+import InputAdornment from "@mui/material/InputAdornment";
+import TextField from "@mui/material/TextField";
 
 type Order = "asc" | "desc";
 
@@ -38,6 +41,7 @@ const RoomPage: React.FC = () => {
 	const [severity, setSeverity] = useState<"error" | "success">("success");
 	const [showAlert, setShowAlert] = useState(false);
 	const [order, setOrder] = useState<Order>("asc");
+	const [searchQuery, setSearchQuery] = useState("");
 
 	const queryClient = useQueryClient();
 
@@ -110,6 +114,12 @@ const RoomPage: React.FC = () => {
 				: b.name.localeCompare(a.name);
 		});
 	}, [rooms, order]);
+
+	const filteredRooms = React.useMemo(() => {
+		return sortedRooms.filter((room) =>
+			room.name.toLowerCase().includes(searchQuery.toLowerCase())
+		);
+	}, [sortedRooms, searchQuery]);
 
 	const renderLoadingSkeleton = () => (
 		<Box sx={{ p: 2 }}>
@@ -233,11 +243,57 @@ const RoomPage: React.FC = () => {
 	return (
 		<Box sx={{ p: 3 }}>
 			<Box
-				sx={{ display: "flex", justifyContent: "space-between", mb: 3 }}
+				sx={{
+					display: "flex",
+					justifyContent: "space-between",
+					alignItems: "center",
+					mb: 3,
+					gap: 2,
+				}}
 			>
 				<Typography variant="h4" color="var(--color-text)">
 					Rooms
 				</Typography>
+
+				<TextField
+					placeholder="Search rooms..."
+					value={searchQuery}
+					onChange={(e) => setSearchQuery(e.target.value)}
+					size="small"
+					sx={{
+						flex: 1,
+						maxWidth: "400px",
+						borderRadius: "10px",
+						bgcolor: "var(--color-card)",
+						"& .MuiOutlinedInput-root": {
+							"& fieldset": {
+								borderColor: "var(--color-text-secondary)",
+								borderRadius: "10px",
+							},
+							"&:hover fieldset": {
+								borderColor: "var(--color-primary)",
+							},
+							"&.Mui-focused fieldset": {
+								borderColor: "var(--color-primary)",
+							},
+						},
+						"& .MuiInputBase-input": {
+							color: "var(--color-text)",
+						},
+					}}
+					InputProps={{
+						startAdornment: (
+							<InputAdornment position="start">
+								<SearchIcon
+									sx={{
+										color: "var(--color-text-secondary)",
+									}}
+								/>
+							</InputAdornment>
+						),
+					}}
+				/>
+
 				<Button
 					variant="contained"
 					startIcon={<AddIcon />}
@@ -288,7 +344,7 @@ const RoomPage: React.FC = () => {
 						</TableRow>
 					</TableHead>
 					<TableBody>
-						{sortedRooms.map((room) => (
+						{filteredRooms.map((room) => (
 							<TableRow
 								key={room.id}
 								sx={{
