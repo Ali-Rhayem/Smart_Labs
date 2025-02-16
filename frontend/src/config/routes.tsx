@@ -8,12 +8,11 @@ import SchoolIcon from "@mui/icons-material/School";
 import ApartmentIcon from "@mui/icons-material/Apartment";
 import { Role } from "../types/user";
 
-
 export interface NavItem {
 	label: string;
 	path: string;
 	icon: React.ReactNode;
-	roles: Role[]; 
+	roles: Role[];
 }
 
 export const navItems: NavItem[] = [
@@ -58,11 +57,11 @@ export const navItems: NavItem[] = [
 		path: "/ppes",
 		icon: <ApartmentIcon />,
 		roles: ["admin"],
-    },
-    {
-        label: "facilities",
-        path: "/facilities",
-        icon: <ApartmentIcon />,
-        roles: ["admin"],
-    }
+	},
+	{
+		label: "faculties",
+		path: "/faculties",
+		icon: <ApartmentIcon />,
+		roles: ["admin"],
+	},
 ];
