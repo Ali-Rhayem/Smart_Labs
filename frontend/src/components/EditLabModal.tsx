@@ -1,15 +1,11 @@
-import { FC, FormEvent, useState } from "react";
-import {
-	Dialog,
-	DialogTitle,
-	DialogContent,
-	DialogActions,
-	Button,
-} from "@mui/material";
-import { Lab, UpdateLabDto } from "../types/lab";
-import { useRooms } from "../hooks/useRooms";
-import Dropdown from "./Dropdown";
+import React, { useState } from "react";
+import { Dialog, DialogTitle, DialogContent, Box, Button } from "@mui/material";
 import InputField from "./InputField";
+import Dropdown from "./Dropdown";
+import { useRooms } from "../hooks/useRooms";
+import { useSemesters } from "../hooks/useSemesters";
+import { Lab, UpdateLabDto } from "../types/lab";
+import ScheduleSelect from "./ScheduleSelect";
 
 interface EditLabModalProps {
 	open: boolean;
@@ -18,44 +14,48 @@ interface EditLabModalProps {
 	lab: Lab;
 }
 
-const EditLabModal: FC<EditLabModalProps> = ({
+const EditLabModal: React.FC<EditLabModalProps> = ({
 	open,
 	onClose,
 	onSubmit,
 	lab,
 }) => {
 	const { data: rooms = [] } = useRooms();
-	const [formData, setFormData] = useState<UpdateLabDto>({});
+	const { data: semesters = [] } = useSemesters();
 
-	const handleSubmit = (e: FormEvent) => {
+	const [formData, setFormData] = useState<UpdateLabDto>({});
+	const [errors, setErrors] = useState<{ [key: string]: string[] }>({});
+
+	const handleSubmit = (e: React.FormEvent) => {
 		e.preventDefault();
-		if (
-			!formData.labName &&
-			!formData.labCode &&
-			!formData.room &&
-			!formData.schedule
-		) {
-			setFormData({});
-			onClose();
+		const newErrors: { [key: string]: string[] } = {};
+
+		if (formData.labName?.trim() === "") {
+			newErrors.labName = ["Lab name is required"];
+		}
+		if (formData.labCode?.trim() === "") {
+			newErrors.labCode = ["Lab code is required"];
+		}
+		if (formData.room === "") {
+			newErrors.room = ["Room is required"];
+		}
+
+		if (Object.keys(newErrors).length > 0) {
+			setErrors(newErrors);
 			return;
 		}
-		if (!formData.labName) {
-			formData.labName = lab.labName;
-		}
-		if (!formData.labCode) {
-			formData.labCode = lab.labCode;
-		}
-		if (!formData.room) {
-			formData.room = lab.room;
-		}
-		if (!formData.schedule) {
-			formData.schedule = lab.schedule;
-		}
-		if (!formData.semesterID) {
-			formData.semesterID = lab.semesterID;
-		}
-		console.log(formData);
-		onSubmit(formData);
+
+		const updatedData = {
+			...formData,
+			labName: formData.labName || lab.labName,
+			labCode: formData.labCode || lab.labCode,
+			room: formData.room || lab.room,
+			description: formData.description || lab.description,
+			semesterID: formData.semesterID || lab.semesterID,
+			schedule: formData.schedule || lab.schedule,
+		};
+
+		onSubmit(updatedData);
 	};
 
 	return (
@@ -65,52 +65,71 @@ const EditLabModal: FC<EditLabModalProps> = ({
 				onClose();
 				setFormData({});
 			}}
-			maxWidth="sm"
+			maxWidth="md"
 			fullWidth
 			PaperProps={{
 				sx: {
-					bgcolor: "var(--color-background-secondary)",
+					bgcolor: "var(--color-card)",
 					color: "var(--color-text)",
 				},
 			}}
 		>
-			<DialogTitle>Edit Lab</DialogTitle>
+			<DialogTitle sx={{ borderBottom: 1, borderColor: "divider" }}>
+				Edit Lab
+			</DialogTitle>
 			<form onSubmit={handleSubmit}>
-				<DialogContent>
-					<InputField
-						id="labName"
-						label="Lab Name"
-						name="labName"
-						type="text"
-						value={formData?.labName || lab.labName}
-						placeholder="Enter lab name"
-						onChange={(e) =>
-							setFormData({
-								...formData,
-								labName: e.target.value,
-							})
-						}
-					/>
-					<InputField
-						id="labCode"
-						label="Lab Code"
-						name="labCode"
-						type="text"
-						value={formData.labCode || lab.labCode}
-						placeholder="Enter lab code"
-						onChange={(e) =>
-							setFormData({
-								...formData,
-								labCode: e.target.value,
-							})
-						}
-					/>
+				<DialogContent sx={{ mt: 2 }}>
+					<Box sx={{ display: "flex", gap: 2, mb: 2 }}>
+						<InputField
+							id="labName"
+							label="Lab Name"
+							name="labName"
+							type="text"
+							value={
+								formData.labName == null
+									? lab.labName
+									: formData.labName
+							}
+							placeholder="Enter lab name"
+							onChange={(e) =>
+								setFormData({
+									...formData,
+									labName: e.target.value,
+								})
+							}
+							error={errors.labName}
+						/>
+						<InputField
+							id="labCode"
+							label="Lab Code"
+							name="labCode"
+							type="text"
+							value={
+								formData.labCode == null
+									? lab.labCode
+									: formData.labCode
+							}
+							placeholder="Enter lab code"
+							onChange={(e) =>
+								setFormData({
+									...formData,
+									labCode: e.target.value,
+								})
+							}
+							error={errors.labCode}
+						/>
+					</Box>
+
 					<InputField
 						id="description"
 						label="Description"
 						name="description"
 						type="text"
-						value={formData.description || lab.description}
+						value={
+							formData.description == null
+								? lab.description
+								: formData.description
+						}
 						placeholder="Enter description"
 						onChange={(e) =>
 							setFormData({
@@ -119,27 +138,72 @@ const EditLabModal: FC<EditLabModalProps> = ({
 							})
 						}
 						multiline
-						rows={4}
+						rows={3}
 					/>
-					<Dropdown
-						label="Room"
-						value={formData.room || lab.room}
-						options={rooms.map((room) => ({
-							value: room.name,
-							label: room.name,
-						}))}
-						onChange={(value) =>
-							setFormData({ ...formData, room: value })
+
+					<Box sx={{ display: "flex", gap: 2, mb: 2 }}>
+						<Dropdown
+							label="Room"
+							value={
+								formData.room == null ? lab.room : formData.room
+							}
+							error={errors.room}
+							options={rooms.map((room) => ({
+								value: room.name,
+								label: room.name,
+							}))}
+							onChange={(value) =>
+								setFormData({ ...formData, room: value })
+							}
+						/>
+
+						<Dropdown
+							label="Semester"
+							value={(formData.semesterID == null
+								? lab.semesterID
+								: formData.semesterID
+							).toString()}
+							options={semesters.map((sem) => ({
+								value: sem.id.toString(),
+								label: sem.name,
+							}))}
+							onChange={(value) =>
+								setFormData({
+									...formData,
+									semesterID: Number(value),
+								})
+							}
+						/>
+					</Box>
+
+					<ScheduleSelect
+						schedules={formData.schedule || lab.schedule}
+						onChange={(schedules) =>
+							setFormData({
+								...formData,
+								schedule: schedules,
+							})
 						}
+						error={errors.schedule}
 					/>
 				</DialogContent>
-				<DialogActions>
+
+				<Box
+					sx={{
+						p: 2,
+						borderTop: 1,
+						borderColor: "divider",
+						display: "flex",
+						justifyContent: "flex-end",
+						gap: 2,
+					}}
+				>
 					<Button
 						onClick={() => {
 							onClose();
 							setFormData({});
 						}}
-						sx={{ color: "var(--color-danger)" }}
+						sx={{ color: "var(--color-text)" }}
 					>
 						Cancel
 					</Button>
@@ -147,13 +211,17 @@ const EditLabModal: FC<EditLabModalProps> = ({
 						type="submit"
 						variant="contained"
 						sx={{
-							backgroundColor: "var(--color-primary)",
+							bgcolor: "var(--color-primary)",
 							color: "var(--color-text-button)",
+							"&:hover": {
+								bgcolor:
+									"rgb(from var(--color-primary) r g b / 0.8)",
+							},
 						}}
 					>
 						Save Changes
 					</Button>
-				</DialogActions>
+				</Box>
 			</form>
 		</Dialog>
 	);
