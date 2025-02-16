@@ -282,7 +282,7 @@ const AnnouncementsTab: React.FC<AnnouncementsTabProps> = ({ labId }) => {
 								<Avatar
 									src={`${imageUrl}/${announcement.user.image}`}
 								/>
-								<Box sx={{ ml: 2 }}>
+								<Box sx={{ ml: 2, flex: 1 }}>
 									<Typography
 										variant="subtitle1"
 										fontWeight="bold"
@@ -299,18 +299,16 @@ const AnnouncementsTab: React.FC<AnnouncementsTabProps> = ({ labId }) => {
 										)}
 									</Typography>
 								</Box>
-								{(isInstructor ||
-									announcement.user.id === user?.id) && (
+								{announcement.user.id === user?.id && (
 									<IconButton
 										onClick={() =>
 											handleDeleteClick(announcement.id!)
 										}
 										sx={{
-											ml: "auto",
 											color: "var(--color-danger)",
 											"&:hover": {
 												bgcolor:
-													"rgba(var(--color-danger-rgb), 0.08)",
+													"rgb(from var(--color-danger) r g b / 0.08)",
 											},
 										}}
 									>
