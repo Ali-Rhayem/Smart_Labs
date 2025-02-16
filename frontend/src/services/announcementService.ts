@@ -3,6 +3,7 @@ import {
 	Announcement,
 	AnnouncementDTO,
 	CommentDTO,
+	Comment,
 } from "../types/announcements";
 
 export const announcementService = {
