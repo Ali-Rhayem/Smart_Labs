@@ -7,8 +7,8 @@ export const roomService = {
 	createRoom: (room: Room) =>
 		smart_labs.postAPI<Room, RoomDTO>(`/room`, room),
 
-	updateRoom: (room: Room) =>
-		smart_labs.putAPI<Room, RoomDTO>(`/room/${room.name}`, room),
+	updateRoom: (old_name: string, room: Room) =>
+		smart_labs.putAPI<Room, RoomDTO>(`/room/${old_name}`, room),
 
 	deleteRoom: (name: string) => smart_labs.deleteAPI<Room>(`/room/${name}`),
 };
