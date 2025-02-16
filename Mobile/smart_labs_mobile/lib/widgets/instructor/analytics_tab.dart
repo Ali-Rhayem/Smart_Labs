@@ -254,7 +254,7 @@ class AnalyticsTab extends ConsumerWidget {
         const SizedBox(height: 8),
         LinearProgressIndicator(
           value: value / 100,
-          backgroundColor: theme.colorScheme.onSurface.withOpacity(0.1),
+          backgroundColor: theme.colorScheme.onSurface.withValues(alpha: 0.1),
           valueColor: AlwaysStoppedAnimation(percentageColor),
           minHeight: 8,
           borderRadius: BorderRadius.circular(4),
