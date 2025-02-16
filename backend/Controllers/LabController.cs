@@ -423,10 +423,10 @@ namespace backend.Controllers
 
             var result = await _labService.SendAnnouncementToLabAsync(labId, announcement);
 
-            if (!result)
-                return NotFound();
+            if (result == null)
+                return NotFound(new { errors = "Announcement not sent." });
 
-            return NoContent();
+            return Ok(result);
         }
 
         // DELETE: api/lab/{labId}/announcement/{announcementId}
@@ -445,10 +445,10 @@ namespace backend.Controllers
                 return Unauthorized();
             }
 
-            var result = await _labService.DeleteAnnouncementFromLabAsync(labId, announcementId);
+            var result = await _labService.DeleteAnnouncementFromLabAsync(labId, announcementId, int.Parse(userIdClaim!.Value));
 
-            if (!result)
-                return NotFound();
+            if (result != "success")
+                return NotFound(new { errors = result });
 
             return NoContent();
         }
@@ -484,10 +484,10 @@ namespace backend.Controllers
 
             var result = await _labService.CommentOnAnnouncementAsync(labId, announcementId, comment);
 
-            if (!result)
-                return NotFound();
+            if (result == null)
+                return NotFound(new { errors = "Comment not sent." });
 
-            return NoContent();
+            return Ok(result);
         }
 
         // DELETE: api/lab/{labId}/announcement/{announcementId}/comment/{commentId}
@@ -514,7 +514,7 @@ namespace backend.Controllers
                 var comment = await _labService.GetCommentByIdAsync(labId, announcementId, commentId);
                 if (comment == null || comment.Sender != int.Parse(userIdClaim!.Value))
                 {
-                    return Unauthorized();
+                    return Unauthorized(new { errors = "User not authorized." });
                 }
             }
 
