@@ -34,6 +34,7 @@ import { User, Role, CreateUserDto } from "../types/user";
 import { imageUrl } from "../config/config";
 import AddUserModal from "../components/AddUserModal";
 import { useFaculties } from "../hooks/useFaculty";
+import EditUserModal from "../components/EditUserModal";
 
 type Order = "asc" | "desc";
 type OrderBy = "name" | "email" | "faculty" | "major" | "role";
@@ -52,6 +53,7 @@ const UsersPage: React.FC = () => {
 	const [severity, setSeverity] = useState<"error" | "success">("success");
 	const [showAlert, setShowAlert] = useState(false);
 	const [openAddDialog, setOpenAddDialog] = useState(false);
+	const [editingUser, setEditingUser] = useState<User | null>(null);
 
 	const queryClient = useQueryClient();
 
@@ -116,6 +118,26 @@ const UsersPage: React.FC = () => {
 			if (error.response?.data?.message) {
 				message = error.response.data.message;
 			}
+			setAlertMessage(message);
+			setSeverity("error");
+			setShowAlert(true);
+		},
+	});
+
+	const editUserMutation = useMutation({
+		mutationFn: (data: { id: number; userData: Partial<User> }) =>
+			userService.editUser(data.id, data.userData),
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["Users"] });
+			setEditingUser(null);
+			setAlertMessage("User updated successfully");
+			setSeverity("success");
+			setShowAlert(true);
+		},
+		onError: (error: any) => {
+			let message = "Failed to update user";
+			if (error.response?.data?.message)
+				message = error.response.data.message;
 			setAlertMessage(message);
 			setSeverity("error");
 			setShowAlert(true);
@@ -601,6 +623,18 @@ const UsersPage: React.FC = () => {
 									>
 										<DeleteIcon />
 									</IconButton>
+									<IconButton
+										onClick={() => setEditingUser(user)}
+										sx={{
+											color: "var(--color-primary)",
+											"&:hover": {
+												backgroundColor:
+													"rgb(from var(--color-primary) r g b / 0.1)",
+											},
+										}}
+									>
+										<EditIcon />
+									</IconButton>
 								</TableCell>
 							</TableRow>
 						))}
@@ -631,6 +665,21 @@ const UsersPage: React.FC = () => {
 				open={openAddDialog}
 				onClose={() => setOpenAddDialog(false)}
 				onSubmit={(data) => createUserMutation.mutate(data)}
+				faculties={facultiesWithMajors}
+			/>
+
+			<EditUserModal
+				open={Boolean(editingUser)}
+				onClose={() => setEditingUser(null)}
+				onSubmit={(data) => {
+					if (editingUser) {
+						editUserMutation.mutate({
+							id: editingUser.id,
+							userData: data,
+						});
+					}
+				}}
+				user={editingUser}
 				faculties={facultiesWithMajors}
 			/>
 		</Box>
