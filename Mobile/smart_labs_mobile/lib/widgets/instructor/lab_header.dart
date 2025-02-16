@@ -42,19 +42,66 @@ class LabHeader extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          Row(
-            children: [
-              Icon(Icons.code, color: theme.colorScheme.onSurface, size: 18),
-              const SizedBox(width: 8),
-              Text(
-                'Lab Code: ${lab.labCode}',
-                style: TextStyle(
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
-                  fontSize: 14,
-                ),
-              ),
-            ],
+          _buildInfoRow(
+            context,
+            Icons.code,
+            'Lab Code: ${lab.labCode}',
           ),
+          if (lab.semesterId.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            _buildInfoRow(
+              context,
+              Icons.calendar_today,
+              'Semester: ${lab.semesterId}',
+            ),
+          ],
+          if (lab.ppeNames.isNotEmpty) ...[
+            const SizedBox(height: 16),
+            Text(
+              'Required PPE',
+              style: TextStyle(
+                color: theme.colorScheme.onSurface,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: lab.ppeNames.map((ppeName) {
+                return Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: (isDark
+                            ? const Color(0xFFFFFF00)
+                            : theme.colorScheme.primary)
+                        .withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: isDark
+                          ? const Color(0xFFFFFF00)
+                          : theme.colorScheme.primary,
+                      width: 1,
+                    ),
+                  ),
+                  child: Text(
+                    ppeName.toUpperCase(),
+                    style: TextStyle(
+                      color: isDark
+                          ? const Color(0xFFFFFF00)
+                          : theme.colorScheme.primary,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+          ],
           const SizedBox(height: 16),
           Text(
             'Schedule',
@@ -67,30 +114,16 @@ class LabHeader extends StatelessWidget {
           const SizedBox(height: 8),
           ...lab.schedule.map((schedule) {
             String dayName = _getDayName(schedule.dayOfWeek);
+            // Format time to remove seconds
+            String startTime = _formatTime(schedule.startTime);
+            String endTime = _formatTime(schedule.endTime);
+
             return Padding(
               padding: const EdgeInsets.only(bottom: 8),
-              child: Row(
-                children: [
-                  Icon(Icons.calendar_today,
-                      color: theme.colorScheme.onSurface, size: 18),
-                  const SizedBox(width: 8),
-                  Text(
-                    '$dayName:',
-                    style: TextStyle(
-                      color: theme.colorScheme.onSurface,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    '${schedule.startTime} - ${schedule.endTime}',
-                    style: TextStyle(
-                      color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
-                      fontSize: 14,
-                    ),
-                  ),
-                ],
+              child: _buildInfoRow(
+                context,
+                Icons.schedule,
+                '$dayName: $startTime - $endTime',
               ),
             );
           })
@@ -98,25 +131,54 @@ class LabHeader extends StatelessWidget {
       ),
     );
   }
-}
 
-String _getDayName(String dayOfWeek) {
-  switch (dayOfWeek.toUpperCase()) {
-    case 'MON':
-      return 'Monday';
-    case 'TUE':
-      return 'Tuesday';
-    case 'WED':
-      return 'Wednesday';
-    case 'THU':
-      return 'Thursday';
-    case 'FRI':
-      return 'Friday';
-    case 'SAT':
-      return 'Saturday';
-    case 'SUN':
-      return 'Sunday';
-    default:
-      return dayOfWeek;
+  Widget _buildInfoRow(BuildContext context, IconData icon, String text) {
+    final theme = Theme.of(context);
+    return Row(
+      children: [
+        Icon(
+          icon,
+          color: theme.colorScheme.onSurface,
+          size: 18,
+        ),
+        const SizedBox(width: 8),
+        Text(
+          text,
+          style: TextStyle(
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+            fontSize: 14,
+          ),
+        ),
+      ],
+    );
+  }
+
+  String _formatTime(String time) {
+    // If time contains seconds (HH:mm:ss), remove them
+    if (time.split(':').length > 2) {
+      return time.substring(0, 5); // Keep only HH:mm
+    }
+    return time;
+  }
+
+  String _getDayName(String dayOfWeek) {
+    switch (dayOfWeek.toUpperCase()) {
+      case 'MON':
+        return 'Monday';
+      case 'TUE':
+        return 'Tuesday';
+      case 'WED':
+        return 'Wednesday';
+      case 'THU':
+        return 'Thursday';
+      case 'FRI':
+        return 'Friday';
+      case 'SAT':
+        return 'Saturday';
+      case 'SUN':
+        return 'Sunday';
+      default:
+        return dayOfWeek;
+    }
   }
 }
