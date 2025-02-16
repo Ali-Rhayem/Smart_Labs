@@ -25,9 +25,10 @@ import ErrorAlert from "../components/ErrorAlertProps";
 import DeleteConfirmDialog from "../components/DeleteConfirmDialog";
 import { faculty } from "../types/faculty";
 import AddItemModal from "../components/AddItemModal";
+import ErrorIcon from "@mui/icons-material/Error";
 
 const FacultyPage: React.FC = () => {
-	const { data: faculties = [], isLoading } = useFaculties();
+	const { data: faculties = [], isLoading, error } = useFaculties();
 	const [openDialog, setOpenDialog] = useState(false);
 	const [, setFacultyName] = useState("");
 	const [, setMajorName] = useState("");
@@ -276,6 +277,83 @@ const FacultyPage: React.FC = () => {
 			))}
 		</Box>
 	);
+
+	if (error) {
+		return (
+			<Box
+				sx={{
+					p: 3,
+					display: "flex",
+					flexDirection: "column",
+					alignItems: "center",
+					gap: 2,
+				}}
+			>
+				<ErrorIcon
+					sx={{
+						fontSize: 60,
+						color: "var(--color-danger)",
+					}}
+				/>
+				<Typography variant="h6" sx={{ color: "var(--color-text)" }}>
+					Failed to load faculties
+				</Typography>
+				<Button
+					onClick={() =>
+						queryClient.invalidateQueries({ queryKey: ["Faculties"] })
+					}
+					sx={{
+						color: "var(--color-primary)",
+						"&:hover": {
+							bgcolor: "rgb(from var(--color-primary) r g b / 0.08)",
+						},
+					}}
+				>
+					Retry
+				</Button>
+			</Box>
+		);
+	}
+
+	if (!isLoading && (!faculties || faculties.length === 0)) {
+		return (
+			<Box
+				sx={{
+					p: 3,
+					display: "flex",
+					flexDirection: "column",
+					alignItems: "center",
+					gap: 2,
+				}}
+			>
+				<Box sx={{ textAlign: "center", mb: 3 }}>
+					<Typography variant="h6" sx={{ color: "var(--color-text)" }}>
+						No Faculties Found
+					</Typography>
+					<Typography
+						variant="body2"
+						sx={{ color: "var(--color-text-secondary)" }}
+					>
+						Start by adding a new faculty
+					</Typography>
+				</Box>
+				<Button
+					variant="contained"
+					startIcon={<AddIcon />}
+					onClick={() => setOpenDialog(true)}
+					sx={{
+						bgcolor: "var(--color-primary)",
+						color: "var(--color-text-button)",
+						"&:hover": {
+							bgcolor: "rgb(from var(--color-primary) r g b / 0.8)",
+						},
+					}}
+				>
+					Add Faculty
+				</Button>
+			</Box>
+		);
+	}
 
 	if (isLoading) {
 		return renderLoadingSkeleton();
