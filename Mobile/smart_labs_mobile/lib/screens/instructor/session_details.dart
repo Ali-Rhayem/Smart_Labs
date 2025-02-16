@@ -11,20 +11,26 @@ class SessionDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'Session Details',
           style: TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 24,
             letterSpacing: 0.5,
+            color: theme.colorScheme.onSurface,
           ),
         ),
         elevation: 0,
-        backgroundColor: const Color(0xFF1E1E1E),
+        backgroundColor:
+            isDark ? const Color(0xFF1E1E1E) : theme.colorScheme.surface,
       ),
-      backgroundColor: const Color(0xFF121212),
+      backgroundColor:
+          isDark ? const Color(0xFF121212) : theme.colorScheme.background,
       body: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
         padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 24.0),
