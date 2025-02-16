@@ -12,6 +12,8 @@ import {
 	IconButton,
 	Chip,
 	Typography,
+	Skeleton,
+	Card,
 } from "@mui/material";
 import { useFaculties } from "../hooks/useFaculty";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -214,6 +216,70 @@ const FacultyPage: React.FC = () => {
 				: [...prev, facultyId]
 		);
 	};
+
+	const renderLoadingSkeleton = () => (
+		<Box sx={{ p: 2 }}>
+			{[1, 2, 3].map((n) => (
+				<Card
+					key={n}
+					sx={{
+						mb: 2,
+						p: 2,
+						backgroundColor: "var(--color-card)",
+						color: "var(--color-text)",
+					}}
+				>
+					<Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+						<Box sx={{ flex: 1 }}>
+							<Skeleton
+								variant="text"
+								width="40%"
+								sx={{ bgcolor: "var(--color-card-hover)" }}
+							/>
+						</Box>
+						<Box sx={{ display: "flex", gap: 1 }}>
+							<Skeleton
+								variant="circular"
+								width={32}
+								height={32}
+								sx={{ bgcolor: "var(--color-card-hover)" }}
+							/>
+							<Skeleton
+								variant="circular"
+								width={32}
+								height={32}
+								sx={{ bgcolor: "var(--color-card-hover)" }}
+							/>
+						</Box>
+					</Box>
+					<Box sx={{ display: "flex", gap: 1 }}>
+						<Skeleton
+							variant="rounded"
+							width={80}
+							height={32}
+							sx={{ bgcolor: "var(--color-card-hover)" }}
+						/>
+						<Skeleton
+							variant="rounded"
+							width={80}
+							height={32}
+							sx={{ bgcolor: "var(--color-card-hover)" }}
+						/>
+						<Skeleton
+							variant="rounded"
+							width={80}
+							height={32}
+							sx={{ bgcolor: "var(--color-card-hover)" }}
+						/>
+					</Box>
+				</Card>
+			))}
+		</Box>
+	);
+
+	if (isLoading) {
+		return renderLoadingSkeleton();
+	}
 
 	return (
 		<Box sx={{ p: 3 }}>
