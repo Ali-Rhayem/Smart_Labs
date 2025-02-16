@@ -8,6 +8,7 @@ import 'package:smart_labs_mobile/providers/lab_student_provider.dart';
 import 'package:smart_labs_mobile/utils/secure_storage.dart';
 import 'package:smart_labs_mobile/widgets/instructor/row_details.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:smart_labs_mobile/widgets/email_input_dialog.dart';
 
 class PeopleTab extends ConsumerStatefulWidget {
   final Lab lab;
@@ -34,37 +35,6 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Padding(
-          //   padding: const EdgeInsets.all(16.0),
-          //   child: Row(
-          //     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          //     children: [
-          //       Expanded(
-          //         child: ElevatedButton.icon(
-          //           onPressed: () => _showAddStudentsDialog(context, ref),
-          //           icon: const Icon(Icons.person_add),
-          //           label: const Text('Add Students'),
-          //           style: ElevatedButton.styleFrom(
-          //             backgroundColor: kNeonAccent,
-          //             foregroundColor: Colors.black,
-          //           ),
-          //         ),
-          //       ),
-          //       const SizedBox(width: 16),
-          //       Expanded(
-          //         child: ElevatedButton.icon(
-          //           onPressed: () => _showAddInstructorsDialog(context, ref),
-          //           icon: const Icon(Icons.school),
-          //           label: const Text('Add Instructors'),
-          //           style: ElevatedButton.styleFrom(
-          //             backgroundColor: kNeonAccent,
-          //             foregroundColor: Colors.black,
-          //           ),
-          //         ),
-          //       ),
-          //     ],
-          //   ),
-          // ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10),
             child: Row(
@@ -121,7 +91,8 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
                   child: Text(
                     'No students enrolled',
                     style: TextStyle(
-                      color: theme.colorScheme.onBackground.withValues(alpha: 0.7),
+                      color:
+                          theme.colorScheme.onBackground.withValues(alpha: 0.7),
                       fontSize: 16,
                     ),
                   ),
@@ -375,7 +346,8 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
                   child: Text(
                     'No instructors enrolled',
                     style: TextStyle(
-                      color: theme.colorScheme.onBackground.withValues(alpha: 0.7),
+                      color:
+                          theme.colorScheme.onBackground.withValues(alpha: 0.7),
                       fontSize: 16,
                     ),
                   ),
@@ -595,95 +567,23 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
 
   Future<void> _showAddStudentsDialog(
       BuildContext context, WidgetRef ref) async {
-    final TextEditingController emailsController = TextEditingController();
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
     return showDialog(
       context: context,
-      builder: (BuildContext dialogContext) => AlertDialog(
-        backgroundColor:
-            isDark ? const Color(0xFF1C1C1C) : theme.colorScheme.surface,
-        title: Text(
-          'Add Students',
-          style: TextStyle(color: theme.colorScheme.onSurface),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              'Enter student emails (one per line):',
-              style: TextStyle(
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.7)),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: emailsController,
-              style: TextStyle(color: theme.colorScheme.onSurface),
-              maxLines: 5,
-              decoration: InputDecoration(
-                hintText: 'student1@example.com\nstudent2@example.com',
-                hintStyle: TextStyle(
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
-                ),
-                border: const OutlineInputBorder(),
-                enabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
-                  ),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(
-                    color: theme.colorScheme.primary,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: Text(
-              'Cancel',
-              style: TextStyle(
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
-              ),
-            ),
-          ),
-          TextButton(
-            onPressed: () async {
-              final emails = emailsController.text
-                  .split('\n')
-                  .map((e) => e.trim())
-                  .where((e) => e.isNotEmpty)
-                  .toList();
-
-              if (emails.isEmpty) return;
-
-              try {
-                await ref
-                    .read(labStudentsProvider(widget.lab.labId).notifier)
-                    .addStudents(emails);
-                if (dialogContext.mounted) {
-                  Navigator.pop(dialogContext);
-                }
-              } catch (e) {
-                if (dialogContext.mounted) {
-                  ScaffoldMessenger.of(dialogContext).showSnackBar(
-                    SnackBar(content: Text(e.toString())),
-                  );
-                }
-              }
-            },
-            child: Text(
-              'Add',
-              style: TextStyle(
-                color: theme.colorScheme.primary,
-              ),
-            ),
-          ),
-        ],
+      builder: (BuildContext dialogContext) => EmailInputDialog(
+        title: 'Add Students',
+        onSubmit: (emails) async {
+          try {
+            await ref
+                .read(labStudentsProvider(widget.lab.labId).notifier)
+                .addStudents(emails);
+          } catch (e) {
+            if (dialogContext.mounted) {
+              ScaffoldMessenger.of(dialogContext).showSnackBar(
+                SnackBar(content: Text(e.toString())),
+              );
+            }
+          }
+        },
       ),
     );
   }
@@ -704,7 +604,8 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
         ),
         content: Text(
           'Are you sure you want to remove ${student.name} from this lab?',
-          style: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.7)),
+          style: TextStyle(
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.7)),
         ),
         actions: [
           TextButton(
@@ -741,113 +642,34 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
 
   Future<void> _showAddInstructorsDialog(
       BuildContext context, WidgetRef ref) async {
-    final TextEditingController emailsController = TextEditingController();
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
     return showDialog(
       context: context,
-      builder: (BuildContext dialogContext) => AlertDialog(
-        backgroundColor:
-            isDark ? const Color(0xFF1C1C1C) : theme.colorScheme.surface,
-        title: Text(
-          'Add Instructors',
-          style: TextStyle(color: theme.colorScheme.onSurface),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              'Enter instructor emails (one per line):',
-              style: TextStyle(
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.7)),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: emailsController,
-              style: TextStyle(color: theme.colorScheme.onSurface),
-              maxLines: 5,
-              decoration: InputDecoration(
-                hintText: 'instructor1@example.com\ninstructor2@example.com',
-                hintStyle: TextStyle(
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
+      builder: (BuildContext dialogContext) => EmailInputDialog(
+        title: 'Add Instructors',
+        onSubmit: (emails) async {
+          try {
+            await ref
+                .read(labInstructorsProvider(widget.lab.labId).notifier)
+                .addInstructors(emails);
+            if (dialogContext.mounted) {
+              ScaffoldMessenger.of(dialogContext).showSnackBar(
+                const SnackBar(
+                  content: Text('Instructors added successfully'),
+                  backgroundColor: Colors.green,
                 ),
-                border: const OutlineInputBorder(),
-                enabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
-                  ),
+              );
+            }
+          } catch (e) {
+            if (dialogContext.mounted) {
+              ScaffoldMessenger.of(dialogContext).showSnackBar(
+                SnackBar(
+                  content: Text(e.toString()),
+                  backgroundColor: Colors.red,
                 ),
-                focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(
-                    color: theme.colorScheme.primary,
-                  ),
-                ),
-                filled: true,
-                fillColor: isDark ? Colors.black12 : theme.colorScheme.surface,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Note: Instructors will receive an email invitation to join the lab.',
-              style: TextStyle(
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
-                fontSize: 12,
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: Text(
-              'Cancel',
-              style: TextStyle(
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.7)),
-            ),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              final emails = emailsController.text
-                  .split('\n')
-                  .map((e) => e.trim())
-                  .where((e) => e.isNotEmpty)
-                  .toList();
-
-              if (emails.isEmpty) return;
-
-              try {
-                await ref
-                    .read(labInstructorsProvider(widget.lab.labId).notifier)
-                    .addInstructors(emails);
-                if (dialogContext.mounted) {
-                  Navigator.pop(dialogContext);
-                  ScaffoldMessenger.of(dialogContext).showSnackBar(
-                    const SnackBar(
-                      content: Text('Instructors added successfully'),
-                      backgroundColor: Colors.green,
-                    ),
-                  );
-                }
-              } catch (e) {
-                if (dialogContext.mounted) {
-                  ScaffoldMessenger.of(dialogContext).showSnackBar(
-                    SnackBar(
-                      content: Text(e.toString()),
-                      backgroundColor: Colors.red,
-                    ),
-                  );
-                }
-              }
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: theme.colorScheme.primary,
-              foregroundColor:
-                  isDark ? Colors.black : theme.colorScheme.onPrimary,
-            ),
-            child: const Text('Add Instructors'),
-          ),
-        ],
+              );
+            }
+          }
+        },
       ),
     );
   }
@@ -870,7 +692,8 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
         ),
         content: Text(
           'Are you sure you want to remove ${instructor.name} from this lab?',
-          style: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.7)),
+          style: TextStyle(
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.7)),
         ),
         actions: [
           TextButton(
