@@ -30,14 +30,17 @@ import SearchField from "../components/SearchField";
 import TableSortLabel from "@mui/material/TableSortLabel";
 import DeleteConfirmDialog from "../components/DeleteConfirmDialog";
 import ErrorAlert from "../components/ErrorAlertProps";
-import { User, Role } from "../types/user";
+import { User, Role, CreateUserDto } from "../types/user";
 import { imageUrl } from "../config/config";
+import AddUserModal from "../components/AddUserModal";
+import { useFaculties } from "../hooks/useFaculty";
 
 type Order = "asc" | "desc";
 type OrderBy = "name" | "email" | "faculty" | "major" | "role";
 
 const UsersPage: React.FC = () => {
 	const { data: users = [], isLoading, error } = useUsers();
+	const { data: facultiesData = [] } = useFaculties();
 	const [orderBy, setOrderBy] = useState<OrderBy>("name");
 	const [order, setOrder] = useState<Order>("asc");
 	const [searchQuery, setSearchQuery] = useState("");
@@ -48,6 +51,7 @@ const UsersPage: React.FC = () => {
 	const [alertMessage, setAlertMessage] = useState("");
 	const [severity, setSeverity] = useState<"error" | "success">("success");
 	const [showAlert, setShowAlert] = useState(false);
+	const [openAddDialog, setOpenAddDialog] = useState(false);
 
 	const queryClient = useQueryClient();
 
@@ -76,12 +80,13 @@ const UsersPage: React.FC = () => {
 		});
 	}, [users, order, orderBy, searchQuery, roleFilter, facultyFilter]);
 
-	const faculties = React.useMemo(
+	const facultiesWithMajors = React.useMemo(
 		() =>
-			Array.from(
-				new Set(users.map((user) => user.faculty).filter(Boolean))
-			),
-		[users]
+			facultiesData.map((faculty) => ({
+				faculty: faculty.faculty,
+				majors: faculty.major,
+			})),
+		[facultiesData]
 	);
 
 	const deleteUserMutation = useMutation({
@@ -92,6 +97,27 @@ const UsersPage: React.FC = () => {
 			setSelectedUser(null);
 			setAlertMessage("User deleted successfully");
 			setSeverity("success");
+			setShowAlert(true);
+		},
+	});
+
+	const createUserMutation = useMutation({
+		mutationFn: (userData: CreateUserDto) =>
+			userService.createUser(userData),
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["Users"] });
+			setOpenAddDialog(false);
+			setAlertMessage("User created successfully");
+			setSeverity("success");
+			setShowAlert(true);
+		},
+		onError: (error: any) => {
+			let message = "Failed to create user";
+			if (error.response?.data?.message) {
+				message = error.response.data.message;
+			}
+			setAlertMessage(message);
+			setSeverity("error");
 			setShowAlert(true);
 		},
 	});
@@ -299,137 +325,167 @@ const UsersPage: React.FC = () => {
 				<Typography variant="h4" color="var(--color-text)">
 					Users
 				</Typography>
+				<Box sx={{ display: "flex", gap: 2 }}>
+					<Button
+						variant="contained"
+						startIcon={<AddIcon />}
+						onClick={() => setOpenAddDialog(true)}
+						sx={{
+							bgcolor: "var(--color-primary)",
+							color: "var(--color-text-button)",
+						}}
+					>
+						Add User
+					</Button>
+				</Box>
+			</Box>
+
+			<Box
+				sx={{
+					display: "flex",
+					gap: 2,
+					mb: 3,
+					alignItems: "center",
+					justifyContent: "space-between",
+				}}
+			>
+				<Box sx={{ display: "flex", gap: 2 }}>
+					<FormControl size="small" sx={{ minWidth: 120 }}>
+						<InputLabel
+							sx={{
+								color: "var(--color-text)",
+								"&.Mui-focused": {
+									color: "var(--color-primary)",
+								},
+								transition: "color 0.2s ease-in-out",
+							}}
+						>
+							Role
+						</InputLabel>
+						<Select
+							value={roleFilter}
+							onChange={(e) =>
+								setRoleFilter(e.target.value as Role | "all")
+							}
+							label="Role"
+							sx={{
+								color: "var(--color-text)",
+								"& .MuiOutlinedInput-notchedOutline": {
+									borderColor: "var(--color-border)",
+								},
+								"&:hover .MuiOutlinedInput-notchedOutline": {
+									borderColor: "var(--color-primary)",
+								},
+								"&.Mui-focused .MuiOutlinedInput-notchedOutline":
+									{
+										borderColor: "var(--color-primary)",
+									},
+								"& .MuiSvgIcon-root": {
+									color: "var(--color-text)",
+								},
+							}}
+							MenuProps={{
+								PaperProps: {
+									sx: {
+										bgcolor: "var(--color-card)",
+										"& .MuiMenuItem-root": {
+											color: "var(--color-text)",
+											"&:hover": {
+												bgcolor:
+													"var(--color-card-hover)",
+											},
+											"&.Mui-selected": {
+												bgcolor:
+													"rgb(from var(--color-primary) r g b / 0.1)",
+												"&:hover": {
+													bgcolor:
+														"rgb(from var(--color-primary) r g b / 0.2)",
+												},
+											},
+										},
+									},
+								},
+							}}
+						>
+							<MenuItem value="all">All Roles</MenuItem>
+							<MenuItem value="student">Student</MenuItem>
+							<MenuItem value="instructor">Instructor</MenuItem>
+							<MenuItem value="admin">Admin</MenuItem>
+						</Select>
+					</FormControl>
+
+					<FormControl size="small" sx={{ minWidth: 120 }}>
+						<InputLabel
+							sx={{
+								color: "var(--color-text)",
+								"&.Mui-focused": {
+									color: "var(--color-primary)",
+								},
+								transition: "color 0.2s ease-in-out",
+							}}
+						>
+							Faculty
+						</InputLabel>
+						<Select
+							value={facultyFilter}
+							onChange={(e) => setFacultyFilter(e.target.value)}
+							label="Faculty"
+							sx={{
+								color: "var(--color-text)",
+								"& .MuiOutlinedInput-notchedOutline": {
+									borderColor: "var(--color-border)",
+								},
+								"&:hover .MuiOutlinedInput-notchedOutline": {
+									borderColor: "var(--color-primary)",
+								},
+								"&.Mui-focused .MuiOutlinedInput-notchedOutline":
+									{
+										borderColor: "var(--color-primary)",
+									},
+								"& .MuiSvgIcon-root": {
+									color: "var(--color-text)",
+								},
+							}}
+							MenuProps={{
+								PaperProps: {
+									sx: {
+										bgcolor: "var(--color-card)",
+										"& .MuiMenuItem-root": {
+											color: "var(--color-text)",
+											"&:hover": {
+												bgcolor:
+													"var(--color-card-hover)",
+											},
+											"&.Mui-selected": {
+												bgcolor:
+													"rgb(from var(--color-primary) r g b / 0.1)",
+												"&:hover": {
+													bgcolor:
+														"rgb(from var(--color-primary) r g b / 0.2)",
+												},
+											},
+										},
+									},
+								},
+							}}
+						>
+							<MenuItem value="all">All Faculties</MenuItem>
+							{facultiesWithMajors.map((faculty) => (
+								<MenuItem
+									key={faculty.faculty}
+									value={faculty.faculty}
+								>
+									{faculty.faculty}
+								</MenuItem>
+							))}
+						</Select>
+					</FormControl>
+				</Box>
 				<SearchField
 					value={searchQuery}
 					onChange={(e) => setSearchQuery(e.target.value)}
 					placeholder="Search users..."
 				/>
-			</Box>
-
-			<Box sx={{ display: "flex", gap: 2, mb: 3 }}>
-				<FormControl size="small" sx={{ minWidth: 120 }}>
-					<InputLabel
-						sx={{
-							color: "var(--color-text)",
-							"&.Mui-focused": {
-								color: "var(--color-primary)",
-							},
-							transition: "color 0.2s ease-in-out",
-						}}
-					>
-						Role
-					</InputLabel>
-					<Select
-						value={roleFilter}
-						onChange={(e) =>
-							setRoleFilter(e.target.value as Role | "all")
-						}
-						label="Role"
-						sx={{
-							color: "var(--color-text)",
-							"& .MuiOutlinedInput-notchedOutline": {
-								borderColor: "var(--color-border)",
-							},
-							"&:hover .MuiOutlinedInput-notchedOutline": {
-								borderColor: "var(--color-primary)",
-							},
-							"&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-								borderColor: "var(--color-primary)",
-							},
-							"& .MuiSvgIcon-root": {
-								color: "var(--color-text)",
-							},
-						}}
-						MenuProps={{
-							PaperProps: {
-								sx: {
-									bgcolor: "var(--color-card)",
-									"& .MuiMenuItem-root": {
-										color: "var(--color-text)",
-										"&:hover": {
-											bgcolor: "var(--color-card-hover)",
-										},
-										"&.Mui-selected": {
-											bgcolor:
-												"rgb(from var(--color-primary) r g b / 0.1)",
-											"&:hover": {
-												bgcolor:
-													"rgb(from var(--color-primary) r g b / 0.2)",
-											},
-										},
-									},
-								},
-							},
-						}}
-					>
-						<MenuItem value="all">All Roles</MenuItem>
-						<MenuItem value="student">Student</MenuItem>
-						<MenuItem value="instructor">Instructor</MenuItem>
-						<MenuItem value="admin">Admin</MenuItem>
-					</Select>
-				</FormControl>
-
-				<FormControl size="small" sx={{ minWidth: 120 }}>
-					<InputLabel
-						sx={{
-							color: "var(--color-text)",
-							"&.Mui-focused": {
-								color: "var(--color-primary)",
-							},
-							transition: "color 0.2s ease-in-out",
-						}}
-					>
-						Faculty
-					</InputLabel>
-					<Select
-						value={facultyFilter}
-						onChange={(e) => setFacultyFilter(e.target.value)}
-						label="Faculty"
-						sx={{
-							color: "var(--color-text)",
-							"& .MuiOutlinedInput-notchedOutline": {
-								borderColor: "var(--color-border)",
-							},
-							"&:hover .MuiOutlinedInput-notchedOutline": {
-								borderColor: "var(--color-primary)",
-							},
-							"&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-								borderColor: "var(--color-primary)",
-							},
-							"& .MuiSvgIcon-root": {
-								color: "var(--color-text)",
-							},
-						}}
-						MenuProps={{
-							PaperProps: {
-								sx: {
-									bgcolor: "var(--color-card)",
-									"& .MuiMenuItem-root": {
-										color: "var(--color-text)",
-										"&:hover": {
-											bgcolor: "var(--color-card-hover)",
-										},
-										"&.Mui-selected": {
-											bgcolor:
-												"rgb(from var(--color-primary) r g b / 0.1)",
-											"&:hover": {
-												bgcolor:
-													"rgb(from var(--color-primary) r g b / 0.2)",
-											},
-										},
-									},
-								},
-							},
-						}}
-					>
-						<MenuItem value="all">All Faculties</MenuItem>
-						{faculties.map((faculty) => (
-							<MenuItem key={faculty} value={faculty}>
-								{faculty}
-							</MenuItem>
-						))}
-					</Select>
-				</FormControl>
 			</Box>
 
 			<TableContainer
@@ -569,6 +625,13 @@ const UsersPage: React.FC = () => {
 				message={alertMessage}
 				severity={severity}
 				onClose={() => setShowAlert(false)}
+			/>
+
+			<AddUserModal
+				open={openAddDialog}
+				onClose={() => setOpenAddDialog(false)}
+				onSubmit={(data) => createUserMutation.mutate(data)}
+				faculties={facultiesWithMajors}
 			/>
 		</Box>
 	);
