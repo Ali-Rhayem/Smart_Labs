@@ -16,6 +16,7 @@ import SessionPage from "./pages/SessionPage";
 import ProfilePage from "./pages/ProfilePage";
 import NotificationsPage from "./pages/NotificationsPage";
 import DashboardPage from "./pages/DashboardPage";
+import FacultyPage from "./pages/FacultyPage";
 
 const queryClient = new QueryClient();
 
@@ -123,11 +124,19 @@ const App: React.FC = () => {
 								</ProtectedRoute>
 							}
 						/>
+						<Route
+							path="/faculties"
+							element={
+								<ProtectedRoute requiredRoles={["admin"]}>
+									<FacultyPage />
+								</ProtectedRoute>
+							}
+						/>
 					</Route>
 				</Routes>
 			</Router>
 			<ReactQueryDevtools
-				buttonPosition="bottom-left"
+				buttonPosition="bottom-right"
 				initialIsOpen={false}
 			/>
 		</QueryClientProvider>
