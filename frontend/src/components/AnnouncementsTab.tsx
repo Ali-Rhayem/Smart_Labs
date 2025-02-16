@@ -24,7 +24,7 @@ import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { announcementService } from "../services/announcementService";
-import { Announcement } from "../types/announcements";
+import { Announcement, Comment } from "../types/announcements";
 
 interface AnnouncementsTabProps {
 	labId: number;
@@ -53,15 +53,21 @@ const AnnouncementsTab: React.FC<AnnouncementsTabProps> = ({ labId }) => {
 	};
 
 	const handleSubmitComment = (announcementId: number) => {
-		// Your submit logic here
 		const commentText = commentInputs[announcementId];
 		if (!commentText?.trim()) return;
 
-		// After submission, clear only this announcement's comment
-		setCommentInputs((prev) => ({
-			...prev,
-			[announcementId]: "",
-		}));
+		sendCommentMutation
+			.mutateAsync({
+				announcementId,
+				comment: { message: commentText.trim() },
+			})
+			.then(() => {
+				// Clear this announcement's comment after successful submission
+				setCommentInputs((prev) => ({
+					...prev,
+					[announcementId]: "",
+				}));
+			});
 	};
 
 	const toggleComments = (announcementId: number) => {
@@ -142,6 +148,29 @@ const AnnouncementsTab: React.FC<AnnouncementsTabProps> = ({ labId }) => {
 		},
 		onError: (error) => {
 			console.error("Failed to send announcement:", error);
+		},
+	});
+
+	const sendCommentMutation = useMutation({
+		mutationFn: ({
+			announcementId,
+			comment,
+		}: {
+			announcementId: number;
+			comment: Comment;
+		}) =>
+			announcementService.CommentOnAnnouncement(
+				labId,
+				announcementId,
+				comment
+			),
+		onSuccess: () => {
+			queryClient.invalidateQueries({
+				queryKey: ["labAnnouncements", labId],
+			});
+		},
+		onError: (error) => {
+			console.error("Failed to send comment:", error);
 		},
 	});
 
