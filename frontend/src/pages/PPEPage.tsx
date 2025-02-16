@@ -274,12 +274,12 @@ const PPEPage: React.FC = () => {
 									direction={order}
 									onClick={handleRequestSort}
 									sx={{
-										color: 'var(--color-text) !important',
-										'& .MuiTableSortLabel-icon': {
-											color: 'var(--color-text-secondary) !important',
+										color: "var(--color-text) !important",
+										"& .MuiTableSortLabel-icon": {
+											color: "var(--color-text-secondary) !important",
 										},
-										'&.Mui-active': {
-											color: 'var(--color-text) !important',
+										"&.Mui-active": {
+											color: "var(--color-text) !important",
 										},
 									}}
 								>
@@ -299,7 +299,15 @@ const PPEPage: React.FC = () => {
 					</TableHead>
 					<TableBody>
 						{sortedPPEs.map((ppe) => (
-							<TableRow key={ppe.id}>
+							<TableRow
+								key={ppe.id}
+								sx={{
+									"&:hover": {
+										backgroundColor:
+											"var(--color-card-hover)",
+									},
+								}}
+							>
 								<TableCell sx={{ color: "var(--color-text)" }}>
 									{ppe.name}
 								</TableCell>
