@@ -37,6 +37,23 @@ class LabNotifier extends StateNotifier<AsyncValue<List<Lab>>> {
       if (response['success']) {
         final List<dynamic> labsData = response['data'];
 
+        // Get all semester IDs
+        final semesterIds = labsData
+            .map((lab) => lab['semesterID'].toString())
+            .toSet()
+            .toList();
+
+        // Fetch all semesters in one request
+        final semesterResponse = await _apiService.get('/Semester');
+        Map<String, String> semesterIdToName = {};
+
+        if (semesterResponse['success']) {
+          final List<dynamic> semestersData = semesterResponse['data'];
+          for (var semester in semestersData) {
+            semesterIdToName[semester['id'].toString()] = semester['name'];
+          }
+        }
+
         // Get all unique PPE IDs from all labs
         final allPPEIds = labsData
             .expand((lab) => (lab['ppe'] as List<dynamic>? ?? []))
@@ -58,11 +75,13 @@ class LabNotifier extends StateNotifier<AsyncValue<List<Lab>>> {
           }
         }
 
+        final ppeIds = (labsData[0]['ppe'] as List<dynamic>? ?? [])
+            .map((e) => e.toString())
+            .toList();
+        final ppeNames = ppeIds.map((id) => ppeIdToName[id] ?? id).toList();
+
         final labs = labsData.map((lab) {
-          final ppeIds = (lab['ppe'] as List<dynamic>? ?? [])
-              .map((e) => e.toString())
-              .toList();
-          final ppeNames = ppeIds.map((id) => ppeIdToName[id] ?? id).toList();
+          final semesterId = lab['semesterID'].toString();
 
           return Lab(
             labId: lab['id'].toString(),
@@ -81,7 +100,8 @@ class LabNotifier extends StateNotifier<AsyncValue<List<Lab>>> {
                 .map((schedule) => LabSchedule.fromJson(schedule))
                 .toList(),
             report: lab['report'] ?? 'N/A',
-            semesterId: lab['semesterID'].toString(),
+            semesterId: semesterId,
+            semesterName: semesterIdToName[semesterId] ?? 'Unknown Semester',
             sessions: [],
             started: lab['started'],
             room: lab['room'],
@@ -116,6 +136,21 @@ class LabNotifier extends StateNotifier<AsyncValue<List<Lab>>> {
 
       if (response['success']) {
         final labData = response['data'];
+        final semesterId = labData['semesterID'].toString();
+
+        // Fetch semester name
+        final semesterResponse = await _apiService.get('/Semester');
+        String semesterName = 'Unknown Semester';
+
+        if (semesterResponse['success']) {
+          final List<dynamic> semestersData = semesterResponse['data'];
+          for (var semester in semestersData) {
+            if (semester['id'].toString() == semesterId) {
+              semesterName = semester['name'];
+              break;
+            }
+          }
+        }
 
         // Convert schedules from JSON
         final scheduleList = (labData['schedule'] as List<dynamic>? ?? [])
@@ -146,7 +181,8 @@ class LabNotifier extends StateNotifier<AsyncValue<List<Lab>>> {
               .toList(),
           schedule: scheduleList,
           report: labData['report'] ?? 'N/A',
-          semesterId: labData['semesterID'].toString(),
+          semesterId: semesterId,
+          semesterName: semesterName,
           sessions: [],
           started: labData['started'],
           room: labData['room'],
