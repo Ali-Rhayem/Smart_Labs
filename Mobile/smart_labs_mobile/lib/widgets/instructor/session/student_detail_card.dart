@@ -11,24 +11,37 @@ class StudentDetailCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return StatefulBuilder(
       builder: (context, setState) {
         return Container(
           margin: const EdgeInsets.only(bottom: 12),
           decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [Color(0xFF2C2C2C), Color(0xFF1C1C1C)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
+            gradient: isDark
+                ? const LinearGradient(
+                    colors: [Color(0xFF2C2C2C), Color(0xFF1C1C1C)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  )
+                : LinearGradient(
+                    colors: [
+                      theme.colorScheme.surface,
+                      theme.colorScheme.surface.withOpacity(0.9)
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: kNeonAccent.withValues(alpha: 0),
+              color: (isDark ? kNeonAccent : theme.colorScheme.primary)
+                  .withOpacity(0),
               width: 2,
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.2),
+                color: Colors.black.withOpacity(0.1),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
@@ -44,12 +57,13 @@ class StudentDetailCard extends StatelessWidget {
             collapsedShape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),
-            tilePadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-            leading: _buildAvatar(),
+            tilePadding:
+                const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+            leading: _buildAvatar(context),
             title: Text(
               data.user.name,
-              style: const TextStyle(
-                color: Colors.white,
+              style: TextStyle(
+                color: theme.colorScheme.onSurface,
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
               ),
@@ -59,7 +73,7 @@ class StudentDetailCard extends StatelessWidget {
               child: Text(
                 'Attendance: ${data.attendancePercentage}%',
                 style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.7),
+                  color: theme.colorScheme.onSurface.withOpacity(0.7),
                   fontSize: 14,
                 ),
               ),
@@ -69,7 +83,8 @@ class StudentDetailCard extends StatelessWidget {
                 padding: const EdgeInsets.all(20.0),
                 child: Column(
                   children: [
-                    const Divider(color: Colors.white12),
+                    Divider(
+                        color: theme.colorScheme.onSurface.withOpacity(0.1)),
                     const SizedBox(height: 12),
                     ...data.ppeCompliance.entries.map(
                       (ppe) => Padding(
@@ -90,7 +105,10 @@ class StudentDetailCard extends StatelessWidget {
     );
   }
 
-  Widget _buildAvatar() {
+  Widget _buildAvatar(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return data.user.imageUrl != null && data.user.imageUrl!.isNotEmpty
         ? CircleAvatar(
             backgroundImage: NetworkImage(
@@ -98,11 +116,11 @@ class StudentDetailCard extends StatelessWidget {
             ),
           )
         : CircleAvatar(
-            backgroundColor: kNeonAccent,
+            backgroundColor: isDark ? kNeonAccent : theme.colorScheme.primary,
             child: Text(
-              data.name[0].toUpperCase(),
-              style: const TextStyle(
-                color: Colors.black,
+              data.user.name[0].toUpperCase(),
+              style: TextStyle(
+                color: isDark ? Colors.black : Colors.white,
                 fontWeight: FontWeight.bold,
               ),
             ),
