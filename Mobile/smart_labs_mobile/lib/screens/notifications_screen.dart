@@ -62,14 +62,14 @@ class NotificationsScreen extends ConsumerWidget {
                         Icons.notifications_none,
                         size: 64,
                         color: (isDark ? Colors.white : Colors.black)
-                            .withOpacity(0.5),
+                            .withValues(alpha: 0.5),
                       ),
                       const SizedBox(height: 16),
                       Text(
                         'No notifications',
                         style: TextStyle(
                           color: (isDark ? Colors.white : Colors.black)
-                              .withOpacity(0.7),
+                              .withValues(alpha: 0.7),
                           fontSize: 16,
                         ),
                       ),
@@ -127,7 +127,7 @@ class NotificationsScreen extends ConsumerWidget {
                                   style: TextStyle(
                                     color:
                                         (isDark ? Colors.white : Colors.black)
-                                            .withOpacity(0.7),
+                                            .withValues(alpha: 0.7),
                                   ),
                                 ),
                                 const SizedBox(height: 4),
@@ -136,7 +136,7 @@ class NotificationsScreen extends ConsumerWidget {
                                   style: TextStyle(
                                     color:
                                         (isDark ? Colors.white : Colors.black)
-                                            .withOpacity(0.5),
+                                            .withValues(alpha: 0.5),
                                     fontSize: 12,
                                   ),
                                 ),
