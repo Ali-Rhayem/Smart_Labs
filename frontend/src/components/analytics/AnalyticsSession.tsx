@@ -49,10 +49,12 @@ const AnalyticsSession: React.FC<AnalyticsSessionProps> = ({
 	// Add state at top of component
 	const [visibleRadars, setVisibleRadars] = useState<Record<string, boolean>>(
 		() => {
-			const initial: Record<string, boolean> = { 
-				attendance_percentage: true 
+			const initial: Record<string, boolean> = {
+				attendance_percentage: true,
 			};
-			ppeTypes.forEach(type => initial[`ppE_compliance.${type}`] = true);
+			ppeTypes.forEach(
+				(type) => (initial[`ppE_compliance.${type}`] = true)
+			);
 			return initial;
 		}
 	);
@@ -68,14 +70,11 @@ const AnalyticsSession: React.FC<AnalyticsSessionProps> = ({
 	// Add handler function
 	const handleRadarLegendClick = (e: any) => {
 		const dataKey = e.dataKey;
-		setVisibleRadars(prev => ({
+		setVisibleRadars((prev) => ({
 			...prev,
-			[dataKey]: !prev[dataKey]
+			[dataKey]: !prev[dataKey],
 		}));
 	};
-
-	// Get PPE types from first result's PPE compliance
-	const ppeTypesFromResults = Object.keys(results[0]?.ppE_compliance || {});
 
 	// Prepare time series data
 	const timeSeriesData = total_ppe_compliance_bytime.map((total, index) => {
@@ -166,7 +165,9 @@ const AnalyticsSession: React.FC<AnalyticsSessionProps> = ({
 									stroke={COLORS[0]}
 									fill={COLORS[0]}
 									fillOpacity={0.6}
-									hide={!visibleRadars['attendance_percentage']}
+									hide={
+										!visibleRadars["attendance_percentage"]
+									}
 								/>
 								{ppeTypes.map((ppeType, index) => (
 									<Radar
@@ -179,12 +180,16 @@ const AnalyticsSession: React.FC<AnalyticsSessionProps> = ({
 										stroke={COLORS[index + 1]}
 										fill={COLORS[index + 1]}
 										fillOpacity={0.6}
-										hide={!visibleRadars[`ppE_compliance.${ppeType}`]}
+										hide={
+											!visibleRadars[
+												`ppE_compliance.${ppeType}`
+											]
+										}
 									/>
 								))}
-								<Legend 
+								<Legend
 									onClick={handleRadarLegendClick}
-									wrapperStyle={{ cursor: 'pointer' }}
+									wrapperStyle={{ cursor: "pointer" }}
 								/>
 							</RadarChart>
 						</ResponsiveContainer>
