@@ -131,8 +131,24 @@ const EditPPEModal: React.FC<EditPPEModalProps> = ({
 			<DialogActions
 				sx={{ p: 2.5, borderTop: 1, borderColor: "divider" }}
 			>
-				<Button onClick={handleClose}>Cancel</Button>
-				<Button variant="contained" onClick={() => onSave(selected)}>
+				<Button
+					onClick={handleClose}
+					sx={{ color: "var(--color-text)" }}
+				>
+					Cancel
+				</Button>
+				<Button
+					variant="contained"
+					sx={{
+						bgcolor: "var(--color-primary)",
+						color: "var(--color-text-button)",
+						"&:hover": {
+							bgcolor:
+								"rgb(from var(--color-primary) r g b / 0.8)",
+						},
+					}}
+					onClick={() => onSave(selected)}
+				>
 					Save Changes
 				</Button>
 			</DialogActions>
