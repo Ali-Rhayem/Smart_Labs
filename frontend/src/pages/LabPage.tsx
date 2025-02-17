@@ -400,11 +400,10 @@ const LabPage: React.FC = () => {
 						</Box>
 					</Box>
 					<Box sx={{ display: "flex", gap: 1, alignItems: "start" }}>
-						<Chip
-							color={lab.started ? "success" : "default"}
-							label={lab.started ? "In Progress" : "Not Started"}
-						/>
-						{lab.endLab && <Chip color="error" label="Ended" />}
+						{lab.started && (
+							<Chip color="success" label="In Progress" />
+						)}
+						{lab.endLab && <Chip color="error" label="archived" />}
 						{canManageLab && (
 							<>
 								<Button
