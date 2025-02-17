@@ -23,6 +23,8 @@ import Dropdown from "../components/Dropdown";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { userService } from "../services/userService";
 import ErrorAlert from "../components/ErrorAlertProps";
+import ChangePasswordModal from "../components/ChangePasswordModal";
+import LockIcon from "@mui/icons-material/Lock";
 
 const ProfilePage: React.FC = () => {
 	const navigate = useNavigate();
@@ -45,6 +47,7 @@ const ProfilePage: React.FC = () => {
 	const [severity, setSeverity] = useState<AlertColor>("success");
 	const [openSnackbar, setOpenSnackbar] = useState(false);
 	const [alertMessage, setAlertMessage] = useState("");
+	const [changePasswordOpen, setChangePasswordOpen] = useState(false);
 
 	// Convert file to base64
 	const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -77,6 +80,39 @@ const ProfilePage: React.FC = () => {
 		onError: (error: any) => {
 			setSeverity("error");
 			setAlertMessage(error.message || "Failed to update profile");
+			setOpenSnackbar(true);
+		},
+	});
+
+	const changePasswordMutation = useMutation({
+		mutationFn: ({
+			oldPassword,
+			newPassword,
+			confirmPassword,
+		}: {
+			oldPassword: string;
+			newPassword: string;
+			confirmPassword: string;
+		}) =>
+			userService.changePassword(
+				oldPassword,
+				newPassword,
+				confirmPassword
+			),
+		onSuccess: () => {
+			setChangePasswordOpen(false);
+			setSeverity("success");
+			setAlertMessage("Password changed successfully");
+			setOpenSnackbar(true);
+		},
+		onError: (error: any) => {
+			console.error(error);
+			let message = "Failed to change password";
+			if (error.response?.data?.errors)
+				message = error.response.data.errors;
+			setSeverity("error");
+			setAlertMessage(message);
+			setChangePasswordOpen(false);
 			setOpenSnackbar(true);
 		},
 	});
@@ -201,18 +237,32 @@ const ProfilePage: React.FC = () => {
 								{userDetails.name}
 							</Typography>
 							{!isEditing && (
-								<Button
-									startIcon={<EditIcon />}
-									sx={{ color: "var(--color-primary)" }}
-									onClick={() => {
-										setIsEditing(!isEditing);
-										setSelectedFaculty(
-											userDetails.faculty || ""
-										);
-									}}
-								>
-									Edit Profile
-								</Button>
+								<Box sx={{ display: "flex" }}>
+									<Button
+										startIcon={<EditIcon />}
+										sx={{ color: "var(--color-primary)" }}
+										onClick={() => {
+											setIsEditing(!isEditing);
+											setSelectedFaculty(
+												userDetails.faculty || ""
+											);
+										}}
+									>
+										Edit Profile
+									</Button>
+									<Button
+										startIcon={<LockIcon />}
+										sx={{
+											color: "var(--color-primary)",
+											ml: 2,
+										}}
+										onClick={() =>
+											setChangePasswordOpen(true)
+										}
+									>
+										Change Password
+									</Button>
+								</Box>
 							)}
 						</Box>
 					</Box>
@@ -376,6 +426,19 @@ const ProfilePage: React.FC = () => {
 				message={alertMessage}
 				severity={severity}
 				onClose={() => setOpenSnackbar(false)}
+			/>
+
+			<ChangePasswordModal
+				open={changePasswordOpen}
+				onClose={() => setChangePasswordOpen(false)}
+				onSubmit={(oldPassword, newPassword, confirmPassword) => {
+					changePasswordMutation.mutate({
+						oldPassword,
+						newPassword,
+						confirmPassword,
+					});
+				}}
+				loading={changePasswordMutation.isPending}
 			/>
 		</Box>
 	);
