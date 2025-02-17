@@ -62,3 +62,22 @@ export interface UpdateLabDto
 			| "endLab"
 		>
 	> {}
+
+export interface LabAnalytics {
+	total_attendance: number;
+	total_attendance_bytime: number[];
+	total_ppe_compliance: number;
+	total_ppe_compliance_bytime: number[];
+	ppe_compliance: Record<string, number>;
+	ppe_compliance_bytime: Record<string, number[]>;
+	people: Array<{
+		name: string;
+		attendance_percentage: number;
+		ppE_compliance: Record<string, number>;
+	}>;
+	people_bytime: Array<{
+		name: string;
+		attendance_percentage: number[];
+		ppE_compliance: Record<string, number[]>;
+	}>;
+}
