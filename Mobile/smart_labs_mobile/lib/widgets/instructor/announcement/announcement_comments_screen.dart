@@ -95,7 +95,8 @@ class _AnnouncementCommentsScreenState
                     Text(
                       formatDateTime(widget.announcement.time),
                       style: TextStyle(
-                        color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                        color:
+                            theme.colorScheme.onSurface.withValues(alpha: 0.7),
                         fontSize: 14,
                       ),
                     ),
@@ -232,12 +233,12 @@ class _AnnouncementCommentsScreenState
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               color:
-                  isDark ? const Color(0xFF2C2C2C) : theme.colorScheme.surface,
+                  isDark ? const Color(0xFF1C1C1C) : theme.colorScheme.surface,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.2),
+                  color: Colors.black.withOpacity(0.1),
+                  offset: const Offset(0, -2),
                   blurRadius: 10,
-                  offset: const Offset(0, -4),
                 ),
               ],
             ),
@@ -246,39 +247,43 @@ class _AnnouncementCommentsScreenState
                 Expanded(
                   child: TextField(
                     controller: _commentController,
-                    style: TextStyle(
-                        color: theme.colorScheme.onSurface, fontSize: 16),
-                    maxLines: null,
+                    style: TextStyle(color: theme.colorScheme.onSurface),
                     decoration: InputDecoration(
-                      hintText: 'Write a comment...',
+                      hintText: 'Add a comment...',
                       hintStyle: TextStyle(
-                        color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                        color: theme.colorScheme.onSurface.withOpacity(0.5),
                       ),
                       filled: true,
-                      fillColor: isDark
-                          ? const Color(0xFF1C1C1C)
-                          : theme.colorScheme.surface.darken(),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 12,
-                      ),
+                      fillColor:
+                          isDark ? Colors.grey[900] : theme.colorScheme.surface,
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(24),
-                        borderSide: BorderSide.none,
+                        borderRadius: BorderRadius.circular(25),
+                        borderSide: BorderSide(
+                          color: theme.colorScheme.onSurface.withOpacity(0.1),
+                        ),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                        borderSide: BorderSide(
+                          color: theme.colorScheme.onSurface.withOpacity(0.1),
+                        ),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                        borderSide: BorderSide(
+                          color:
+                              isDark ? kNeonAccent : theme.colorScheme.primary,
+                        ),
                       ),
                     ),
                   ),
                 ),
-                const SizedBox(width: 12),
-                Container(
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: accentColor,
-                  ),
-                  child: IconButton(
-                    icon: Icon(Icons.send,
-                        color: isDark ? const Color(0xFF1C1C1C) : Colors.white),
-                    onPressed: _addComment,
+                const SizedBox(width: 8),
+                IconButton(
+                  onPressed: _addComment,
+                  icon: Icon(
+                    Icons.send_rounded,
+                    color: isDark ? kNeonAccent : theme.colorScheme.primary,
                   ),
                 ),
               ],
