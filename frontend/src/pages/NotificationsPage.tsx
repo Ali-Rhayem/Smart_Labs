@@ -65,8 +65,7 @@ const NotificationsPage: React.FC = () => {
 	});
 
 	const deleteAllMutation = useMutation({
-		mutationFn: () =>
-			notificationService.deleteAllNotifications(authUser!.id),
+		mutationFn: () => notificationService.deleteAllNotifications(),
 		onSuccess: () => {
 			queryClient.invalidateQueries({
 				queryKey: ["Notification", authUser?.id],
