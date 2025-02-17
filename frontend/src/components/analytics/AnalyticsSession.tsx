@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Box, Grid, Paper, Typography } from "@mui/material";
 import {
 	LineChart,
@@ -17,14 +17,17 @@ import {
 } from "recharts";
 import "react-circular-progressbar/dist/styles.css";
 
-interface AnalyticsSectionProps {
+// Add colors array at top of file
+const COLORS = ["#8884d8", "#82ca9d", "#ffc658", "#ff8042"];
+
+interface AnalyticsSessionProps {
 	results: any[];
 	totalPPECompliance: Record<string, number>;
 	ppE_compliance_bytime: Record<string, number[]>;
 	total_ppe_compliance_bytime: number[];
 }
 
-const AnalyticsSection: React.FC<AnalyticsSectionProps> = ({
+const AnalyticsSession: React.FC<AnalyticsSessionProps> = ({
 	results,
 	totalPPECompliance,
 	ppE_compliance_bytime,
@@ -32,6 +35,47 @@ const AnalyticsSection: React.FC<AnalyticsSectionProps> = ({
 }) => {
 	// Get PPE types dynamically
 	const ppeTypes = Object.keys(totalPPECompliance);
+
+	// Add state at the top of component
+	const [visibleLines, setVisibleLines] = useState<Record<string, boolean>>(
+		() => {
+			const initial: Record<string, boolean> = {};
+			ppeTypes.forEach((type) => (initial[type] = true));
+			initial["total"] = true;
+			return initial;
+		}
+	);
+
+	// Add state at top of component
+	const [visibleRadars, setVisibleRadars] = useState<Record<string, boolean>>(
+		() => {
+			const initial: Record<string, boolean> = { 
+				attendance_percentage: true 
+			};
+			ppeTypes.forEach(type => initial[`ppE_compliance.${type}`] = true);
+			return initial;
+		}
+	);
+
+	// Add toggle handler
+	const handleLegendClick = (dataKey: string) => {
+		setVisibleLines((prev) => ({
+			...prev,
+			[dataKey]: !prev[dataKey],
+		}));
+	};
+
+	// Add handler function
+	const handleRadarLegendClick = (e: any) => {
+		const dataKey = e.dataKey;
+		setVisibleRadars(prev => ({
+			...prev,
+			[dataKey]: !prev[dataKey]
+		}));
+	};
+
+	// Get PPE types from first result's PPE compliance
+	const ppeTypesFromResults = Object.keys(results[0]?.ppE_compliance || {});
 
 	// Prepare time series data
 	const timeSeriesData = total_ppe_compliance_bytime.map((total, index) => {
@@ -62,11 +106,19 @@ const AnalyticsSection: React.FC<AnalyticsSectionProps> = ({
 						</Typography>
 						<ResponsiveContainer width="100%" height={300}>
 							<LineChart data={timeSeriesData}>
-								<CartesianGrid strokeDasharray="3 3" />
+								<CartesianGrid
+									vertical={false}
+									strokeDasharray="3 3"
+								/>
 								<XAxis dataKey="" />
-								<YAxis />
+								<YAxis domain={[0, 100]} />
 								<Tooltip />
-								<Legend />
+								<Legend
+									onClick={(e) =>
+										handleLegendClick(e.dataKey as string)
+									}
+									wrapperStyle={{ cursor: "pointer" }}
+								/>
 								{ppeTypes.map((ppeType, index) => (
 									<Line
 										key={ppeType}
@@ -79,6 +131,7 @@ const AnalyticsSection: React.FC<AnalyticsSectionProps> = ({
 											ppeType.charAt(0).toUpperCase() +
 											ppeType.slice(1)
 										}
+										hide={!visibleLines[ppeType]}
 									/>
 								))}
 								<Line
@@ -86,6 +139,7 @@ const AnalyticsSection: React.FC<AnalyticsSectionProps> = ({
 									dataKey="total"
 									stroke="#ffc658"
 									name="Total"
+									hide={!visibleLines["total"]}
 								/>
 							</LineChart>
 						</ResponsiveContainer>
@@ -105,26 +159,33 @@ const AnalyticsSection: React.FC<AnalyticsSectionProps> = ({
 							<RadarChart data={results}>
 								<PolarGrid />
 								<PolarAngleAxis dataKey="name" />
-								<PolarRadiusAxis />
+								<PolarRadiusAxis domain={[0, 100]} />
 								<Radar
 									name="Attendance"
 									dataKey="attendance_percentage"
-									fill="#8884d8"
+									stroke={COLORS[0]}
+									fill={COLORS[0]}
 									fillOpacity={0.6}
+									hide={!visibleRadars['attendance_percentage']}
 								/>
-								<Radar
-									name="Goggles"
-									dataKey="ppE_compliance.goggles"
-									fill="#82ca9d"
-									fillOpacity={0.6}
+								{ppeTypes.map((ppeType, index) => (
+									<Radar
+										key={ppeType}
+										name={`${
+											ppeType.charAt(0).toUpperCase() +
+											ppeType.slice(1)
+										} Compliance`}
+										dataKey={`ppE_compliance.${ppeType}`}
+										stroke={COLORS[index + 1]}
+										fill={COLORS[index + 1]}
+										fillOpacity={0.6}
+										hide={!visibleRadars[`ppE_compliance.${ppeType}`]}
+									/>
+								))}
+								<Legend 
+									onClick={handleRadarLegendClick}
+									wrapperStyle={{ cursor: 'pointer' }}
 								/>
-								<Radar
-									name="Helmet"
-									dataKey="ppE_compliance.helmet"
-									fill="#ffc658"
-									fillOpacity={0.6}
-								/>
-								<Legend />
 							</RadarChart>
 						</ResponsiveContainer>
 					</Paper>
@@ -134,4 +195,4 @@ const AnalyticsSection: React.FC<AnalyticsSectionProps> = ({
 	);
 };
 
-export default AnalyticsSection;
+export default AnalyticsSession;
