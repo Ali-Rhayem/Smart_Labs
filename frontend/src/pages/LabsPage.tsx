@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Button, Typography, Box, Grid, CircularProgress } from "@mui/material";
 import { useUser } from "../contexts/UserContext";
 import LabCard from "../components/LabCard";
@@ -10,6 +10,7 @@ import ErrorAlert from "../components/ErrorAlertProps";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { labService } from "../services/labService";
 import CreateLabModal from "../components/CreateLabModal";
+import SearchField from "../components/SearchField";
 
 const LabsPage: React.FC = () => {
 	const { data: labs = [], isLoading, error } = useLabsQuery();
@@ -20,6 +21,7 @@ const LabsPage: React.FC = () => {
 	const navigate = useNavigate();
 	const [createModalOpen, setCreateModalOpen] = useState(false);
 	const queryClient = useQueryClient();
+	const [searchQuery, setSearchQuery] = useState("");
 
 	const canCreateLab =
 		user && (user.role === "instructor" || user.role === "admin");
@@ -57,6 +59,14 @@ const LabsPage: React.FC = () => {
 			setOpenSnackbar(true);
 		},
 	});
+
+	const filteredLabs = useMemo(() => {
+		return labs.filter(
+			(lab) =>
+				lab.labName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+				lab.description.toLowerCase().includes(searchQuery.toLowerCase())
+		);
+	}, [labs, searchQuery]);
 
 	if (isLoading) {
 		return (
@@ -99,36 +109,55 @@ const LabsPage: React.FC = () => {
 		<div style={{ minHeight: "100vh" }}>
 			<Box sx={{ p: 3 }}>
 				<Box
-					display="flex"
-					justifyContent="space-between"
-					alignItems="center"
-					mb={3}
+					sx={{
+						display: "flex",
+						justifyContent: "space-between",
+						alignItems: "center",
+						mb: 3,
+						gap: 2,
+					}}
 				>
 					<Typography variant="h4" color="var(--color-text)">
 						Labs
 					</Typography>
-					{canCreateLab && (
-						<Button
-							variant="contained"
-							startIcon={<AddIcon />}
-							sx={{
-								backgroundColor: "var(--color-primary)",
-								color: "var(--color-text-button)",
-							}}
-							onClick={() => setCreateModalOpen(true)}
-						>
-							Create Lab
-						</Button>
-					)}
+
+					<Box
+						sx={{
+							display: "flex",
+							gap: 2,
+							flex: 1,
+							justifyContent: "flex-end",
+							maxWidth: "600px",
+						}}
+					>
+						<SearchField
+							value={searchQuery}
+							onChange={(e) => setSearchQuery(e.target.value)}
+							placeholder="Search labs..."
+						/>
+						{canCreateLab && (
+							<Button
+								variant="contained"
+								startIcon={<AddIcon />}
+								sx={{
+									bgcolor: "var(--color-primary)",
+									color: "var(--color-text-button)",
+								}}
+								onClick={() => setCreateModalOpen(true)}
+							>
+								Create Lab
+							</Button>
+						)}
+					</Box>
 				</Box>
 
 				<Grid container spacing={3}>
-					{labs.map((lab) => (
+					{filteredLabs.map((lab) => (
 						<Grid item xs={12} sm={6} md={4} key={lab.id}>
 							<LabCard lab={lab} onView={handleViewLab} />
 						</Grid>
 					))}
-					{labs.length === 0 && !isLoading && !error && (
+					{filteredLabs.length === 0 && !isLoading && !error && (
 						<Box sx={{ p: 3, textAlign: "center", width: "100%" }}>
 							<Typography color="var(--color-text)">
 								No labs found
