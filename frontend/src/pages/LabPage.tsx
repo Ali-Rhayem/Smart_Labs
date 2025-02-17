@@ -32,6 +32,8 @@ import MoreVertIcon from "@mui/icons-material/MoreVert";
 import ArchiveIcon from "@mui/icons-material/Archive";
 import DeleteIcon from "@mui/icons-material/Delete";
 import DeleteConfirmDialog from "../components/DeleteConfirmDialog";
+import PlayArrowIcon from "@mui/icons-material/PlayArrow";
+import StopIcon from "@mui/icons-material/Stop";
 
 interface TabPanelProps {
 	children?: React.ReactNode;
@@ -287,6 +289,46 @@ const LabPage: React.FC = () => {
 		},
 	});
 
+	const startSessionMutation = useMutation({
+		mutationFn: () => labService.startSession(lab.id),
+		onSuccess: () => {
+			setLab((prev: any) => ({ ...prev, started: true }));
+			queryClient.invalidateQueries({ queryKey: ["labs"] });
+			setAlertMessage("Session started successfully");
+			setSeverity("success");
+			setOpenSnackbar(true);
+		},
+		onError: (err: any) => {
+			let message = "Failed to start session";
+			if (err?.response?.data?.errors) message = err.response.data.errors;
+			setAlertMessage(message);
+			setSeverity("error");
+			setOpenSnackbar(true);
+		},
+	});
+
+	const endSessionMutation = useMutation({
+		mutationFn: () => labService.endSession(lab.id),
+		onSuccess: () => {
+			setLab((prev: any) => ({ ...prev, started: false }));
+			queryClient.invalidateQueries({ queryKey: ["labs"] });
+			queryClient.invalidateQueries({
+				queryKey: ["labSessions", lab.id],
+			});
+
+			setAlertMessage("Session ended successfully");
+			setSeverity("success");
+			setOpenSnackbar(true);
+		},
+		onError: (err: any) => {
+			let message = "Failed to end session";
+			if (err?.response?.data?.errors) message = err.response.data.errors;
+			setAlertMessage(message);
+			setSeverity("error");
+			setOpenSnackbar(true);
+		},
+	});
+
 	return (
 		<Box
 			sx={{
@@ -400,12 +442,52 @@ const LabPage: React.FC = () => {
 						</Box>
 					</Box>
 					<Box sx={{ display: "flex", gap: 1, alignItems: "start" }}>
-						{lab.started && (
-							<Chip color="success" label="In Progress" />
-						)}
 						{lab.endLab && <Chip color="error" label="archived" />}
-						{canManageLab && (
+						{canManageLab && !lab.endLab && (
 							<>
+								{!lab.started ? (
+									<Button
+										variant="contained"
+										startIcon={<PlayArrowIcon />}
+										onClick={() =>
+											startSessionMutation.mutate()
+										}
+										disabled={
+											startSessionMutation.isPending
+										}
+										size="small"
+										sx={{
+											bgcolor: "var(--color-success)",
+											color: "var(--color-text-button)",
+											"&:hover": {
+												bgcolor:
+													"rgb(from var(--color-success) r g b / 0.8)",
+											},
+										}}
+									>
+										Start Session
+									</Button>
+								) : (
+									<Button
+										variant="contained"
+										startIcon={<StopIcon />}
+										onClick={() =>
+											endSessionMutation.mutate()
+										}
+										disabled={endSessionMutation.isPending}
+										size="small"
+										sx={{
+											bgcolor: "var(--color-danger)",
+											color: "var(--color-text-button)",
+											"&:hover": {
+												bgcolor:
+													"rgb(from var(--color-danger) r g b / 0.8)",
+											},
+										}}
+									>
+										End Session
+									</Button>
+								)}
 								<Button
 									variant="contained"
 									startIcon={<EditIcon />}
