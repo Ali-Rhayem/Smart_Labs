@@ -17,4 +17,15 @@ export const userService = {
 		smart_labs.postAPI<never, object>(`/user/resetPassword`, {
 			email: email,
 		}),
+
+	changePassword: (
+		old_password: string,
+		new_password: string,
+		confirm_password: string
+	) =>
+		smart_labs.postAPI<never, object>(`/user/changePassword/`, {
+			old_password: old_password,
+			new_password: new_password,
+			confirm_password: confirm_password,
+		}),
 };
