@@ -17,7 +17,7 @@ const ErrorAlert: React.FC<ErrorAlertProps> = ({
 	return (
 		<Snackbar
 			open={open}
-			autoHideDuration={5000}
+			autoHideDuration={4000}
 			onClose={onClose}
 			anchorOrigin={{ vertical: "top", horizontal: "right" }}
 		>
