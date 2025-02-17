@@ -7,6 +7,8 @@ import {
 	Chip,
 	Button,
 	IconButton,
+	Menu,
+	MenuItem,
 } from "@mui/material";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useUser } from "../contexts/UserContext";
@@ -21,11 +23,15 @@ import SafetyIcon from "@mui/icons-material/VerifiedUser";
 import { useAllPPEs } from "../hooks/usePPE";
 import EditPPEModal from "../components/EditPPEModal";
 import { labService } from "../services/labService";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQueryClient, useMutation } from "@tanstack/react-query";
 import SessionsTab from "../components/SessionsTab";
 import AnnouncementsTab from "../components/AnnouncementsTab";
 import { User } from "../types/user";
 import { UpdateLabDto } from "../types/lab";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
+import ArchiveIcon from "@mui/icons-material/Archive";
+import DeleteIcon from "@mui/icons-material/Delete";
+import DeleteConfirmDialog from "../components/DeleteConfirmDialog";
 
 interface TabPanelProps {
 	children?: React.ReactNode;
@@ -57,6 +63,9 @@ const LabPage: React.FC = () => {
 	const [editModalOpen, setEditModalOpen] = useState(false);
 	const [editPPEOpen, setEditPPEOpen] = useState(false);
 	const [selectedPPEs, setSelectedPPEs] = useState<number[]>(lab.ppe || []);
+	const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+	const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+	const [archiveDialogOpen, setArchiveDialogOpen] = useState(false);
 	const {
 		instructors,
 		students,
@@ -244,6 +253,40 @@ const LabPage: React.FC = () => {
 		}
 	};
 
+	const deleteMutation = useMutation({
+		mutationFn: () => labService.deleteLab(lab.id),
+		onSuccess: () => {
+			navigate("/labs");
+			queryClient.invalidateQueries({ queryKey: ["labs"] });
+		},
+		onError: (err: any) => {
+			let message = "Failed to delete lab";
+			if (err?.response?.data?.errors) message = err.response.data.errors;
+			setAlertMessage(message);
+			setSeverity("error");
+			setOpenSnackbar(true);
+		},
+	});
+
+	const archiveMutation = useMutation({
+		mutationFn: () => labService.archiveLab(lab.id),
+		onSuccess: () => {
+			setLab((prev: any) => ({ ...prev, endLab: true }));
+			queryClient.invalidateQueries({ queryKey: ["labs"] });
+			setAlertMessage("Lab archived successfully");
+			setSeverity("success");
+			setArchiveDialogOpen(false);
+			setOpenSnackbar(true);
+		},
+		onError: (err: any) => {
+			let message = "Failed to archive lab";
+			if (err?.response?.data?.errors) message = err.response.data.errors;
+			setAlertMessage(message);
+			setSeverity("error");
+			setOpenSnackbar(true);
+		},
+	});
+
 	return (
 		<Box
 			sx={{
@@ -363,19 +406,86 @@ const LabPage: React.FC = () => {
 						/>
 						{lab.endLab && <Chip color="error" label="Ended" />}
 						{canManageLab && (
-							<Button
-								variant="contained"
-								startIcon={<EditIcon />}
-								onClick={() => setEditModalOpen(true)}
-								size="small"
-								sx={{
-									bgcolor: "var(--color-primary)",
-									color: "var(--color-text-button)",
-									whiteSpace: "nowrap",
-								}}
-							>
-								Edit Lab
-							</Button>
+							<>
+								<Button
+									variant="contained"
+									startIcon={<EditIcon />}
+									onClick={() => setEditModalOpen(true)}
+									size="small"
+									sx={{
+										bgcolor: "var(--color-primary)",
+										color: "var(--color-text-button)",
+										whiteSpace: "nowrap",
+									}}
+								>
+									Edit Lab
+								</Button>
+								<IconButton
+									onClick={(e) =>
+										setAnchorEl(e.currentTarget)
+									}
+									sx={{
+										color: "var(--color-text)",
+										"&:hover": {
+											color: "var(--color-primary)",
+										},
+									}}
+								>
+									<MoreVertIcon />
+								</IconButton>
+								<Menu
+									anchorEl={anchorEl}
+									open={Boolean(anchorEl)}
+									onClose={() => setAnchorEl(null)}
+									PaperProps={{
+										sx: {
+											bgcolor: "var(--color-card)",
+											color: "var(--color-text)",
+										},
+									}}
+								>
+									<MenuItem
+										onClick={() => {
+											setAnchorEl(null);
+											setArchiveDialogOpen(true);
+										}}
+										sx={{
+											"&:hover": {
+												bgcolor:
+													"var(--color-card-hover)",
+											},
+											gap: 1,
+										}}
+									>
+										<ArchiveIcon
+											sx={{
+												color: "var(--color-warning)",
+											}}
+										/>
+										Archive Lab
+									</MenuItem>
+									<MenuItem
+										onClick={() => {
+											setAnchorEl(null);
+											setDeleteDialogOpen(true);
+										}}
+										sx={{
+											"&:hover": {
+												bgcolor:
+													"var(--color-card-hover)",
+											},
+											gap: 1,
+										}}
+									>
+										<DeleteIcon
+											sx={{
+												color: "var(--color-danger)",
+											}}
+										/>
+										Delete Lab
+									</MenuItem>
+								</Menu>
+							</>
 						)}
 					</Box>
 				</Box>
@@ -447,6 +557,24 @@ const LabPage: React.FC = () => {
 				onSave={handleSavePPE}
 				currentPPEs={selectedPPEs}
 				allPPEs={allPPEs}
+			/>
+
+			<DeleteConfirmDialog
+				open={deleteDialogOpen}
+				onClose={() => setDeleteDialogOpen(false)}
+				onConfirm={() => deleteMutation.mutate()}
+				title="Delete Lab"
+				message={`Are you sure you want to delete ${lab.labName}? This action cannot be undone.`}
+			/>
+
+			<DeleteConfirmDialog
+				open={archiveDialogOpen}
+				onClose={() => setArchiveDialogOpen(false)}
+				onConfirm={() => archiveMutation.mutate()}
+				title="Archive Lab"
+				message={`Are you sure you want to archive ${lab.labName}? This will end all current sessions.`}
+				submitLabel="Archive"
+				submitColor="var(--color-warning)"
 			/>
 		</Box>
 	);
