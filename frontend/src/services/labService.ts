@@ -49,4 +49,10 @@ export const labService = {
 
 	archiveLab: (id: number) =>
 		smart_labs.postAPI<void, void>(`/lab/${id}/endlab`, undefined),
+
+	startSession: (id: number) =>
+		smart_labs.postAPI<void, void>(`/lab/${id}/startSession`, undefined),
+
+	endSession: (id: number) =>
+		smart_labs.postAPI<void, void>(`/lab/${id}/endSession`, undefined),
 };
