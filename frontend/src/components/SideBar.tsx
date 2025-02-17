@@ -8,13 +8,16 @@ import {
 	ListItemButton,
 	Divider,
 	Box,
+	IconButton,
 } from "@mui/material";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import ThemeToggleButton from "./ThemeToggleButton";
 import { navItems } from "../config/routes";
 import { Role } from "../types/user";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { useUser } from "../contexts/UserContext";
+import MenuIcon from "@mui/icons-material/Menu";
+import MenuOpenIcon from "@mui/icons-material/MenuOpen";
 
 interface SideBarProps {
 	userRole: Role;
@@ -27,6 +30,7 @@ const SideBar: React.FC<SideBarProps> = ({ userRole }) => {
 	const [isMiniVariant, setIsMiniVariant] = useState(
 		window.innerWidth <= 1200
 	);
+	const [isOpen, setIsOpen] = useState(!isMiniVariant);
 
 	useEffect(() => {
 		const handleResize = () => {
@@ -42,6 +46,10 @@ const SideBar: React.FC<SideBarProps> = ({ userRole }) => {
 		navigate("/login");
 	};
 
+	const toggleDrawer = () => {
+		setIsOpen(!isOpen);
+	};
+
 	// Filter navigation items based on the current user's role.
 	const allowedNavItems = navItems.filter((item) =>
 		item.roles.includes(userRole)
@@ -51,10 +59,10 @@ const SideBar: React.FC<SideBarProps> = ({ userRole }) => {
 		<Drawer
 			variant="permanent"
 			sx={{
-				width: isMiniVariant ? 65 : 240,
+				width: isOpen ? 240 : 65,
 				transition: "width 0.2s ease-in-out",
 				"& .MuiDrawer-paper": {
-					width: isMiniVariant ? 65 : 240,
+					width: isOpen ? 240 : 65,
 					transition: "width 0.2s ease-in-out",
 					overflowX: "hidden",
 					bgcolor: "var(--color-card)",
@@ -64,6 +72,19 @@ const SideBar: React.FC<SideBarProps> = ({ userRole }) => {
 				},
 			}}
 		>
+			<Box sx={{ p: 2, display: "flex", justifyContent: "flex-end" }}>
+				<IconButton
+					onClick={toggleDrawer}
+					sx={{
+						color: "var(--color-text)",
+						"&:hover": {
+							color: "var(--color-primary)",
+						},
+					}}
+				>
+					{isOpen ? <MenuOpenIcon /> : <MenuIcon />}
+				</IconButton>
+			</Box>
 			<List sx={{ flex: 1 }}>
 				{allowedNavItems.map((item) => (
 					<ListItem
@@ -100,11 +121,11 @@ const SideBar: React.FC<SideBarProps> = ({ userRole }) => {
 							>
 								{item.icon}
 							</ListItemIcon>
-							{!isMiniVariant && (
+							{isOpen && (
 								<ListItemText
 									primary={item.label}
 									sx={{
-										opacity: isMiniVariant ? 0 : 1,
+										opacity: isOpen ? 1 : 0,
 										color:
 											location.pathname === item.path
 												? "var(--color-primary)"
