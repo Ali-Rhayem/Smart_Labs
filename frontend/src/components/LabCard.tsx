@@ -29,26 +29,26 @@ const LabCard: React.FC<LabCardProps> = ({ lab, onView }) => {
 			onClick={() => onView(lab)}
 		>
 			<CardContent sx={{ flexGrow: 1, position: "relative" }}>
-				<Box
-					sx={{
-						position: "absolute",
-						top: 8,
-						right: 8,
-						display: "flex",
-						gap: 1,
-						p: 1,
-						borderRadius: 1,
-						bgcolor: "rgba(0,0,0,0.03)",
-					}}
-				>
-					{lab.started && (
+				{lab.started && (
+					<Box
+						sx={{
+							position: "absolute",
+							top: 8,
+							right: 8,
+							display: "flex",
+							gap: 1,
+							p: 1,
+							borderRadius: 1,
+							bgcolor: "rgba(0,0,0,0.03)",
+						}}
+					>
 						<Chip
 							size="small"
-							color={ "success"}
+							color={"success"}
 							label={"In Progress"}
 						/>
-					)}
-				</Box>
+					</Box>
+				)}
 				<Typography
 					variant="h5"
 					gutterBottom
