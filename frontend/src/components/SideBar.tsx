@@ -18,6 +18,7 @@ import LogoutIcon from "@mui/icons-material/Logout";
 import { useUser } from "../contexts/UserContext";
 import MenuIcon from "@mui/icons-material/Menu";
 import MenuOpenIcon from "@mui/icons-material/MenuOpen";
+import { useTheme } from "../themes/ThemeContext";
 
 interface SideBarProps {
 	userRole: Role;
@@ -31,6 +32,7 @@ const SideBar: React.FC<SideBarProps> = ({ userRole }) => {
 		window.innerWidth <= 1200
 	);
 	const [isOpen, setIsOpen] = useState(!isMiniVariant);
+	const { themeMode } = useTheme();
 
 	useEffect(() => {
 		const handleResize = () => {
@@ -166,7 +168,11 @@ const SideBar: React.FC<SideBarProps> = ({ userRole }) => {
 							</ListItemIcon>
 							{!isMiniVariant && (
 								<ListItemText
-									primary="Dark Mode"
+									primary={
+										themeMode === "dark"
+											? "Dark Mode"
+											: "Light Mode"
+									}
 									sx={{
 										color: "var(--color-text)",
 										"& .MuiTypography-root": {
