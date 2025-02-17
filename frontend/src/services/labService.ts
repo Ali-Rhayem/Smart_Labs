@@ -1,5 +1,5 @@
 import { smart_labs } from "../utils/axios";
-import { Lab, CreateLabDto, UpdateLabDto } from "../types/lab";
+import { Lab, CreateLabDto, UpdateLabDto, LabAnalytics } from "../types/lab";
 import { User } from "../types/user";
 import { AnnouncementDTO } from "../types/announcements";
 
@@ -55,4 +55,7 @@ export const labService = {
 
 	endSession: (id: number) =>
 		smart_labs.postAPI<void, void>(`/lab/${id}/endSession`, undefined),
+
+	getLabAnalytics: (id: number) =>
+		smart_labs.getAPI<LabAnalytics>(`/lab/${id}/analyze`),
 };
