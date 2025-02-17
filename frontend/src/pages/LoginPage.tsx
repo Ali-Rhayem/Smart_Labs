@@ -8,6 +8,8 @@ import ErrorAlert from "../components/ErrorAlertProps";
 import { useUser } from "../contexts/UserContext";
 import { authService } from "../services/authService";
 import type { LoginData } from "../types/auth";
+import AddItemModal from "../components/AddItemModal";
+import { userService } from "../services/userService";
 
 interface error {
 	email: string[];
@@ -27,6 +29,7 @@ const LoginPage: React.FC = () => {
 	const navigate = useNavigate();
 	const { login: userLogin } = useUser();
 	const [isLoading, setIsLoading] = useState(false);
+	const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false);
 
 	const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const { name, value } = e.target;
@@ -57,6 +60,22 @@ const LoginPage: React.FC = () => {
 			setOpenSnackbar(true);
 		} finally {
 			setIsLoading(false);
+		}
+	};
+
+	const handleForgotPassword = async (email: string) => {
+		try {
+			await userService.resetPassword(email);
+			setAlertMessage("Password reset instructions sent to your email");
+			setSeverity("success");
+			setOpenSnackbar(true);
+		} catch (err: any) {
+			let message = "Failed to reset password";
+			if (err.response?.data?.message)
+				message = err.response.data.message;
+			setAlertMessage(message);
+			setSeverity("error");
+			setOpenSnackbar(true);
 		}
 	};
 
@@ -144,7 +163,17 @@ const LoginPage: React.FC = () => {
 					/>
 
 					<div className="flex justify-between items-center">
-						<Link href="#" className="text-sm text-primary">
+						<Link
+							onClick={() => setForgotPasswordOpen(true)}
+							sx={{
+								color: "var(--color-primary)",
+								textDecoration: "none",
+								"&:hover": {
+									textDecoration: "underline",
+									cursor: "pointer",
+								},
+							}}
+						>
 							Forgot Password?
 						</Link>
 					</div>
@@ -169,6 +198,15 @@ const LoginPage: React.FC = () => {
 				message={alertMessage}
 				severity={severity}
 				onClose={() => setOpenSnackbar(false)}
+			/>
+			<AddItemModal
+				open={forgotPasswordOpen}
+				onClose={() => setForgotPasswordOpen(false)}
+				onSubmit={handleForgotPassword}
+				title="Reset Password"
+				itemLabel="Email"
+				placeholder="Enter your email address"
+				submitLabel="Reset Password"
 			/>
 		</div>
 	);
