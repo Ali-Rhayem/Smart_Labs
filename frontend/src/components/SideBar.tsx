@@ -28,15 +28,15 @@ const SideBar: React.FC<SideBarProps> = ({ userRole }) => {
 	const location = useLocation();
 	const { logout } = useUser();
 	const navigate = useNavigate();
-	const [isMiniVariant, setIsMiniVariant] = useState(
-		window.innerWidth <= 1200
-	);
-	const [isOpen, setIsOpen] = useState(!isMiniVariant);
+	const [isMiniVariant, setIsMiniVariant] = useState(window.innerWidth <= 1200);
+	const [isOpen, setIsOpen] = useState(window.innerWidth > 1200);
 	const { themeMode } = useTheme();
 
 	useEffect(() => {
 		const handleResize = () => {
-			setIsMiniVariant(window.innerWidth <= 1200);
+			const isSmallScreen = window.innerWidth <= 1200;
+			setIsMiniVariant(isSmallScreen);
+			setIsOpen(!isSmallScreen);
 		};
 
 		window.addEventListener("resize", handleResize);
@@ -49,7 +49,7 @@ const SideBar: React.FC<SideBarProps> = ({ userRole }) => {
 	};
 
 	const toggleDrawer = () => {
-		setIsOpen(!isOpen);
+		setIsOpen((prev) => !prev);
 	};
 
 	// Filter navigation items based on the current user's role.
