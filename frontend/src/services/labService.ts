@@ -46,4 +46,7 @@ export const labService = {
 
 	updateLab: (id: number, data: UpdateLabDto) =>
 		smart_labs.putAPI<Lab, UpdateLabDto>(`/lab/${id}`, data),
+
+	archiveLab: (id: number) =>
+		smart_labs.postAPI<void, void>(`/lab/${id}/endlab`, undefined),
 };
