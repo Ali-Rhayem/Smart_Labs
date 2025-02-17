@@ -56,3 +56,11 @@ export const useLabAnnouncements = (labId: number) => {
 		staleTime: 30 * 60 * 1000,
 	});
 };
+
+export const useLabAnalytics = (labId: number) => {
+	return useQuery({
+		queryKey: ["labAnalytics", labId],
+		queryFn: () => labService.getLabAnalytics(labId),
+		staleTime: 30 * 60 * 1000,
+	});
+};
