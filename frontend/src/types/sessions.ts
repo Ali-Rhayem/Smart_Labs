@@ -9,6 +9,8 @@ export interface Session {
 	report: string | null;
 	totalAttendance: number;
 	totalPPECompliance: { [key: string]: number };
+	ppE_compliance_bytime: { [key: string]: number[] };
+	total_ppe_compliance_bytime: number[];
 }
 
 export interface ObjectResult {
