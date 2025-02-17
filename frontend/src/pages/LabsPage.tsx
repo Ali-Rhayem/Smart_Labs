@@ -1,5 +1,15 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { Button, Typography, Box, Grid, CircularProgress } from "@mui/material";
+import {
+	Button,
+	Typography,
+	Box,
+	Grid,
+	CircularProgress,
+	FormControl,
+	InputLabel,
+	MenuItem,
+	Select,
+} from "@mui/material";
 import { useUser } from "../contexts/UserContext";
 import LabCard from "../components/LabCard";
 import { Lab } from "../types/lab";
@@ -11,6 +21,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { labService } from "../services/labService";
 import CreateLabModal from "../components/CreateLabModal";
 import SearchField from "../components/SearchField";
+import { useSemesters } from "../hooks/useSemesters";
 
 const LabsPage: React.FC = () => {
 	const { data: labs = [], isLoading, error } = useLabsQuery();
@@ -22,6 +33,8 @@ const LabsPage: React.FC = () => {
 	const [createModalOpen, setCreateModalOpen] = useState(false);
 	const queryClient = useQueryClient();
 	const [searchQuery, setSearchQuery] = useState("");
+	const { data: semesters = [] } = useSemesters();
+	const [semesterFilter, setSemesterFilter] = useState<string>("all");
 
 	const canCreateLab =
 		user && (user.role === "instructor" || user.role === "admin");
@@ -61,12 +74,21 @@ const LabsPage: React.FC = () => {
 	});
 
 	const filteredLabs = useMemo(() => {
-		return labs.filter(
-			(lab) =>
-				lab.labName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-				lab.description.toLowerCase().includes(searchQuery.toLowerCase())
-		);
-	}, [labs, searchQuery]);
+		return labs
+			.filter((lab) => {
+				if (semesterFilter === "all") return true;
+				return lab.semesterID.toString() === semesterFilter;
+			})
+			.filter(
+				(lab) =>
+					lab.labName
+						.toLowerCase()
+						.includes(searchQuery.toLowerCase()) ||
+					lab.description
+						.toLowerCase()
+						.includes(searchQuery.toLowerCase())
+			);
+	}, [labs, searchQuery, semesterFilter]);
 
 	if (isLoading) {
 		return (
@@ -130,11 +152,6 @@ const LabsPage: React.FC = () => {
 							maxWidth: "600px",
 						}}
 					>
-						<SearchField
-							value={searchQuery}
-							onChange={(e) => setSearchQuery(e.target.value)}
-							placeholder="Search labs..."
-						/>
 						{canCreateLab && (
 							<Button
 								variant="contained"
@@ -149,6 +166,87 @@ const LabsPage: React.FC = () => {
 							</Button>
 						)}
 					</Box>
+				</Box>
+				<Box
+					sx={{
+						display: "flex",
+						justifyContent: "space-between",
+						alignItems: "center",
+						mb: 3,
+						gap: 2,
+					}}
+				>
+					<FormControl size="small" sx={{ minWidth: 120 }}>
+						<InputLabel
+							sx={{
+								color: "var(--color-text)",
+								"&.Mui-focused": {
+									color: "var(--color-primary)",
+								},
+								transition: "color 0.2s ease-in-out",
+							}}
+						>
+							Semester
+						</InputLabel>
+						<Select
+							value={semesterFilter}
+							onChange={(e) => setSemesterFilter(e.target.value)}
+							label="Semester"
+							sx={{
+								color: "var(--color-text)",
+								"& .MuiOutlinedInput-notchedOutline": {
+									borderColor: "var(--color-border)",
+								},
+								"&:hover .MuiOutlinedInput-notchedOutline": {
+									borderColor: "var(--color-primary)",
+								},
+								"&.Mui-focused .MuiOutlinedInput-notchedOutline":
+									{
+										borderColor: "var(--color-primary)",
+									},
+								"& .MuiSvgIcon-root": {
+									color: "var(--color-text)",
+								},
+							}}
+							MenuProps={{
+								PaperProps: {
+									sx: {
+										bgcolor: "var(--color-card)",
+										"& .MuiMenuItem-root": {
+											color: "var(--color-text)",
+											"&:hover": {
+												bgcolor:
+													"var(--color-card-hover)",
+											},
+											"&.Mui-selected": {
+												bgcolor:
+													"rgb(from var(--color-primary) r g b / 0.1)",
+												"&:hover": {
+													bgcolor:
+														"rgb(from var(--color-primary) r g b / 0.2)",
+												},
+											},
+										},
+									},
+								},
+							}}
+						>
+							<MenuItem value="all">All Semesters</MenuItem>
+							{semesters.map((semester) => (
+								<MenuItem
+									key={semester.id}
+									value={semester.id.toString()}
+								>
+									{semester.name}
+								</MenuItem>
+							))}
+						</Select>
+					</FormControl>
+					<SearchField
+						value={searchQuery}
+						onChange={(e) => setSearchQuery(e.target.value)}
+						placeholder="Search labs..."
+					/>
 				</Box>
 
 				<Grid container spacing={3}>
