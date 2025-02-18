@@ -699,4 +699,31 @@ public class LabService
         return result.ModifiedCount > 0 ? assignmentDTO : null;
     }
 
+    public async Task<bool> SetGradeAsync(int lab_id, int assignment_id, int user_id, int grade)
+    {
+        var lab = await GetLabByIdAsync(lab_id);
+        if (lab == null)
+            return false;
+
+        var assignment = lab.Announcements.Find(a => a.Id == assignment_id);
+        if (assignment == null || !assignment.Assignment)
+            return false;
+
+        var submission = assignment.Submissions.Find(s => s.UserId == user_id);
+        if (submission == null)
+            return false;
+
+        submission.Grade = grade;
+
+        var updateDefinition = Builders<Lab>.Update.Set("Announcements.$[a].Submissions.$[s].Grade", grade);
+        var arrayFilters = new List<ArrayFilterDefinition>
+        {
+            new BsonDocumentArrayFilterDefinition<BsonDocument>(new BsonDocument("a._id", assignment_id)),
+            new BsonDocumentArrayFilterDefinition<BsonDocument>(new BsonDocument("s.UserId", submission.UserId))
+        };
+        var result = await _labs.UpdateOneAsync(l => l.Id == lab_id, updateDefinition, new UpdateOptions { ArrayFilters = arrayFilters });
+
+        return result.ModifiedCount > 0;
+    }
+
 }
