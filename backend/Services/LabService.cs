@@ -453,9 +453,10 @@ public class LabService
                 var updateDefinition = Builders<Lab>.Update.Set(l => l.Started, true);
                 var ppe_list = await _ppeService.GetListOfPPEsAsync(lab.PPE);
                 var ppe_names = ppe_list.Select(ppe => ppe.Name).ToList();
-                await _labs.UpdateOneAsync(l => l.Id == lab_id, updateDefinition);
                 var message = new { ppe_arr = ppe_names, session_id = session.Id, lab_id = lab_id, room = lab.Room, command = "start" };
-                await _kafkaProducer.ProduceAsync("recording_se", JsonSerializer.Serialize(message));
+                var kafka = await _kafkaProducer.ProduceAsync("recording_se", JsonSerializer.Serialize(message));
+                if (!kafka.success) return new ErrorMessage { StatusCode = 500, Message = "Connection error" };
+                await _labs.UpdateOneAsync(l => l.Id == lab_id, updateDefinition);
                 return session;
             }
         }
@@ -472,7 +473,8 @@ public class LabService
             return new ErrorMessage { StatusCode = 400, Message = "lab is not started" };
         }
 
-        await _kafkaProducer.ProduceAsync("recording_se", JsonSerializer.Serialize(new { room = lab.Room, command = "end" }));
+        var kafka = await _kafkaProducer.ProduceAsync("recording_se", JsonSerializer.Serialize(new { room = lab.Room, command = "end" }));
+        if (!kafka.success) return new ErrorMessage { StatusCode = 500, Message = "Connection error" };
         var updateDefinition = Builders<Lab>.Update.Set(l => l.Started, false);
         await _labs.UpdateOneAsync(l => l.Id == lab_id, updateDefinition);
 
@@ -493,6 +495,7 @@ public class LabService
 
         int total_attendance = 0;
         List<int> total_attendance_bysession = [];
+        List<string> xaxis = [];
 
         var ppe_compliance = new Dictionary<string, int>();
         Dictionary<string, List<int>> ppe_compliance_bysesions = [];
@@ -509,6 +512,7 @@ public class LabService
         {
             total_attendance += session.TotalAttendance;
             total_attendance_bysession.Add(session.TotalAttendance);
+            xaxis.Add(session.Date.ToString());
             // loop over all ppe in the session
             foreach (var ppe in session.TotalPPECompliance)
             {
