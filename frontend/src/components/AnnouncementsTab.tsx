@@ -24,11 +24,13 @@ import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { announcementService } from "../services/announcementService";
-import { Announcement, Comment } from "../types/announcements";
+import { Comment } from "../types/announcements";
 import DeleteIcon from "@mui/icons-material/Delete";
 import DeleteConfirmDialog from "./DeleteConfirmDialog";
 import ErrorAlert from "./ErrorAlertProps";
 import AssignmentModal, { AssignmentData } from "./AssignmentModal";
+import AssignmentView from "./AssignmentView";
+import { AnnouncementDTO } from "../types/announcements";
 
 // Add constants
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB in bytes
@@ -73,6 +75,10 @@ const AnnouncementsTab: React.FC<AnnouncementsTabProps> = ({ labId }) => {
 		useState(false);
 
 	const [assignmentModalOpen, setAssignmentModalOpen] = useState(false);
+
+	// Add state for assignment view
+	const [selectedAssignment, setSelectedAssignment] =
+		useState<AnnouncementDTO | null>(null);
 
 	const handleCommentChange = (announcementId: number, value: string) => {
 		setCommentInputs((prev) => ({
@@ -362,6 +368,13 @@ const AnnouncementsTab: React.FC<AnnouncementsTabProps> = ({ labId }) => {
 		}
 	};
 
+	// Add click handler for assignment cards
+	const handleAssignmentClick = (announcement: AnnouncementDTO) => {
+		if (announcement.assignment) {
+			setSelectedAssignment(announcement);
+		}
+	};
+
 	return (
 		<Box sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
 			{isLoading ? (
@@ -376,7 +389,11 @@ const AnnouncementsTab: React.FC<AnnouncementsTabProps> = ({ labId }) => {
 								p: 2,
 								backgroundColor: "var(--color-card)",
 								color: "var(--color-text)",
+								cursor: announcement.assignment
+									? "pointer"
+									: "default",
 							}}
+							onClick={() => handleAssignmentClick(announcement)}
 						>
 							{/* Announcement Header */}
 							<Box
@@ -438,14 +455,27 @@ const AnnouncementsTab: React.FC<AnnouncementsTabProps> = ({ labId }) => {
 											key={index}
 											variant="outlined"
 											size="small"
-											onClick={() =>
+											onClick={(e) => {
+												e.stopPropagation();
 												window.open(
 													`${imageUrl}/${file}`,
 													"_blank"
-												)
-											}
+												);
+											}}
 											startIcon={<AttachFileIcon />}
-											sx={{ mr: 1, mb: 1 }}
+											sx={{
+												color: "var(--color-primary)",
+												borderColor:
+													"var(--color-primary)",
+												"&:hover": {
+													borderColor:
+														"var(--color-primary)",
+													bgcolor:
+														"var(--color-card-hover)",
+												},
+												mr: 1,
+												mt: 1,
+											}}
 										>
 											{file
 												.split("/")
@@ -780,6 +810,15 @@ const AnnouncementsTab: React.FC<AnnouncementsTabProps> = ({ labId }) => {
 				onClose={() => setAssignmentModalOpen(false)}
 				onSubmit={handleAssignmentSubmit}
 			/>
+			{/* Add AssignmentView */}
+			{selectedAssignment && (
+				<AssignmentView
+					open={!!selectedAssignment}
+					onClose={() => setSelectedAssignment(null)}
+					assignment={selectedAssignment}
+					labId={labId}
+				/>
+			)}
 		</Box>
 	);
 };
