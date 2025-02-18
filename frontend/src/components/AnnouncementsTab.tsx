@@ -29,6 +29,14 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import DeleteConfirmDialog from "./DeleteConfirmDialog";
 import ErrorAlert from "./ErrorAlertProps";
 
+// Add constants
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB in bytes
+const ALLOWED_FILE_TYPES = [
+	"application/pdf", // PDF
+	"application/msword", // DOC
+	"application/vnd.openxmlformats-officedocument.wordprocessingml.document", // DOCX
+];
+
 interface AnnouncementsTabProps {
 	labId: number;
 }
@@ -155,8 +163,8 @@ const AnnouncementsTab: React.FC<AnnouncementsTabProps> = ({ labId }) => {
 	);
 
 	const sendAnnouncementMutation = useMutation({
-		mutationFn: (announcement: Announcement) =>
-			announcementService.sendAnnouncement(labId, announcement),
+		mutationFn: (formData: FormData) =>
+			announcementService.sendAnnouncement(labId, formData),
 		onSuccess: () => {
 			queryClient.invalidateQueries({
 				queryKey: ["labAnnouncements", labId],
@@ -257,25 +265,55 @@ const AnnouncementsTab: React.FC<AnnouncementsTabProps> = ({ labId }) => {
 		},
 	});
 
+	// Update handleFileSelect
 	const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
 		if (event.target.files) {
-			setFiles(Array.from(event.target.files));
+			const selectedFiles = Array.from(event.target.files);
+
+			// Validate each file
+			const invalidFiles = selectedFiles.filter(
+				(file) =>
+					!ALLOWED_FILE_TYPES.includes(file.type) ||
+					file.size > MAX_FILE_SIZE
+			);
+
+			if (invalidFiles.length > 0) {
+				setAlertMessage(
+					"Only PDF and Word documents up to 10MB are allowed"
+				);
+				setSeverity("error");
+				setShowAlert(true);
+				event.target.value = ""; // Clear file input
+				return;
+			}
+
+			setFiles(selectedFiles);
 		}
 	};
 
+	// Update handleSendAnnouncement
 	const handleSendAnnouncement = async () => {
 		if (!message.trim()) return;
 
-		const formData = new FormData();
-		files.forEach((file) => {
-			formData.append("files", file);
-		});
-		formData.append("message", message);
+		try {
+			const formData = new FormData();
+			formData.append("Message", message.trim());
 
-		await sendAnnouncementMutation.mutateAsync({
-			message,
-			files: [],
-		} as Announcement);
+			files.forEach((file) => {
+				if (
+					file.size <= MAX_FILE_SIZE &&
+					ALLOWED_FILE_TYPES.includes(file.type)
+				) {
+					formData.append("Files", file);
+				}
+			});
+
+			await sendAnnouncementMutation.mutateAsync(formData);
+		} catch (error) {
+			setAlertMessage("Failed to send announcement");
+			setSeverity("error");
+			setShowAlert(true);
+		}
 	};
 
 	const handleDeleteClick = (announcementId: number) => {
@@ -377,14 +415,26 @@ const AnnouncementsTab: React.FC<AnnouncementsTabProps> = ({ labId }) => {
 							{announcement.files.length > 0 && (
 								<Box sx={{ mb: 2 }}>
 									{announcement.files.map((file, index) => (
+										// onclick file download
 										<Button
 											key={index}
 											variant="outlined"
 											size="small"
+											onClick={() =>
+												window.open(
+													`${imageUrl}/${file}`,
+													"_blank"
+												)
+											}
 											startIcon={<AttachFileIcon />}
 											sx={{ mr: 1, mb: 1 }}
 										>
-											{file.split("/").pop()}
+											{file
+												.split("/")
+												.pop()
+												?.split("_")
+												.slice(0, -1)
+												.join("_")}
 										</Button>
 									))}
 								</Box>

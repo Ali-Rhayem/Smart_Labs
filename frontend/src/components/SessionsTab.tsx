@@ -10,7 +10,7 @@ import {
 } from "@mui/material";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import { useLabSessions } from "../hooks/useSessions";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 
 import { isWithinInterval, parseISO } from "date-fns";
 
@@ -277,7 +277,9 @@ const SessionsTab: React.FC<{ labId: number }> = ({ labId }) => {
 
 									<Button
 										variant="contained"
-										onClick={() => handleViewSession(session)}
+										onClick={() =>
+											handleViewSession(session)
+										}
 										startIcon={<VisibilityIcon />}
 										fullWidth
 										sx={{
