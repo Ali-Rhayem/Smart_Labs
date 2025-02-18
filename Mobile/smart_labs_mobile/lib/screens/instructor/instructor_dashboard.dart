@@ -1,130 +1,141 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:smart_labs_mobile/models/dashboard_analytics_model.dart';
+import 'package:smart_labs_mobile/providers/dashboard_analytics_provider.dart';
 import 'package:fl_chart/fl_chart.dart';
 
-class InstructorDashboardScreen extends StatelessWidget {
+class InstructorDashboardScreen extends ConsumerWidget {
   const InstructorDashboardScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    // Static data for analytics
-    const totalStudents = 120;
-    const totalLabs = 5;
-    const avgAttendance = 78.5;
-    const avgPPECompliance = 85.2;
-
-    // Monthly attendance data
-    final monthlyAttendance = [65.0, 72.0, 78.5, 82.0, 75.0, 88.0];
-    final monthLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final analyticsAsync = ref.watch(dashboardAnalyticsProvider);
 
     return Scaffold(
-      backgroundColor: const Color(0xFF121212),
+      backgroundColor:
+          isDark ? const Color(0xFF121212) : theme.colorScheme.background,
       appBar: AppBar(
-        title: const Text(
-          'Analytics Dashboard',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-        backgroundColor: const Color(0xFF1C1C1C),
+        title: const Text('Student Dashboard'),
+        backgroundColor: isDark ? const Color(0xFF1C1C1C) : null,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
+      body: analyticsAsync.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, stack) => Center(
+          child: Text('Error: $error',
+              style: TextStyle(color: theme.colorScheme.error)),
+        ),
+        data: (analytics) => SingleChildScrollView(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 16.0,
+                  mainAxisSpacing: 16.0,
+                  childAspectRatio: 1.3,
+                ),
+                itemCount: 4,
+                itemBuilder: (context, index) {
+                  final items = [
+                    (
+                      'Total Labs',
+                      analytics.totalLabs.toString(),
+                      Icons.science,
+                      Colors.blue
+                    ),
+                    (
+                      'Avg Attendance',
+                      '${analytics.avgAttendance.toStringAsFixed(1)}%',
+                      Icons.people,
+                      Colors.green
+                    ),
+                    (
+                      'PPE Compliance',
+                      '${analytics.ppeCompliance.toStringAsFixed(1)}%',
+                      Icons.health_and_safety,
+                      Colors.orange
+                    ),
+                    (
+                      'Total Students',
+                      analytics.totalStudents.toString(),
+                      Icons.people,
+                      Colors.purple
+                    ),
+                  ];
+                  final item = items[index];
+                  return _buildSummaryCard(
+                    item.$1,
+                    item.$2,
+                    item.$3,
+                    item.$4,
+                    isDark,
+                    theme,
+                  );
+                },
+              ),
+              const SizedBox(height: 24),
+              ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: analytics.labs
+                    .where(
+                        (lab) => lab.labId.isNotEmpty && lab.labName.isNotEmpty)
+                    .length,
+                itemBuilder: (context, index) {
+                  final validLabs = analytics.labs
+                      .where((lab) =>
+                          lab.labId.isNotEmpty && lab.labName.isNotEmpty)
+                      .toList();
+                  return _buildLabCard(validLabs[index], isDark, theme);
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSummaryCard(String title, String value, IconData icon,
+      Color color, bool isDark, ThemeData theme) {
+    return Card(
+      elevation: isDark ? 0 : 1,
+      color: isDark ? const Color(0xFF1C1C1C) : theme.colorScheme.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(
+          color: isDark ? Colors.white12 : Colors.black12,
+          width: 1,
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Summary Cards
-            GridView.count(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              crossAxisCount: 2,
-              crossAxisSpacing: 16.0,
-              mainAxisSpacing: 16.0,
-              childAspectRatio: 1.5,
-              children: [
-                _buildSummaryCard(
-                  'Total Students',
-                  totalStudents.toString(),
-                  Icons.people,
-                  Colors.blue,
-                ),
-                _buildSummaryCard(
-                  'Active Labs',
-                  totalLabs.toString(),
-                  Icons.science,
-                  Colors.green,
-                ),
-                _buildSummaryCard(
-                  'Avg Attendance',
-                  '${avgAttendance.toStringAsFixed(1)}%',
-                  Icons.check_circle,
-                  Colors.orange,
-                ),
-                _buildSummaryCard(
-                  'PPE Compliance',
-                  '${avgPPECompliance.toStringAsFixed(1)}%',
-                  Icons.health_and_safety,
-                  Colors.purple,
-                ),
-              ],
+            Icon(icon, color: color, size: 28),
+            const SizedBox(height: 8),
+            Text(
+              title,
+              style: TextStyle(
+                color: theme.colorScheme.onSurface.withOpacity(0.7),
+                fontSize: 13,
+              ),
+              textAlign: TextAlign.center,
             ),
-
-            const SizedBox(height: 24),
-
-            // Attendance Trend Chart
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: const Color(0xFF1C1C1C),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Attendance Trend',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  SizedBox(
-                    height: 200,
-                    child: LineChart(
-                      _buildLineChartData(monthlyAttendance, monthLabels),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 24),
-
-            // Lab Performance List
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: const Color(0xFF1C1C1C),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Lab Performance',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  _buildLabPerformanceItem(
-                      'Chemistry Lab 101', 92, Colors.green),
-                  _buildLabPerformanceItem('Physics Lab 202', 85, Colors.blue),
-                  _buildLabPerformanceItem(
-                      'Biology Lab 303', 78, Colors.orange),
-                  _buildLabPerformanceItem('Computer Lab 404', 73, Colors.red),
-                ],
+            const SizedBox(height: 2),
+            Text(
+              value,
+              style: TextStyle(
+                color: theme.colorScheme.onSurface,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
               ),
             ),
           ],
@@ -133,110 +144,250 @@ class InstructorDashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSummaryCard(
-      String title, String value, IconData icon, Color color) {
-    return Container(
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        color: const Color(0xFF1C1C1C),
+  Widget _buildLabCard(
+      LabDashboardAnalytics lab, bool isDark, ThemeData theme) {
+    if (lab.labId.isEmpty || lab.labName.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return Card(
+      elevation: isDark ? 0 : 1,
+      color: isDark ? const Color(0xFF1C1C1C) : theme.colorScheme.surface,
+      shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
+        side: BorderSide(
+          color: isDark ? Colors.white12 : Colors.black12,
+          width: 1,
+        ),
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min, // Add this
-        mainAxisAlignment: MainAxisAlignment.center,
+      margin: const EdgeInsets.only(bottom: 16),
+      clipBehavior: Clip.antiAlias,
+      child: ExpansionTile(
+        shape: const RoundedRectangleBorder(
+          side: BorderSide.none,
+        ),
+        collapsedShape: const RoundedRectangleBorder(
+          side: BorderSide.none,
+        ),
+        title: Text(
+          lab.labName,
+          style: TextStyle(
+            color: theme.colorScheme.onSurface,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         children: [
-          Icon(icon, color: color, size: 32),
-          const SizedBox(height: 8),
-          Text(
-            value,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
+          Container(
+            decoration: BoxDecoration(
+              border: Border(
+                top: BorderSide(
+                  color: isDark ? Colors.white12 : Colors.black12,
+                  width: 1,
+                ),
+              ),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildProgressStat(
+                          'Attendance',
+                          lab.totalAttendance,
+                          Icons.people,
+                          Colors.blue,
+                          isDark,
+                          theme,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: _buildProgressStat(
+                          'PPE Compliance',
+                          lab.totalPPECompliance,
+                          Icons.health_and_safety,
+                          Colors.green,
+                          isDark,
+                          theme,
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (lab.xaxis.isNotEmpty) ...[
+                    const SizedBox(height: 24),
+                    SizedBox(
+                      height: 250,
+                      child: Padding(
+                        padding: const EdgeInsets.only(right: 16, bottom: 8),
+                        child: LineChart(_buildLineChartData(
+                          lab.totalAttendanceByTime,
+                          lab.xaxis,
+                          isDark,
+                          theme,
+                        )),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
             ),
           ),
-          const SizedBox(height: 4),
-          Flexible(
-            // Wrap in Flexible
-            child: Text(
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProgressStat(String title, int value, IconData icon, Color color,
+      bool isDark, ThemeData theme) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(icon, color: color, size: 20),
+            const SizedBox(width: 8),
+            Text(
               title,
               style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.7),
+                color: theme.colorScheme.onSurface.withOpacity(0.7),
                 fontSize: 14,
               ),
-              textAlign: TextAlign.center,
-              overflow: TextOverflow.ellipsis, // Handle text overflow
             ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        LinearProgressIndicator(
+          value: value / 100,
+          backgroundColor: theme.colorScheme.onSurface.withOpacity(0.1),
+          valueColor: AlwaysStoppedAnimation<Color>(color),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          '$value%',
+          style: TextStyle(
+            color: theme.colorScheme.onSurface,
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
-  Widget _buildLabPerformanceItem(
-      String labName, int performance, Color color) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  labName,
-                  style: const TextStyle(color: Colors.white),
-                ),
-                const SizedBox(height: 4),
-                LinearProgressIndicator(
-                  value: performance / 100,
-                  backgroundColor: Colors.grey[800],
-                  valueColor: AlwaysStoppedAnimation<Color>(color),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 16),
-          Text(
-            '$performance%',
-            style: TextStyle(color: color, fontWeight: FontWeight.bold),
-          ),
-        ],
-      ),
-    );
-  }
-
-  LineChartData _buildLineChartData(List<double> values, List<String> labels) {
+  LineChartData _buildLineChartData(
+      List<int> values, List<String> labels, bool isDark, ThemeData theme) {
     return LineChartData(
-      gridData: const FlGridData(show: false),
+      gridData: FlGridData(
+        show: true,
+        drawVerticalLine: true,
+        horizontalInterval: 10,
+        verticalInterval: 1,
+        getDrawingHorizontalLine: (value) {
+          return FlLine(
+            color: theme.colorScheme.onSurface.withOpacity(0.1),
+            strokeWidth: 1,
+          );
+        },
+        getDrawingVerticalLine: (value) {
+          return FlLine(
+            color: theme.colorScheme.onSurface.withOpacity(0.1),
+            strokeWidth: 1,
+          );
+        },
+      ),
       titlesData: FlTitlesData(
-        rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+        rightTitles:
+            const AxisTitles(sideTitles: SideTitles(showTitles: false)),
         topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+        leftTitles: AxisTitles(
+          sideTitles: SideTitles(
+            showTitles: true,
+            interval: 10,
+            reservedSize: 35,
+            getTitlesWidget: (value, meta) {
+              return Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: Text(
+                  '${value.toInt()}%',
+                  style: TextStyle(
+                    color: theme.colorScheme.onSurface.withOpacity(0.7),
+                    fontSize: 12,
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
         bottomTitles: AxisTitles(
           sideTitles: SideTitles(
             showTitles: true,
+            interval: 1,
+            reservedSize: 30,
             getTitlesWidget: (value, meta) {
               if (value.toInt() >= 0 && value.toInt() < labels.length) {
-                return Text(
-                  labels[value.toInt()],
-                  style: const TextStyle(color: Colors.white70, fontSize: 12),
-                );
+                final date = labels[value.toInt()];
+                // Format the date to show only month and day
+                final parts = date.split('/');
+                if (parts.length >= 2) {
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 5),
+                    child: Text(
+                      '${parts[0]}/${parts[1]}',
+                      style: TextStyle(
+                        color: theme.colorScheme.onSurface.withOpacity(0.7),
+                        fontSize: 11,
+                      ),
+                    ),
+                  );
+                }
               }
               return const Text('');
             },
           ),
         ),
       ),
-      borderData: FlBorderData(show: false),
+      borderData: FlBorderData(
+        show: true,
+        border: Border.all(
+          color: theme.colorScheme.onSurface.withOpacity(0.1),
+          width: 1,
+        ),
+      ),
+      minX: 0,
+      maxX: (values.length - 1).toDouble(),
+      minY: 0,
+      maxY: 100,
       lineBarsData: [
         LineChartBarData(
           spots: values.asMap().entries.map((e) {
-            return FlSpot(e.key.toDouble(), e.value);
+            return FlSpot(e.key.toDouble(), e.value.toDouble());
           }).toList(),
           isCurved: true,
-          color: const Color(0xFFFFFF00),
+          color: isDark ? const Color(0xFFFFFF00) : theme.colorScheme.primary,
           barWidth: 3,
-          dotData: const FlDotData(show: false),
+          dotData: FlDotData(
+            show: true,
+            getDotPainter: (spot, percent, barData, index) {
+              return FlDotCirclePainter(
+                radius: 4,
+                color: isDark
+                    ? const Color(0xFFFFFF00)
+                    : theme.colorScheme.primary,
+                strokeWidth: 2,
+                strokeColor: isDark ? Colors.black : Colors.white,
+              );
+            },
+          ),
+          belowBarData: BarAreaData(
+            show: true,
+            color:
+                (isDark ? const Color(0xFFFFFF00) : theme.colorScheme.primary)
+                    .withOpacity(0.1),
+          ),
         ),
       ],
     );
