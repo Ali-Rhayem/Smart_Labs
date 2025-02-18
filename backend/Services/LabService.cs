@@ -307,7 +307,7 @@ public class LabService
         return result.ModifiedCount > 0;
     }
 
-    public async Task<AnnouncementDTO?> SendAnnouncementToLabAsync(int id, Announcement announcement)
+    public async Task<AnnouncementDTO?> SendAnnouncementToLabAsync(int id, Announcement announcement, IFormFileCollection? files)
     {
         var lab = await GetLabByIdAsync(id);
         if (lab == null)
@@ -317,6 +317,31 @@ public class LabService
         var last_announcement = lab.Announcements.OrderByDescending(a => a.Id).FirstOrDefault();
         announcement.Id = last_announcement == null ? 1 : last_announcement.Id + 1;
         announcement.Time = DateTime.UtcNow;
+        // handle files upload
+        var currentDirectory = AppContext.BaseDirectory;
+        var directoryPath = Path.Combine(currentDirectory, "wwwroot", "files");
+        if (!Directory.Exists(directoryPath))
+        {
+            Directory.CreateDirectory(directoryPath);
+        }
+        if (files != null)
+        {
+
+            var files_paths = new List<string>();
+            foreach (var file in files)
+            {
+                var timestamp = DateTime.Now.ToString("yyyyMMddHHmmssffff");
+                var new_file_name = $"{file.FileName}_{timestamp}.{file.FileName.Split('.').Last()}";
+                var file_path = $"files/{new_file_name}";
+                using (var stream = new FileStream(Path.Combine(directoryPath, new_file_name), FileMode.Create))
+                {
+                    await file.CopyToAsync(stream);
+                }
+                if (file_path != null)
+                    files_paths.Add(file_path);
+            }
+            announcement.Files = files_paths;
+        }
         var updateDefinition = Builders<Lab>.Update.Push(lab => lab.Announcements, announcement);
         var result = await _labs.UpdateOneAsync(lab => lab.Id == id, updateDefinition);
 
@@ -604,6 +629,74 @@ public class LabService
         result["people_bytime"] = people_bysession;
 
         return result;
+    }
+
+    public async Task<AnnouncementDTO?> SubmitSolutionToAssignmentAsync(int lab_id, int assignment_id, Submission submission, IFormFileCollection? files)
+    {
+        var lab = await GetLabByIdAsync(lab_id);
+        if (lab == null)
+            return null;
+
+        var assignment = lab.Announcements.Find(a => a.Id == assignment_id);
+        if (assignment == null || !assignment.Assignment)
+            return null;
+
+        submission.Time = DateTime.UtcNow;
+        submission.Submitted = true;
+
+        // handle files upload
+        var currentDirectory = AppContext.BaseDirectory;
+        var directoryPath = Path.Combine(currentDirectory, "wwwroot", "files");
+        if (!Directory.Exists(directoryPath))
+        {
+            Directory.CreateDirectory(directoryPath);
+        }
+        if (files != null)
+        {
+
+            var files_paths = new List<string>();
+            foreach (var file in files)
+            {
+                var timestamp = DateTime.Now.ToString("yyyyMMddHHmmssffff");
+                var file_path = $"files/{file.FileName}_${timestamp}.${file.FileName.Split('.').Last()}";
+                using (var stream = new FileStream(Path.Combine(directoryPath, file.FileName), FileMode.Create))
+                {
+                    await file.CopyToAsync(stream);
+                }
+                if (file_path != null)
+                    files_paths.Add(file_path);
+            }
+            submission.Files = files_paths;
+        }
+        // save the assignment 
+        var updateDefinition = Builders<Lab>.Update.Push("Announcements.$[a].Submissions", submission);
+        var arrayFilters = new List<ArrayFilterDefinition>
+        {
+            new BsonDocumentArrayFilterDefinition<BsonDocument>(new BsonDocument("a._id", assignment_id))
+        };
+        var result = await _labs.UpdateOneAsync(l => l.Id == lab_id, updateDefinition, new UpdateOptions { ArrayFilters = arrayFilters });
+
+        if (result.ModifiedCount == 0)
+            return null;
+
+        assignment.Submissions.Add(submission);
+
+        AnnouncementDTO assignmentDTO = new AnnouncementDTO
+        {
+            Id = assignment.Id,
+            user = (UserDTO)await _userService.GetUserById(assignment.Sender),
+            Message = assignment.Message,
+            Files = assignment.Files,
+            Time = assignment.Time,
+            Comments = CommentDTO.FromCommentListAsync(assignment.Comments, _userService).Result,
+            Assignment = assignment.Assignment,
+            CanSubmit = assignment.CanSubmit,
+            Deadline = assignment.Deadline,
+            Submissions = SubmissionDTO.FromSubmissionAsync(assignment.Submissions, _userService).Result,
+            Grade = assignment.Grade
+        };
+
+        return result.ModifiedCount > 0 ? assignmentDTO : null;
     }
 
 }
