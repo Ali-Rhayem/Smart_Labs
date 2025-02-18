@@ -146,9 +146,8 @@ class StudentDashboardScreen extends ConsumerWidget {
 
   Widget _buildLabCard(
       LabDashboardAnalytics lab, bool isDark, ThemeData theme) {
-    // Check if lab data is empty
     if (lab.labId.isEmpty || lab.labName.isEmpty) {
-      return const SizedBox.shrink(); // Don't show anything for empty labs
+      return const SizedBox.shrink();
     }
 
     return Card(
@@ -162,59 +161,82 @@ class StudentDashboardScreen extends ConsumerWidget {
         ),
       ),
       margin: const EdgeInsets.only(bottom: 16),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              lab.labName,
-              style: TextStyle(
-                color: theme.colorScheme.onSurface,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 20),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildProgressStat(
-                    'Attendance',
-                    lab.totalAttendance,
-                    Icons.people,
-                    Colors.blue,
-                    isDark,
-                    theme,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: _buildProgressStat(
-                    'PPE Compliance',
-                    lab.totalPPECompliance,
-                    Icons.health_and_safety,
-                    Colors.green,
-                    isDark,
-                    theme,
-                  ),
-                ),
-              ],
-            ),
-            if (lab.xaxis.isNotEmpty) ...[
-              const SizedBox(height: 24),
-              SizedBox(
-                height: 200,
-                child: LineChart(_buildLineChartData(
-                  lab.totalAttendanceByTime,
-                  lab.xaxis,
-                  isDark,
-                  theme,
-                )),
-              ),
-            ],
-          ],
+      clipBehavior: Clip.antiAlias,
+      child: ExpansionTile(
+        shape: const RoundedRectangleBorder(
+          side: BorderSide.none,
         ),
+        collapsedShape: const RoundedRectangleBorder(
+          side: BorderSide.none,
+        ),
+        title: Text(
+          lab.labName,
+          style: TextStyle(
+            color: theme.colorScheme.onSurface,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              border: Border(
+                top: BorderSide(
+                  color: isDark ? Colors.white12 : Colors.black12,
+                  width: 1,
+                ),
+              ),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildProgressStat(
+                          'Attendance',
+                          lab.totalAttendance,
+                          Icons.people,
+                          Colors.blue,
+                          isDark,
+                          theme,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: _buildProgressStat(
+                          'PPE Compliance',
+                          lab.totalPPECompliance,
+                          Icons.health_and_safety,
+                          Colors.green,
+                          isDark,
+                          theme,
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (lab.xaxis.isNotEmpty) ...[
+                    const SizedBox(height: 24),
+                    SizedBox(
+                      height: 250,
+                      child: Padding(
+                        padding: const EdgeInsets.only(right: 16, bottom: 8),
+                        child: LineChart(_buildLineChartData(
+                          lab.totalAttendanceByTime,
+                          lab.xaxis,
+                          isDark,
+                          theme,
+                        )),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -261,9 +283,16 @@ class StudentDashboardScreen extends ConsumerWidget {
     return LineChartData(
       gridData: FlGridData(
         show: true,
-        drawVerticalLine: false,
-        horizontalInterval: 5,
+        drawVerticalLine: true,
+        horizontalInterval: 10,
+        verticalInterval: 1,
         getDrawingHorizontalLine: (value) {
+          return FlLine(
+            color: theme.colorScheme.onSurface.withOpacity(0.1),
+            strokeWidth: 1,
+          );
+        },
+        getDrawingVerticalLine: (value) {
           return FlLine(
             color: theme.colorScheme.onSurface.withOpacity(0.1),
             strokeWidth: 1,
@@ -278,11 +307,12 @@ class StudentDashboardScreen extends ConsumerWidget {
           sideTitles: SideTitles(
             showTitles: true,
             interval: 10,
+            reservedSize: 35,
             getTitlesWidget: (value, meta) {
               return Padding(
                 padding: const EdgeInsets.only(right: 8),
                 child: Text(
-                  value.toInt().toString(),
+                  '${value.toInt()}%',
                   style: TextStyle(
                     color: theme.colorScheme.onSurface.withOpacity(0.7),
                     fontSize: 12,
@@ -296,25 +326,41 @@ class StudentDashboardScreen extends ConsumerWidget {
           sideTitles: SideTitles(
             showTitles: true,
             interval: 1,
+            reservedSize: 30,
             getTitlesWidget: (value, meta) {
               if (value.toInt() >= 0 && value.toInt() < labels.length) {
-                return Padding(
-                  padding: const EdgeInsets.only(top: 8),
-                  child: Text(
-                    labels[value.toInt()],
-                    style: TextStyle(
-                      color: theme.colorScheme.onSurface.withOpacity(0.7),
-                      fontSize: 12,
+                final date = labels[value.toInt()];
+                // Format the date to show only month and day
+                final parts = date.split('/');
+                if (parts.length >= 2) {
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 5),
+                    child: Text(
+                      '${parts[0]}/${parts[1]}',
+                      style: TextStyle(
+                        color: theme.colorScheme.onSurface.withOpacity(0.7),
+                        fontSize: 11,
+                      ),
                     ),
-                  ),
-                );
+                  );
+                }
               }
               return const Text('');
             },
           ),
         ),
       ),
-      borderData: FlBorderData(show: false),
+      borderData: FlBorderData(
+        show: true,
+        border: Border.all(
+          color: theme.colorScheme.onSurface.withOpacity(0.1),
+          width: 1,
+        ),
+      ),
+      minX: 0,
+      maxX: (values.length - 1).toDouble(),
+      minY: 0,
+      maxY: 100,
       lineBarsData: [
         LineChartBarData(
           spots: values.asMap().entries.map((e) {
