@@ -109,7 +109,7 @@ const AnalyticsSession: React.FC<AnalyticsSessionProps> = ({
 									vertical={false}
 									strokeDasharray="3 3"
 								/>
-								<XAxis dataKey="" />
+								<XAxis dataKey="time" />
 								<YAxis domain={[0, 100]} />
 								<Tooltip />
 								<Legend
