@@ -669,5 +669,38 @@ namespace backend.Controllers
 
             return Ok(result);
         }
+
+        // set grades
+        // POST: api/lab/{labId}/assignment/{assignmentId}/user/{userId}/grade
+        [HttpPost("{labId}/assignment/{assignmentId}/user/{userId}/grade/{grade}")]
+        [Authorize(Roles = "instructor")]
+        public async Task<ActionResult> SetGrade(int labId, int assignmentId, int userId, int grade)
+        {
+            var userIdClaim = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier);
+            var lab = await _labService.GetLabByIdAsync(labId);
+
+            if (lab == null)
+                return NotFound(new { errors = "Lab not found." });
+
+            if (!lab.Instructors.Contains(int.Parse(userIdClaim!.Value)))
+                return Unauthorized(new { errors = "User not authorized." });
+
+            var announcements = await GetAnnouncements(labId);
+            if (announcements == null)
+                return NotFound(new { errors = "Assignment not found." });
+            var announcement = announcements.Value!.FirstOrDefault(a => a.Id == assignmentId);
+            if (announcement == null)
+                return NotFound(new { errors = "Assignment not found." });
+
+            if (grade < 0 || grade > announcement.Grade)
+                return BadRequest(new { errors = "Grade must be between 0 and 100." });
+
+            var result = await _labService.SetGradeAsync(labId, assignmentId, userId, grade);
+
+            if (!result)
+                return NotFound(new { errors = "Grade not set." });
+
+            return NoContent();
+        }
     }
 }
