@@ -51,6 +51,9 @@ public class Submission
     [BsonElement("Time")]
     public DateTime Time { get; set; } = DateTime.UtcNow;
 
+    [BsonElement("Submitted")]
+    public bool Submitted { get; set; } = false;
+
     [BsonElement("Grade")]
     public int? Grade { get; set; }
 }
