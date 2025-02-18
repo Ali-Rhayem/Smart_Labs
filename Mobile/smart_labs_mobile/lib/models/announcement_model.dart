@@ -8,6 +8,10 @@ class Announcement {
   final List<String> files;
   final DateTime time;
   List<Comment> comments = [];
+  final bool isAssignment;
+  final bool canSubmit;
+  final DateTime? deadline;
+  final int? grade;
 
   Announcement({
     required this.id,
@@ -16,6 +20,10 @@ class Announcement {
     required this.files,
     required this.time,
     required this.comments,
+    this.isAssignment = false,
+    this.canSubmit = false,
+    this.deadline,
+    this.grade,
   });
 
   factory Announcement.fromJson(Map<String, dynamic> json) {
@@ -28,6 +36,11 @@ class Announcement {
       comments: (json['comments'] as List<dynamic>? ?? [])
           .map((comment) => Comment.fromJson(comment))
           .toList(),
+      isAssignment: json['assignment'] ?? false,
+      canSubmit: json['canSubmit'] ?? false,
+      deadline:
+          json['deadline'] != null ? DateTime.parse(json['deadline']) : null,
+      grade: json['grade'],
     );
   }
 }
