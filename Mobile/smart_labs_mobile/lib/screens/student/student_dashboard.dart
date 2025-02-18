@@ -83,9 +83,16 @@ class StudentDashboardScreen extends ConsumerWidget {
               ListView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
-                itemCount: analytics.labs.length,
+                itemCount: analytics.labs
+                    .where(
+                        (lab) => lab.labId.isNotEmpty && lab.labName.isNotEmpty)
+                    .length,
                 itemBuilder: (context, index) {
-                  return _buildLabCard(analytics.labs[index], isDark, theme);
+                  final validLabs = analytics.labs
+                      .where((lab) =>
+                          lab.labId.isNotEmpty && lab.labName.isNotEmpty)
+                      .toList();
+                  return _buildLabCard(validLabs[index], isDark, theme);
                 },
               ),
             ],
@@ -139,6 +146,11 @@ class StudentDashboardScreen extends ConsumerWidget {
 
   Widget _buildLabCard(
       LabDashboardAnalytics lab, bool isDark, ThemeData theme) {
+    // Check if lab data is empty
+    if (lab.labId.isEmpty || lab.labName.isEmpty) {
+      return const SizedBox.shrink(); // Don't show anything for empty labs
+    }
+
     return Card(
       elevation: isDark ? 0 : 1,
       color: isDark ? const Color(0xFF1C1C1C) : theme.colorScheme.surface,
