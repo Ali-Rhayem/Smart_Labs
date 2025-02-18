@@ -4,6 +4,8 @@ import 'package:smart_labs_mobile/models/lab_model.dart';
 import 'package:smart_labs_mobile/providers/announcement_provider.dart';
 import 'package:smart_labs_mobile/widgets/instructor/announcement/announcement_comments_screen.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'dart:io';
+import 'package:file_picker/file_picker.dart';
 
 String formatDateTime(DateTime dateTime) {
   final hour = dateTime.hour > 12
@@ -32,14 +34,15 @@ class AnnouncementsTab extends ConsumerStatefulWidget {
 class _AnnouncementsTabState extends ConsumerState<AnnouncementsTab> {
   final TextEditingController _messageController = TextEditingController();
   bool _isDialogOpen = false;
+  final List<File> selectedFiles = [];
 
-  Future<void> _addAnnouncement() async {
+  Future<void> _addAnnouncement(List<File> files) async {
     if (_messageController.text.trim().isEmpty) return;
 
     try {
       await ref
           .read(labAnnouncementsProvider(widget.lab.labId).notifier)
-          .addAnnouncement(_messageController.text.trim());
+          .addAnnouncement(_messageController.text.trim(), files);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -86,105 +89,179 @@ class _AnnouncementsTabState extends ConsumerState<AnnouncementsTab> {
       await showDialog(
         context: context,
         builder: (BuildContext context) {
-          return Dialog(
-            backgroundColor:
-                isDark ? const Color(0xFF1C1C1C) : theme.colorScheme.surface,
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            child: Container(
-              padding: const EdgeInsets.all(24),
-              constraints: const BoxConstraints(maxWidth: 400),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          return StatefulBuilder(
+            builder: (context, setState) {
+              return Dialog(
+                backgroundColor: isDark
+                    ? const Color(0xFF1C1C1C)
+                    : theme.colorScheme.surface,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16)),
+                child: Container(
+                  padding: const EdgeInsets.all(24),
+                  constraints: const BoxConstraints(maxWidth: 400),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'New Announcement',
-                        style: TextStyle(
-                          color: theme.colorScheme.onSurface,
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'New Announcement',
+                            style: TextStyle(
+                              color: theme.colorScheme.onSurface,
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          IconButton(
+                            icon: Icon(
+                              Icons.close,
+                              color:
+                                  theme.colorScheme.onSurface.withOpacity(0.7),
+                            ),
+                            onPressed: () => Navigator.pop(context),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 24),
+                      Flexible(
+                        child: SingleChildScrollView(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: isDark
+                                      ? Colors.black12
+                                      : Colors.grey[100],
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: isDark
+                                        ? Colors.white24
+                                        : Colors.black12,
+                                  ),
+                                ),
+                                child: TextField(
+                                  controller: _messageController,
+                                  maxLines: 5,
+                                  style: TextStyle(
+                                      color: theme.colorScheme.onSurface),
+                                  decoration: InputDecoration(
+                                    hintText: 'Write your announcement here...',
+                                    hintStyle: TextStyle(
+                                      color: theme.colorScheme.onSurface
+                                          .withOpacity(0.5),
+                                    ),
+                                    border: InputBorder.none,
+                                    contentPadding: const EdgeInsets.all(16),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                              Row(
+                                children: [
+                                  ElevatedButton.icon(
+                                    icon: const Icon(Icons.attach_file),
+                                    label: const Text('Attach Files'),
+                                    onPressed: () => _showAttachmentOptions(
+                                        context, setState),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: isDark
+                                          ? Colors.grey[800]
+                                          : Colors.grey[200],
+                                      foregroundColor:
+                                          theme.colorScheme.onSurface,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      selectedFiles.isEmpty
+                                          ? 'No files selected'
+                                          : '${selectedFiles.length} files selected',
+                                      style: TextStyle(
+                                        color: theme.colorScheme.onSurface
+                                            .withOpacity(0.7),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              if (selectedFiles.isNotEmpty) ...[
+                                const SizedBox(height: 8),
+                                SizedBox(
+                                  height: 40,
+                                  child: ListView.builder(
+                                    scrollDirection: Axis.horizontal,
+                                    itemCount: selectedFiles.length,
+                                    itemBuilder: (context, index) {
+                                      final file = selectedFiles[index];
+                                      return Padding(
+                                        padding:
+                                            const EdgeInsets.only(right: 8),
+                                        child: Chip(
+                                          label:
+                                              Text(file.path.split('/').last),
+                                          onDeleted: () {
+                                            setState(() {
+                                              selectedFiles.remove(file);
+                                            });
+                                          },
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
                         ),
                       ),
-                      IconButton(
-                        icon: Icon(
-                          Icons.close,
-                          color: theme.colorScheme.onSurface.withOpacity(0.7),
-                        ),
-                        onPressed: () => Navigator.pop(context),
+                      const SizedBox(height: 24),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: Text(
+                              'Cancel',
+                              style: TextStyle(
+                                color: theme.colorScheme.onSurface
+                                    .withOpacity(0.7),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          ElevatedButton(
+                            onPressed: () {
+                              _addAnnouncement(selectedFiles);
+                              Navigator.pop(context);
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: isDark
+                                  ? const Color(0xFFFFFF00)
+                                  : theme.colorScheme.primary,
+                              foregroundColor:
+                                  isDark ? Colors.black : Colors.white,
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 24, vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8)),
+                            ),
+                            child: const Text(
+                              'Post Announcement',
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
-                  const SizedBox(height: 24),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: isDark ? Colors.black12 : Colors.grey[100],
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: isDark ? Colors.white24 : Colors.black12,
-                      ),
-                    ),
-                    child: TextField(
-                      controller: _messageController,
-                      maxLines: 5,
-                      style: TextStyle(color: theme.colorScheme.onSurface),
-                      decoration: InputDecoration(
-                        hintText: 'Write your announcement here...',
-                        hintStyle: TextStyle(
-                          color: theme.colorScheme.onSurface.withOpacity(0.5),
-                        ),
-                        border: InputBorder.none,
-                        contentPadding: const EdgeInsets.all(16),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: Text(
-                          'Cancel',
-                          style: TextStyle(
-                            color: theme.colorScheme.onSurface.withOpacity(0.7),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      ElevatedButton(
-                        onPressed: () {
-                          _addAnnouncement();
-                          Navigator.pop(context);
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: isDark
-                              ? const Color(0xFFFFFF00)
-                              : theme.colorScheme.primary,
-                          foregroundColor: isDark ? Colors.black : Colors.white,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 24,
-                            vertical: 12,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                        child: const Text(
-                          'Post Announcement',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
+                ),
+              );
+            },
           );
         },
       );
@@ -192,6 +269,74 @@ class _AnnouncementsTabState extends ConsumerState<AnnouncementsTab> {
       if (mounted) {
         setState(() => _isDialogOpen = false);
       }
+    }
+  }
+
+  Future<void> _showAttachmentOptions(
+      BuildContext context, Function setState) async {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor:
+          isDark ? const Color(0xFF1C1C1C) : theme.colorScheme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.image),
+              title: const Text('Photo'),
+              onTap: () async {
+                Navigator.pop(context);
+                final result = await FilePicker.platform.pickFiles(
+                  type: FileType.image,
+                  allowMultiple: true,
+                );
+                _handleFilePickerResult(result, setState);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.insert_drive_file),
+              title: const Text('Document'),
+              onTap: () async {
+                Navigator.pop(context);
+                final result = await FilePicker.platform.pickFiles(
+                  type: FileType.custom,
+                  allowMultiple: true,
+                  allowedExtensions: ['pdf', 'doc', 'docx', 'txt'],
+                );
+                _handleFilePickerResult(result, setState);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.attachment),
+              title: const Text('Any File'),
+              onTap: () async {
+                Navigator.pop(context);
+                final result = await FilePicker.platform.pickFiles(
+                  allowMultiple: true,
+                );
+                _handleFilePickerResult(result, setState);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _handleFilePickerResult(FilePickerResult? result, Function setState) {
+    if (result != null) {
+      setState(() {
+        selectedFiles.addAll(
+          result.paths.map((path) => File(path!)).toList(),
+        );
+      });
     }
   }
 
