@@ -10,6 +10,7 @@ import 'package:dio/dio.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:file_picker/file_picker.dart';
 
 String formatDateTime(DateTime dateTime) {
   final hour = dateTime.hour > 12
@@ -48,6 +49,9 @@ class _AnnouncementCommentsScreenState
   final ScrollController _scrollController = ScrollController();
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
+  final List<File> selectedFiles = [];
+  final TextEditingController submissionMessageController =
+      TextEditingController();
 
   @override
   void initState() {
@@ -268,6 +272,320 @@ class _AnnouncementCommentsScreenState
     }
   }
 
+  void _resetSubmission() {
+    setState(() {
+      selectedFiles.clear();
+      submissionMessageController.clear();
+    });
+  }
+
+  Future<void> _pickFiles() async {
+    try {
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png'],
+        allowMultiple: true,
+      );
+
+      if (result != null) {
+        setState(() {
+          selectedFiles.addAll(result.paths.map((path) => File(path!)));
+        });
+        // Force rebuild of the bottom sheet
+        if (mounted) {
+          Navigator.pop(context);
+          _showSubmissionDialog();
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error picking files: $e')),
+        );
+      }
+    }
+  }
+
+  void _showSubmissionDialog() {
+    // Check if user has already submitted
+    final hasSubmitted = widget.announcement.submissions?.any(
+          (submission) => submission.submitted == true,
+        ) ??
+        false;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) {
+          final theme = Theme.of(context);
+          final isDark = theme.brightness == Brightness.dark;
+
+          return Container(
+            height: MediaQuery.of(context).size.height * 0.8,
+            decoration: BoxDecoration(
+              color:
+                  isDark ? const Color(0xFF1C1C1C) : theme.colorScheme.surface,
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(20)),
+            ),
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        hasSubmitted ? 'Your Submission' : 'Submit Assignment',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: theme.colorScheme.onSurface,
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () {
+                          _resetSubmission();
+                          Navigator.pop(context);
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+                const Divider(),
+                Expanded(
+                  child: ListView(
+                    padding: const EdgeInsets.all(16),
+                    children: [
+                      if (hasSubmitted) ...[
+                        // Show previous submissions
+                        ...widget.announcement.submissions!
+                            .where((submission) => submission.submitted)
+                            .map((submission) => Card(
+                                  margin: const EdgeInsets.only(bottom: 16),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(16),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          'Submitted on: ${formatDateTime(submission.submittedAt)}',
+                                          style: TextStyle(
+                                            color: theme.colorScheme.onSurface
+                                                .withOpacity(0.7),
+                                          ),
+                                        ),
+                                        if (submission.message.isNotEmpty) ...[
+                                          const SizedBox(height: 8),
+                                          Text(
+                                            submission.message,
+                                            style: TextStyle(
+                                              color:
+                                                  theme.colorScheme.onSurface,
+                                            ),
+                                          ),
+                                        ],
+                                        if (submission.files.isNotEmpty) ...[
+                                          const SizedBox(height: 8),
+                                          Text(
+                                            'Submitted Files:',
+                                            style: TextStyle(
+                                              color:
+                                                  theme.colorScheme.onSurface,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 4),
+                                          ...submission.files.map(
+                                            (file) => ListTile(
+                                              leading: Icon(_getFileIcon(file)),
+                                              title: Text(file.split('/').last),
+                                              onTap: () async {
+                                                final fileUrl =
+                                                    '${dotenv.env['BASE_URL']}/$file';
+                                                await _downloadAndOpenFile(
+                                                  fileUrl,
+                                                  file.split('/').last,
+                                                );
+                                              },
+                                            ),
+                                          ),
+                                        ],
+                                        if (submission.grade != null) ...[
+                                          const SizedBox(height: 8),
+                                          Text(
+                                            'Grade: ${submission.grade}',
+                                            style: TextStyle(
+                                              color: theme.colorScheme.primary,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ],
+                                      ],
+                                    ),
+                                  ),
+                                ))
+                            .toList(),
+                      ] else ...[
+                        // Show submission form
+                        TextField(
+                          controller: submissionMessageController,
+                          decoration: InputDecoration(
+                            hintText: 'Add a comment (optional)',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          maxLines: 3,
+                        ),
+                        const SizedBox(height: 24),
+                        Text(
+                          'Attachments',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: theme.colorScheme.onSurface,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        if (selectedFiles.isEmpty)
+                          Center(
+                            child: Padding(
+                              padding: const EdgeInsets.all(24),
+                              child: Text(
+                                'No files selected',
+                                style: TextStyle(
+                                  color: theme.colorScheme.onSurface
+                                      .withOpacity(0.6),
+                                ),
+                              ),
+                            ),
+                          )
+                        else
+                          ListView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: selectedFiles.length,
+                            itemBuilder: (context, index) {
+                              final file = selectedFiles[index];
+                              final fileName = file.path.split('/').last;
+                              return StatefulBuilder(
+                                builder: (context, setListState) {
+                                  return ListTile(
+                                    leading: Icon(_getFileIcon(fileName)),
+                                    title: Text(fileName),
+                                    trailing: IconButton(
+                                      icon: const Icon(Icons.close),
+                                      onPressed: () {
+                                        setState(() {
+                                          selectedFiles.removeAt(index);
+                                        });
+                                        setListState(() {});
+                                      },
+                                    ),
+                                  );
+                                },
+                              );
+                            },
+                          ),
+                        const SizedBox(height: 16),
+                        ElevatedButton.icon(
+                          onPressed: _pickFiles,
+                          icon: const Icon(Icons.attach_file),
+                          label: const Text('Add Files (PDF, DOC, Images)'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.grey[800],
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                if (!hasSubmitted)
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.surface,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 8,
+                          offset: const Offset(0, -2),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: selectedFiles.isEmpty
+                                ? null
+                                : () async {
+                                    try {
+                                      await ref
+                                          .read(labAnnouncementsProvider(
+                                                  widget.labId)
+                                              .notifier)
+                                          .submitAssignment(
+                                            widget.announcement.id.toString(),
+                                            {
+                                              'message':
+                                                  submissionMessageController
+                                                      .text
+                                            },
+                                            selectedFiles,
+                                          );
+                                      if (mounted) {
+                                        _resetSubmission();
+                                        Navigator.pop(context);
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          const SnackBar(
+                                            content: Text(
+                                                'Assignment submitted successfully'),
+                                          ),
+                                        );
+                                      }
+                                    } catch (e) {
+                                      if (mounted) {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                                'Error submitting assignment: $e'),
+                                          ),
+                                        );
+                                      }
+                                    }
+                                  },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: isDark
+                                  ? kNeonAccent
+                                  : theme.colorScheme.primary,
+                              foregroundColor:
+                                  isDark ? Colors.black : Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                            ),
+                            child: const Text('Submit'),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -349,19 +667,74 @@ class _AnnouncementCommentsScreenState
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Icon(Icons.assignment,
-                                color: isDark
-                                    ? kNeonAccent
-                                    : theme.colorScheme.primary),
-                            const SizedBox(width: 8),
-                            Text(
-                              'Assignment',
-                              style: TextStyle(
-                                color: theme.colorScheme.onSurface,
-                                fontWeight: FontWeight.bold,
-                              ),
+                            Row(
+                              children: [
+                                Icon(Icons.assignment,
+                                    color: isDark
+                                        ? kNeonAccent
+                                        : theme.colorScheme.primary),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Assignment',
+                                  style: TextStyle(
+                                    color: theme.colorScheme.onSurface,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
                             ),
+                            if (widget.announcement.canSubmit)
+                              ElevatedButton(
+                                onPressed: _showSubmissionDialog,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: widget
+                                              .announcement.submissions
+                                              ?.any((submission) =>
+                                                  submission.submitted ==
+                                                  true) ??
+                                          false
+                                      ? Colors.green
+                                      : isDark
+                                          ? kNeonAccent
+                                          : theme.colorScheme.primary,
+                                  foregroundColor:
+                                      isDark ? Colors.black : Colors.white,
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 16, vertical: 8),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      widget.announcement.submissions?.any(
+                                                  (submission) =>
+                                                      submission.submitted ==
+                                                      true) ??
+                                              false
+                                          ? Icons.check_circle
+                                          : Icons.upload_file,
+                                      size: 18,
+                                      color:
+                                          isDark ? Colors.black : Colors.white,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      widget.announcement.submissions?.any(
+                                                  (submission) =>
+                                                      submission.submitted ==
+                                                      true) ??
+                                              false
+                                          ? 'View Submission'
+                                          : 'Submit',
+                                    ),
+                                  ],
+                                ),
+                              ),
                           ],
                         ),
                         if (widget.announcement.deadline != null) ...[
@@ -378,7 +751,30 @@ class _AnnouncementCommentsScreenState
                                 'Deadline: ${formatDateTime(widget.announcement.deadline!)}',
                                 style: TextStyle(
                                   color: theme.colorScheme.onSurface
-                                      .withValues(alpha: 0.7),
+                                      .withOpacity(0.7),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                        if (widget.announcement.submissions?.any(
+                              (submission) => submission.grade != null,
+                            ) ??
+                            false) ...[
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              Icon(Icons.grade,
+                                  size: 16,
+                                  color: isDark
+                                      ? kNeonAccent
+                                      : theme.colorScheme.primary),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Grade: ${widget.announcement.submissions!.firstWhere((s) => s.grade != null).grade}/${widget.announcement.grade}',
+                                style: TextStyle(
+                                  color: theme.colorScheme.primary,
+                                  fontWeight: FontWeight.bold,
                                 ),
                               ),
                             ],
