@@ -542,6 +542,32 @@ class _AnnouncementCommentsScreenState
                                             selectedFiles,
                                           );
                                       if (mounted) {
+                                        // Create a new submission with local data
+                                        final currentUser =
+                                            ref.read(userProvider);
+                                        final newSubmission = Submission(
+                                          userId: currentUser!.id,
+                                          user: currentUser,
+                                          message:
+                                              submissionMessageController.text,
+                                          files: selectedFiles
+                                              .map((file) =>
+                                                  file.path.split('/').last)
+                                              .toList(),
+                                          submittedAt: DateTime.now(),
+                                          submitted: true,
+                                        );
+
+                                        setState(() {
+                                          if (widget.announcement.submissions ==
+                                              null) {
+                                            widget.announcement.submissions =
+                                                [];
+                                          }
+                                          widget.announcement.submissions!
+                                              .add(newSubmission);
+                                        });
+
                                         _resetSubmission();
                                         Navigator.pop(context);
                                         ScaffoldMessenger.of(context)
