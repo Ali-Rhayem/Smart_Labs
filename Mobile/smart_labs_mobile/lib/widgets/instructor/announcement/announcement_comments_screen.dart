@@ -102,6 +102,65 @@ class _AnnouncementCommentsScreenState
                     ),
                   ],
                 ),
+                const SizedBox(height: 12),
+                if (widget.announcement.files.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  SizedBox(
+                    height: 40,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: widget.announcement.files.length,
+                      itemBuilder: (context, index) {
+                        final fileName =
+                            widget.announcement.files[index].split('/').last;
+                        return Padding(
+                          padding: const EdgeInsets.only(right: 8),
+                          child: InkWell(
+                            onTap: () {
+                              // TODO: Add file download/view functionality
+                              final fileUrl =
+                                  '${dotenv.env['BASE_URL']}/${widget.announcement.files[index]}';
+                              // Launch file download
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: isDark
+                                    ? Colors.grey[800]
+                                    : Colors.grey[200],
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(
+                                  color:
+                                      isDark ? Colors.white24 : Colors.black12,
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    _getFileIcon(fileName),
+                                    size: 16,
+                                    color: accentColor,
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    fileName,
+                                    style: TextStyle(
+                                      color: theme.colorScheme.onSurface
+                                          .withOpacity(0.7),
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
@@ -339,6 +398,23 @@ class _AnnouncementCommentsScreenState
           SnackBar(content: Text('Error: $e')),
         );
       }
+    }
+  }
+
+  IconData _getFileIcon(String fileName) {
+    final extension = fileName.split('.').last.toLowerCase();
+    switch (extension) {
+      case 'pdf':
+        return Icons.picture_as_pdf;
+      case 'doc':
+      case 'docx':
+        return Icons.description;
+      case 'jpg':
+      case 'jpeg':
+      case 'png':
+        return Icons.image;
+      default:
+        return Icons.insert_drive_file;
     }
   }
 }
