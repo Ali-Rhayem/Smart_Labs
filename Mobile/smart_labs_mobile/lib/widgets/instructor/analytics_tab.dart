@@ -286,12 +286,18 @@ class AnalyticsTab extends ConsumerWidget {
         leading: CircleAvatar(
           backgroundImage: student.user.image != null
               ? NetworkImage(
-                  '${dotenv.env['IMAGE_BASE_URL']}/${student.user.image}')
+                  '${dotenv.env['IMAGE_BASE_URL']}/${student.user.image}',
+                  headers: const {'Accept': 'image/*'},
+                )
               : null,
           backgroundColor: isDark ? kNeonAccent : theme.colorScheme.primary,
-          child: student.user.image == null
+          onBackgroundImageError: (_, __) {
+            // This will trigger if the image fails to load
+            return;
+          },
+          child: (student.user.image == null || true)
               ? Text(
-                  student.name[0].toUpperCase(),
+                  student.user.name[0].toUpperCase(),
                   style: TextStyle(
                     color: isDark ? Colors.black : Colors.white,
                     fontWeight: FontWeight.bold,
@@ -300,7 +306,7 @@ class AnalyticsTab extends ConsumerWidget {
               : null,
         ),
         title: Text(
-          student.name,
+          student.user.name,
           style: TextStyle(
             color: theme.colorScheme.onSurface,
             fontWeight: FontWeight.w500,
