@@ -406,7 +406,7 @@ namespace backend.Controllers
         // POST: api/lab/{labId}/announcement
         [HttpPost("{labId}/announcement")]
         [Authorize(Roles = "instructor")]
-        public async Task<ActionResult> SendAnnouncementToLab(int labId, Announcement announcement)
+        public async Task<ActionResult> SendAnnouncementToLab(int labId, [FromForm] Announcement announcement)
         {
             var userIdClaim = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier);
             var lab = await _labService.GetLabByIdAsync(labId);
@@ -421,7 +421,20 @@ namespace backend.Controllers
 
             announcement.Sender = int.Parse(userIdClaim!.Value);
 
-            var result = await _labService.SendAnnouncementToLabAsync(labId, announcement);
+            var files = Request.Form.Files;
+
+            for (int i = 0; i < files.Count; i++)
+            {
+                var file = files[i];
+                if (file.Length == 0)
+                    return BadRequest(new { errors = "File is empty." });
+                if (file.Length > 10485760)
+                    return BadRequest(new { errors = "File is too large." });
+                if (file.ContentType != "application/pdf" && file.ContentType != "application/msword" && file.ContentType != "application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+                    return BadRequest(new { errors = "File type not suppoted" });
+            }
+
+            var result = await _labService.SendAnnouncementToLabAsync(labId, announcement, files);
 
             if (result == null)
                 return NotFound(new { errors = "Announcement not sent." });
@@ -614,6 +627,45 @@ namespace backend.Controllers
                 return Unauthorized(new { errors = "User not authorized." });
 
             var result = await _labService.AnalyzeLabAsync(id);
+
+            return Ok(result);
+        }
+        // submite solution
+        // POST: api/lab/{labId}/assignment/{assignmentId}/submit
+        [HttpPost("{labId}/assignment/{assignmentId}/submit")]
+        [Authorize(Roles = "student")]
+        public async Task<ActionResult> SubmitSolution(int labId, int assignmentId, Submission submission)
+        {
+            var userIdClaim = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier);
+            var lab = await _labService.GetLabByIdAsync(labId);
+
+            if (lab == null)
+                return NotFound(new { errors = "Lab not found." });
+
+            if (!lab.Students.Contains(int.Parse(userIdClaim!.Value)))
+                return Unauthorized(new { errors = "User not authorized." });
+
+
+            submission.UserId = int.Parse(userIdClaim!.Value);
+            submission.Grade = null;
+
+            var files = Request.Form.Files;
+
+            for (int i = 0; i < files.Count; i++)
+            {
+                var file = files[i];
+                if (file.Length == 0)
+                    return BadRequest(new { errors = "File is empty." });
+                if (file.Length > 10485760)
+                    return BadRequest(new { errors = "File is too large." });
+                if (file.ContentType != "application/pdf" && file.ContentType != "application/msword" && file.ContentType != "application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+                    return BadRequest(new { errors = "File is not a PDF." });
+            }
+
+            var result = await _labService.SubmitSolutionToAssignmentAsync(labId, assignmentId, submission, files);
+
+            if (result == null)
+                return NotFound(new { errors = "Assignment not sent." });
 
             return Ok(result);
         }
