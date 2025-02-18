@@ -91,18 +91,12 @@ class _AnnouncementsTabState extends ConsumerState<AnnouncementsTab> {
                 .read(labAnnouncementsProvider(widget.lab.labId).notifier)
                 .fetchAnnouncements(),
             child: announcementsAsync.when(
-              loading: () => Center(
-                child: CircularProgressIndicator(
-                  color: isDark
-                      ? const Color(0xFFFFFF00)
-                      : theme.colorScheme.primary,
-                ),
-              ),
+              loading: () => const Center(child: CircularProgressIndicator()),
               error: (error, stack) => Center(child: Text('Error: $error')),
               data: (announcements) => ListView.builder(
+                keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
                 itemCount: announcements.length,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                 itemBuilder: (context, index) {
                   final announcement = announcements[index];
                   return Card(
@@ -233,57 +227,74 @@ class _AnnouncementsTabState extends ConsumerState<AnnouncementsTab> {
             ),
           ),
         ),
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: _messageController,
-                  style: TextStyle(color: theme.colorScheme.onSurface),
-                  decoration: InputDecoration(
-                    hintText: 'Write an announcement...',
-                    hintStyle: TextStyle(
-                      color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
-                    ),
-                    filled: true,
-                    fillColor: isDark
-                        ? const Color(0xFF1C1C1C)
-                        : theme.colorScheme.surface,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(
-                        color: isDark ? Colors.white24 : Colors.black12,
+        SafeArea(
+          child: Container(
+            padding: EdgeInsets.only(
+              left: 16,
+              right: 16,
+              bottom: MediaQuery.of(context).viewInsets.bottom + 8,
+              top: 8,
+            ),
+            decoration: BoxDecoration(
+              color: isDark ? const Color(0xFF1C1C1C) : theme.colorScheme.surface,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 4,
+                  offset: const Offset(0, -1),
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _messageController,
+                    maxLines: 1,
+                    style: TextStyle(color: theme.colorScheme.onSurface),
+                    decoration: InputDecoration(
+                      hintText: 'Write an announcement...',
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
                       ),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(
-                        color: isDark ? Colors.white24 : Colors.black12,
+                      filled: true,
+                      fillColor: isDark
+                          ? const Color(0xFF1C1C1C)
+                          : theme.colorScheme.surface,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(
+                          color: isDark ? Colors.white24 : Colors.black12,
+                        ),
                       ),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(
-                        color: isDark
-                            ? const Color(0xFFFFFF00)
-                            : theme.colorScheme.primary,
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(
+                          color: isDark ? Colors.white24 : Colors.black12,
+                        ),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(
+                          color: isDark
+                              ? const Color(0xFFFFFF00)
+                              : theme.colorScheme.primary,
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-              const SizedBox(width: 8),
-              IconButton(
-                icon: Icon(
-                  Icons.send,
-                  color: isDark
-                      ? const Color(0xFFFFFF00)
-                      : theme.colorScheme.primary,
+                const SizedBox(width: 8),
+                IconButton(
+                  onPressed: _addAnnouncement,
+                  icon: Icon(
+                    Icons.send,
+                    color: isDark ? const Color(0xFFFFFF00) : theme.colorScheme.primary,
+                  ),
                 ),
-                onPressed: _addAnnouncement,
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ],
