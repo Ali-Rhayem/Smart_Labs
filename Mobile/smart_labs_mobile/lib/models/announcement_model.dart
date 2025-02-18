@@ -54,26 +54,34 @@ class Announcement {
 }
 
 class Submission {
+  final int userId;
   final User user;
-  final int? grade;
+  final String message;
   final List<String> files;
   final DateTime submittedAt;
+  final bool submitted;
+  final int? grade;
 
   Submission({
+    required this.userId,
     required this.user,
-    this.grade,
+    required this.message,
     required this.files,
     required this.submittedAt,
+    required this.submitted,
+    this.grade,
   });
 
   factory Submission.fromJson(Map<String, dynamic> json) {
     return Submission(
+      userId: json['userId'],
       user: User.fromJson(json['user'] ?? {}),
-      grade: json['grade'],
+      message: json['message'] ?? '',
       files: List<String>.from(json['files'] ?? []),
-      submittedAt: json['submittedAt'] != null
-          ? DateTime.parse(json['submittedAt'])
-          : DateTime.now(),
+      submittedAt:
+          json['time'] != null ? DateTime.parse(json['time']) : DateTime.now(),
+      submitted: json['submitted'] ?? false,
+      grade: json['grade'],
     );
   }
 }
