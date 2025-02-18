@@ -44,6 +44,7 @@ builder.Services.AddScoped<RoomService>();
 builder.Services.AddScoped<FacultyService>();
 builder.Services.AddScoped<SessionService>();
 builder.Services.AddScoped<NotificationService>();
+builder.Services.AddScoped<DashboardService>();
 builder.Services.AddScoped<LabHelper>();
 builder.Services.AddSingleton<KafkaProducer>();
 
