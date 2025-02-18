@@ -31,17 +31,7 @@ namespace backend.Controllers
             int userId = int.Parse(userIdClaim.Value);
             var result = new Dictionary<string, object>();
 
-            if (userRoleClaim.Value == "Admin"){}
-                // result = await _dashboardService.GetAdminDashboardAsync();
-
-            else if (userRoleClaim.Value == "instructor")
-                result = await _dashboardService.GetinstructorDashboardAsync(userId);
-
-            else if (userRoleClaim.Value == "student"){}
-                // result = await _dashboardService.GetstudentDashboardAsync(userId);
-
-            else
-                return Unauthorized(new { errors = "Invalid user" });
+            result = await _dashboardService.GetDashboardAsync(userId, userRoleClaim.Value);
 
             if (result == null)
             {
