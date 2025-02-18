@@ -1,8 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:smart_labs_mobile/providers/announcement_provider.dart';
+import 'package:smart_labs_mobile/providers/faculty_provider.dart';
+import 'package:smart_labs_mobile/providers/lab_analytics_provider.dart';
 import 'package:smart_labs_mobile/providers/lab_instructor_provider.dart';
 import 'package:smart_labs_mobile/providers/lab_student_provider.dart';
 import 'package:smart_labs_mobile/providers/notification_provider.dart';
+import 'package:smart_labs_mobile/providers/room_provider.dart';
 import 'package:smart_labs_mobile/providers/semester_provider.dart';
 import 'package:smart_labs_mobile/providers/session_provider.dart';
 
@@ -35,4 +38,7 @@ void resetAllProviders(WidgetRef ref) {
   ref.invalidate(labAnnouncementsProvider);
   ref.invalidate(notificationsProvider);
   ref.invalidate(semestersProvider);
+  ref.invalidate(labAnalyticsProvider);
+  ref.invalidate(facultiesProvider);
+  ref.invalidate(roomsProvider);
 }
