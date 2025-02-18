@@ -7,6 +7,8 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:smart_labs_mobile/providers/announcement_provider.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:open_filex/open_filex.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 String formatDateTime(DateTime dateTime) {
   final hour = dateTime.hour > 12
@@ -43,6 +45,27 @@ class _AnnouncementCommentsScreenState
   static const Color kNeonAccent = Color(0xFFFFFF00);
   final TextEditingController _commentController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeNotifications();
+  }
+
+  Future<void> _initializeNotifications() async {
+    const androidSettings =
+        AndroidInitializationSettings('@mipmap/ic_launcher');
+    const iosSettings = DarwinInitializationSettings();
+
+    const initializationSettings = InitializationSettings(
+      android: androidSettings,
+      iOS: iosSettings,
+    );
+
+    await flutterLocalNotificationsPlugin.initialize(initializationSettings);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -419,6 +442,137 @@ class _AnnouncementCommentsScreenState
         return Icons.insert_drive_file;
     }
   }
+
+  Future<void> _downloadAndOpenFile(String fileUrl, String fileName) async {
+    try {
+      final Dio dio = Dio();
+      Directory? directory;
+
+      if (Platform.isAndroid) {
+        directory = Directory('/storage/emulated/0/Download');
+      } else if (Platform.isIOS) {
+        directory = await getApplicationDocumentsDirectory();
+      } else {
+        directory = await getTemporaryDirectory();
+      }
+
+      final String filePath = '${directory.path}/$fileName';
+
+      // Show initial download notification
+      const androidDetails = AndroidNotificationDetails(
+        'download_channel',
+        'File Downloads',
+        channelDescription: 'Shows file download progress',
+        importance: Importance.low,
+        priority: Priority.low,
+        showProgress: true,
+        maxProgress: 100,
+        progress: 0,
+        ongoing: true,
+        autoCancel: false,
+      );
+
+      const iosDetails = DarwinNotificationDetails();
+
+      const notificationDetails = NotificationDetails(
+        android: androidDetails,
+        iOS: iosDetails,
+      );
+
+      await flutterLocalNotificationsPlugin.show(
+        0,
+        'Downloading $fileName',
+        'Download starting...',
+        notificationDetails,
+      );
+
+      await dio.download(
+        fileUrl,
+        filePath,
+        onReceiveProgress: (received, total) async {
+          if (total != -1) {
+            final progress = (received / total * 100).toInt();
+
+            // Update progress notification
+            final androidProgressDetails = AndroidNotificationDetails(
+              'download_channel',
+              'File Downloads',
+              channelDescription: 'Shows file download progress',
+              importance: Importance.low,
+              priority: Priority.low,
+              showProgress: true,
+              maxProgress: 100,
+              progress: progress,
+              ongoing: true,
+              autoCancel: false,
+            );
+
+            final progressNotificationDetails = NotificationDetails(
+              android: androidProgressDetails,
+              iOS: const DarwinNotificationDetails(),
+            );
+
+            await flutterLocalNotificationsPlugin.show(
+              0,
+              'Downloading $fileName',
+              '$progress% completed',
+              progressNotificationDetails,
+            );
+          }
+        },
+      );
+
+      // Show completion notification
+      const completedAndroidDetails = AndroidNotificationDetails(
+        'download_channel',
+        'File Downloads',
+        channelDescription: 'Shows file download progress',
+        importance: Importance.high,
+        priority: Priority.high,
+      );
+
+      const completedNotificationDetails = NotificationDetails(
+        android: completedAndroidDetails,
+        iOS: iosDetails,
+      );
+
+      await flutterLocalNotificationsPlugin.show(
+        1,
+        'Download Complete',
+        '$fileName has been downloaded',
+        completedNotificationDetails,
+      );
+
+      // Try to open the file
+      final file = File(filePath);
+      if (await file.exists()) {
+        await OpenFilex.open(filePath);
+      }
+    } catch (e) {
+      debugPrint("Error downloading file: $e");
+
+      // Show error notification
+      const errorAndroidDetails = AndroidNotificationDetails(
+        'download_channel',
+        'File Downloads',
+        channelDescription: 'Shows file download progress',
+        importance: Importance.high,
+        priority: Priority.high,
+      );
+
+      const errorNotificationDetails = NotificationDetails(
+        android: errorAndroidDetails,
+        iOS: const DarwinNotificationDetails(),
+      );
+
+      await flutterLocalNotificationsPlugin.show(
+        2,
+        'Download Failed',
+        'Failed to download $fileName: $e',
+        errorNotificationDetails,
+      );
+    }
+  }
 }
 
 extension ColorExtension on Color {
@@ -427,42 +581,5 @@ extension ColorExtension on Color {
     final hsl = HSLColor.fromColor(this);
     final hslDark = hsl.withLightness((hsl.lightness - amount).clamp(0.0, 1.0));
     return hslDark.toColor();
-  }
-}
-
-Future<void> _downloadAndOpenFile(String fileUrl, String fileName) async {
-  try {
-    final Dio dio = Dio();
-    Directory? directory;
-
-    if (Platform.isAndroid) {
-      // Get the Downloads directory on Android
-      directory = Directory('/storage/emulated/0/Download');
-    } else if (Platform.isIOS) {
-      // Get the Documents directory on iOS
-      directory = await getApplicationDocumentsDirectory();
-    } else {
-      // Fallback to temp directory for other platforms
-      directory = await getTemporaryDirectory();
-    }
-
-    final String filePath = '${directory.path}/$fileName';
-
-    // Show download progress
-    await dio.download(
-      fileUrl,
-      filePath,
-      onReceiveProgress: (received, total) {
-        if (total != -1) {
-          debugPrint(
-              'Download progress: ${(received / total * 100).toStringAsFixed(0)}%');
-        }
-      },
-    );
-    debugPrint("File downloaded at $filePath");
-    // You can add file opening functionality here using open_filex
-    // await OpenFilex.open(filePath);
-  } catch (e) {
-    debugPrint("Error downloading file: $e");
   }
 }
