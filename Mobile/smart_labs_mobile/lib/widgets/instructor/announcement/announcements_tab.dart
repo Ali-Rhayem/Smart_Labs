@@ -36,6 +36,12 @@ class _AnnouncementsTabState extends ConsumerState<AnnouncementsTab> {
   bool _isDialogOpen = false;
   final List<File> selectedFiles = [];
 
+  void _resetFiles() {
+    setState(() {
+      selectedFiles.clear();
+    });
+  }
+
   Future<void> _addAnnouncement(List<File> files) async {
     if (_messageController.text.trim().isEmpty) return;
 
@@ -49,6 +55,7 @@ class _AnnouncementsTabState extends ConsumerState<AnnouncementsTab> {
           const SnackBar(content: Text('Announcement posted successfully')),
         );
         _messageController.clear();
+        _resetFiles();
       }
     } catch (e) {
       if (mounted) {
@@ -121,7 +128,10 @@ class _AnnouncementsTabState extends ConsumerState<AnnouncementsTab> {
                               color:
                                   theme.colorScheme.onSurface.withOpacity(0.7),
                             ),
-                            onPressed: () => Navigator.pop(context),
+                            onPressed: () {
+                              _resetFiles();
+                              Navigator.pop(context);
+                            },
                           ),
                         ],
                       ),
@@ -224,7 +234,10 @@ class _AnnouncementsTabState extends ConsumerState<AnnouncementsTab> {
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
                           TextButton(
-                            onPressed: () => Navigator.pop(context),
+                            onPressed: () {
+                              _resetFiles();
+                              Navigator.pop(context);
+                            },
                             child: Text(
                               'Cancel',
                               style: TextStyle(
@@ -289,18 +302,6 @@ class _AnnouncementsTabState extends ConsumerState<AnnouncementsTab> {
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: const Icon(Icons.image),
-              title: const Text('Photo'),
-              onTap: () async {
-                Navigator.pop(context);
-                final result = await FilePicker.platform.pickFiles(
-                  type: FileType.image,
-                  allowMultiple: true,
-                );
-                _handleFilePickerResult(result, setState);
-              },
-            ),
-            ListTile(
               leading: const Icon(Icons.insert_drive_file),
               title: const Text('Document'),
               onTap: () async {
@@ -308,18 +309,7 @@ class _AnnouncementsTabState extends ConsumerState<AnnouncementsTab> {
                 final result = await FilePicker.platform.pickFiles(
                   type: FileType.custom,
                   allowMultiple: true,
-                  allowedExtensions: ['pdf', 'doc', 'docx', 'txt'],
-                );
-                _handleFilePickerResult(result, setState);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.attachment),
-              title: const Text('Any File'),
-              onTap: () async {
-                Navigator.pop(context);
-                final result = await FilePicker.platform.pickFiles(
-                  allowMultiple: true,
+                  allowedExtensions: ['pdf', 'doc', 'docx'],
                 );
                 _handleFilePickerResult(result, setState);
               },
