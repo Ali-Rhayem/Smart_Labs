@@ -14,8 +14,8 @@ export const announcementService = {
 			formData,
 			{
 				headers: {
-					'Content-Type': 'multipart/form-data'
-				}
+					"Content-Type": "multipart/form-data",
+				},
 			}
 		),
 
@@ -40,15 +40,19 @@ export const announcementService = {
 		smart_labs.deleteAPI(
 			`/lab/${lab_id}/announcement/${announcement_id}/comment/${comment_id}`
 		),
-	
-	submiteAssignment: (lab_id: number, announcement_id: number, formData: FormData) =>
+
+	submiteAssignment: (
+		lab_id: number,
+		announcement_id: number,
+		formData: FormData
+	) =>
 		smart_labs.postAPI<AnnouncementDTO, FormData>(
-			`/lab/${lab_id}/announcement/${announcement_id}/submit`,
+			`/lab/${lab_id}/assignment/${announcement_id}/submit`,
 			formData,
 			{
 				headers: {
-					'Content-Type': 'multipart/form-data'
-				}
+					"Content-Type": "multipart/form-data",
+				},
 			}
 		),
 };
