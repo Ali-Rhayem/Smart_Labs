@@ -77,7 +77,8 @@ namespace backend.Controllers
         {
             // check if change is to the current user
             var userIdClaim = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier);
-            if (userIdClaim == null || id != int.Parse(userIdClaim.Value))
+            var userRoleClaim = HttpContext.User.FindFirst(ClaimTypes.Role);
+            if (userIdClaim == null || (id != int.Parse(userIdClaim.Value) && userRoleClaim?.Value != "admin"))
             {
                 return Unauthorized();
             }
