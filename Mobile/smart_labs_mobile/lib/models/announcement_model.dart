@@ -12,7 +12,7 @@ class Announcement {
   final bool canSubmit;
   final DateTime? deadline;
   final int? grade;
-  final List<Submission>? submissions;
+  List<Submission>? submissions;
 
   Announcement({
     required this.id,
@@ -82,6 +82,26 @@ class Submission {
           json['time'] != null ? DateTime.parse(json['time']) : DateTime.now(),
       submitted: json['submitted'] ?? false,
       grade: json['grade'],
+    );
+  }
+
+  Submission copyWith({
+    String? userId,
+    User? user,
+    String? message,
+    List<String>? files,
+    DateTime? submittedAt,
+    bool? submitted,
+    int? grade,
+  }) {
+    return Submission(
+      userId: int.parse(userId ?? this.userId.toString()),
+      user: user ?? this.user,
+      message: message ?? this.message,
+      files: files ?? this.files,
+      submittedAt: submittedAt ?? this.submittedAt,
+      submitted: submitted ?? this.submitted,
+      grade: grade ?? this.grade,
     );
   }
 }
