@@ -1,9 +1,12 @@
+import 'dart:io';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:smart_labs_mobile/models/announcement_model.dart';
 import 'package:smart_labs_mobile/models/comment_model.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:smart_labs_mobile/providers/announcement_provider.dart';
+import 'package:path_provider/path_provider.dart';
 
 String formatDateTime(DateTime dateTime) {
   final hour = dateTime.hour > 12
@@ -116,11 +119,10 @@ class _AnnouncementCommentsScreenState
                         return Padding(
                           padding: const EdgeInsets.only(right: 8),
                           child: InkWell(
-                            onTap: () {
-                              // TODO: Add file download/view functionality
+                            onTap: () async {
                               final fileUrl =
                                   '${dotenv.env['BASE_URL']}/${widget.announcement.files[index]}';
-                              // Launch file download
+                              await _downloadAndOpenFile(fileUrl, fileName);
                             },
                             child: Container(
                               padding: const EdgeInsets.symmetric(
@@ -425,5 +427,42 @@ extension ColorExtension on Color {
     final hsl = HSLColor.fromColor(this);
     final hslDark = hsl.withLightness((hsl.lightness - amount).clamp(0.0, 1.0));
     return hslDark.toColor();
+  }
+}
+
+Future<void> _downloadAndOpenFile(String fileUrl, String fileName) async {
+  try {
+    final Dio dio = Dio();
+    Directory? directory;
+
+    if (Platform.isAndroid) {
+      // Get the Downloads directory on Android
+      directory = Directory('/storage/emulated/0/Download');
+    } else if (Platform.isIOS) {
+      // Get the Documents directory on iOS
+      directory = await getApplicationDocumentsDirectory();
+    } else {
+      // Fallback to temp directory for other platforms
+      directory = await getTemporaryDirectory();
+    }
+
+    final String filePath = '${directory.path}/$fileName';
+
+    // Show download progress
+    await dio.download(
+      fileUrl,
+      filePath,
+      onReceiveProgress: (received, total) {
+        if (total != -1) {
+          debugPrint(
+              'Download progress: ${(received / total * 100).toStringAsFixed(0)}%');
+        }
+      },
+    );
+    debugPrint("File downloaded at $filePath");
+    // You can add file opening functionality here using open_filex
+    // await OpenFilex.open(filePath);
+  } catch (e) {
+    debugPrint("Error downloading file: $e");
   }
 }
