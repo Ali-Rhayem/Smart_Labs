@@ -1,8 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:smart_labs_mobile/providers/announcement_provider.dart';
+import 'package:smart_labs_mobile/providers/dashboard_analytics_provider.dart';
 import 'package:smart_labs_mobile/providers/faculty_provider.dart';
 import 'package:smart_labs_mobile/providers/lab_analytics_provider.dart';
 import 'package:smart_labs_mobile/providers/lab_instructor_provider.dart';
+import 'package:smart_labs_mobile/providers/lab_provider.dart';
 import 'package:smart_labs_mobile/providers/lab_student_provider.dart';
 import 'package:smart_labs_mobile/providers/notification_provider.dart';
 import 'package:smart_labs_mobile/providers/room_provider.dart';
@@ -31,7 +33,7 @@ void resetAllProviders(WidgetRef ref) {
   //   ref.read(labStudentsProvider(lab.labId).notifier).clearStudents();
   // }
 
-  // Invalidate provider families to ensure fresh data on next use
+  // Invalidate all providers to ensure fresh data on next use
   ref.invalidate(labStudentsProvider);
   ref.invalidate(labInstructorsProvider);
   ref.invalidate(labSessionsProvider);
@@ -41,4 +43,6 @@ void resetAllProviders(WidgetRef ref) {
   ref.invalidate(labAnalyticsProvider);
   ref.invalidate(facultiesProvider);
   ref.invalidate(roomsProvider);
+  ref.invalidate(dashboardAnalyticsProvider);
+  ref.invalidate(labsProvider);
 }
