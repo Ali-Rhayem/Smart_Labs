@@ -28,6 +28,7 @@ import { Announcement, Comment } from "../types/announcements";
 import DeleteIcon from "@mui/icons-material/Delete";
 import DeleteConfirmDialog from "./DeleteConfirmDialog";
 import ErrorAlert from "./ErrorAlertProps";
+import AssignmentModal, { AssignmentData } from "./AssignmentModal";
 
 // Add constants
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB in bytes
@@ -70,6 +71,8 @@ const AnnouncementsTab: React.FC<AnnouncementsTabProps> = ({ labId }) => {
 	);
 	const [deleteCommentDialogOpen, setDeleteCommentDialogOpen] =
 		useState(false);
+
+	const [assignmentModalOpen, setAssignmentModalOpen] = useState(false);
 
 	const handleCommentChange = (announcementId: number, value: string) => {
 		setCommentInputs((prev) => ({
@@ -314,6 +317,21 @@ const AnnouncementsTab: React.FC<AnnouncementsTabProps> = ({ labId }) => {
 			setSeverity("error");
 			setShowAlert(true);
 		}
+	};
+
+	const handleAssignmentSubmit = async (data: AssignmentData) => {
+		const formData = new FormData();
+		formData.append("Message", data.message);
+		formData.append("Deadline", data.deadline.toISOString());
+		formData.append("Grade", data.grade.toString());
+		formData.append("assignment", "true");
+		formData.append("canSubmit", "true");
+
+		data.files.forEach((file) => {
+			formData.append("Files", file);
+		});
+
+		await sendAnnouncementMutation.mutateAsync(formData);
 	};
 
 	const handleDeleteClick = (announcementId: number) => {
@@ -705,24 +723,35 @@ const AnnouncementsTab: React.FC<AnnouncementsTabProps> = ({ labId }) => {
 								</Typography>
 							)}
 						</Box>
-
-						<Button
-							variant="contained"
-							onClick={handleSendAnnouncement}
-							disabled={
-								!message.trim() ||
-								sendAnnouncementMutation.isPending
-							}
-							sx={{
-								backgroundColor: "var(--color-primary)",
-								color: "var(--color-text-button)",
-							}}
-							endIcon={<SendIcon />}
-						>
-							{sendAnnouncementMutation.isPending
-								? "Sending..."
-								: "Announce"}
-						</Button>
+						<Box sx={{ display: "flex", gap: 1 }}>
+							<Button
+								variant="contained"
+								onClick={() => setAssignmentModalOpen(true)}
+								sx={{
+									backgroundColor: "var(--color-primary)",
+									color: "var(--color-text-button)",
+								}}
+							>
+								Create Assignment
+							</Button>
+							<Button
+								variant="contained"
+								onClick={handleSendAnnouncement}
+								disabled={
+									!message.trim() ||
+									sendAnnouncementMutation.isPending
+								}
+								sx={{
+									backgroundColor: "var(--color-primary)",
+									color: "var(--color-text-button)",
+								}}
+								endIcon={<SendIcon />}
+							>
+								{sendAnnouncementMutation.isPending
+									? "Sending..."
+									: "Announce"}
+							</Button>
+						</Box>
 					</Box>
 				</Paper>
 			)}
@@ -745,6 +774,11 @@ const AnnouncementsTab: React.FC<AnnouncementsTabProps> = ({ labId }) => {
 				message={alertMessage}
 				severity={severity}
 				onClose={() => setShowAlert(false)}
+			/>
+			<AssignmentModal
+				open={assignmentModalOpen}
+				onClose={() => setAssignmentModalOpen(false)}
+				onSubmit={handleAssignmentSubmit}
 			/>
 		</Box>
 	);
