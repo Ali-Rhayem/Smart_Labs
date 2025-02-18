@@ -35,6 +35,10 @@ class _AnnouncementsTabState extends ConsumerState<AnnouncementsTab> {
   final TextEditingController _messageController = TextEditingController();
   bool _isDialogOpen = false;
   final List<File> selectedFiles = [];
+  bool isAssignment = false;
+  bool canSubmit = false;
+  DateTime? deadline;
+  TextEditingController gradeController = TextEditingController();
 
   void _resetFiles() {
     setState(() {
@@ -42,13 +46,14 @@ class _AnnouncementsTabState extends ConsumerState<AnnouncementsTab> {
     });
   }
 
-  Future<void> _addAnnouncement(List<File> files) async {
-    if (_messageController.text.trim().isEmpty) return;
+  Future<void> _addAnnouncement(
+      List<File> files, Map<String, dynamic> data) async {
+    if (data['message'].trim().isEmpty) return;
 
     try {
       await ref
           .read(labAnnouncementsProvider(widget.lab.labId).notifier)
-          .addAnnouncement(_messageController.text.trim(), files);
+          .addAnnouncement(data, files);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -225,6 +230,78 @@ class _AnnouncementsTabState extends ConsumerState<AnnouncementsTab> {
                                   ),
                                 ),
                               ],
+                              SwitchListTile(
+                                title: const Text('Is Assignment'),
+                                value: isAssignment,
+                                onChanged: (bool value) {
+                                  setState(() {
+                                    isAssignment = value;
+                                    if (!value) {
+                                      canSubmit = false;
+                                      deadline = null;
+                                      gradeController.clear();
+                                    }
+                                  });
+                                },
+                              ),
+                              if (isAssignment) ...[
+                                SwitchListTile(
+                                  title: const Text('Allow Submissions'),
+                                  value: canSubmit,
+                                  onChanged: (bool value) {
+                                    setState(() {
+                                      canSubmit = value;
+                                    });
+                                  },
+                                ),
+                                ListTile(
+                                  title: const Text('Deadline'),
+                                  subtitle: Text(deadline?.toString() ??
+                                      'No deadline set'),
+                                  trailing: IconButton(
+                                    icon: const Icon(Icons.calendar_today),
+                                    onPressed: () async {
+                                      final date = await showDatePicker(
+                                        context: context,
+                                        initialDate: DateTime.now(),
+                                        firstDate: DateTime.now(),
+                                        lastDate: DateTime.now()
+                                            .add(const Duration(days: 365)),
+                                      );
+                                      if (date != null) {
+                                        final time = await showTimePicker(
+                                          context: context,
+                                          initialTime: TimeOfDay.now(),
+                                        );
+                                        if (time != null) {
+                                          setState(() {
+                                            deadline = DateTime(
+                                              date.year,
+                                              date.month,
+                                              date.day,
+                                              time.hour,
+                                              time.minute,
+                                            );
+                                          });
+                                        }
+                                      }
+                                    },
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 16),
+                                  child: TextField(
+                                    controller: gradeController,
+                                    decoration: const InputDecoration(
+                                      labelText: 'Maximum Grade',
+                                      hintText:
+                                          'Enter maximum grade (e.g., 100)',
+                                    ),
+                                    keyboardType: TextInputType.number,
+                                  ),
+                                ),
+                              ],
                             ],
                           ),
                         ),
@@ -249,7 +326,14 @@ class _AnnouncementsTabState extends ConsumerState<AnnouncementsTab> {
                           const SizedBox(width: 12),
                           ElevatedButton(
                             onPressed: () {
-                              _addAnnouncement(selectedFiles);
+                              final data = {
+                                'message': _messageController.text,
+                                'assignment': isAssignment,
+                                'canSubmit': canSubmit,
+                                'deadline': deadline?.toIso8601String(),
+                                'grade': int.tryParse(gradeController.text),
+                              };
+                              _addAnnouncement(selectedFiles, data);
                               Navigator.pop(context);
                             },
                             style: ElevatedButton.styleFrom(
