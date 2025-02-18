@@ -12,6 +12,7 @@ interface InputFieldProps {
 	error?: string[] | null;
 	disabled?: boolean;
 	onChange: React.ChangeEventHandler<HTMLInputElement>;
+	onBlur?: () => void; 
 	multiline?: boolean;
 	rows?: number;
 }
@@ -26,6 +27,7 @@ const InputField: React.FC<InputFieldProps> = ({
 	error = null,
 	disabled = false,
 	onChange,
+	onBlur, 
 	multiline = false,
 	rows = 1,
 }) => {
@@ -49,6 +51,7 @@ const InputField: React.FC<InputFieldProps> = ({
 				}
 				value={value}
 				onChange={onChange}
+				onBlur={onBlur} 
 				fullWidth
 				variant="outlined"
 				margin="normal"
