@@ -38,8 +38,7 @@ public class UserService
     public async Task<List<User>> GetAllUsers()
     {
         var projection = Builders<User>.Projection
-            .Exclude(u => u.Password)
-            .Exclude(u => u.Role);
+            .Exclude(u => u.Password);
 
         return await _users.Find(_ => true).Project<User>(projection).ToListAsync();
     }
@@ -73,18 +72,28 @@ public class UserService
                 if (fieldName == "Image")
                 {
                     var image = value as string;
-                    var imageType = image!.Split(';')[0].Split('/')[1];
-                    var imageBytes = Convert.FromBase64String(image.Split(',')[1]);
-                    var currentDirectory = AppContext.BaseDirectory;
-                    var directoryPath = Path.Combine(currentDirectory, "wwwroot", "medi");
-                    if (!Directory.Exists(directoryPath))
+                    if (image == null || image == "")
+                        continue;
+                    try
                     {
-                        Directory.CreateDirectory(directoryPath);
+                        var imageType = image!.Split(';')[0].Split('/')[1];
+                        var imageBytes = Convert.FromBase64String(image.Split(',')[1]);
+                        var currentDirectory = AppContext.BaseDirectory;
+                        var directoryPath = Path.Combine(currentDirectory, "wwwroot", "medi");
+                        if (!Directory.Exists(directoryPath))
+                        {
+                            Directory.CreateDirectory(directoryPath);
+                        }
+                        var image_path = $"medi/{id}.{imageType}";
+                        var SaveimagePath = Path.Combine(directoryPath, $"{id}.{imageType}");
+                        await File.WriteAllBytesAsync(SaveimagePath, imageBytes);
+                        value = image_path;
                     }
-                    var image_path = $"medi/{id}.{imageType}";
-                    var SaveimagePath = Path.Combine(directoryPath, $"{id}.{imageType}");
-                    await File.WriteAllBytesAsync(SaveimagePath, imageBytes);
-                    value = image_path;
+                    catch
+                    {
+                        value = "";
+                    }
+
                 }
                 else if (fieldName == "email")
                 {
@@ -151,18 +160,22 @@ public class UserService
 
     public async Task<User?> FirstLoginAsync(FirstLogin firstLogin)
     {
-        var image = firstLogin.Image;
-        var imageType = image!.Split(';')[0].Split('/')[1];
-        var imageBytes = Convert.FromBase64String(image.Split(',')[1]);
-        var currentDirectory = AppContext.BaseDirectory;
-        var directoryPath = Path.Combine(currentDirectory, "wwwroot", "medi");
-        if (!Directory.Exists(directoryPath))
+        string image_path = "";
+        if (firstLogin.Image == null && firstLogin.Image == "")
         {
-            Directory.CreateDirectory(directoryPath);
+            var image = firstLogin.Image;
+            var imageType = image!.Split(';')[0].Split('/')[1];
+            var imageBytes = Convert.FromBase64String(image.Split(',')[1]);
+            var currentDirectory = AppContext.BaseDirectory;
+            var directoryPath = Path.Combine(currentDirectory, "wwwroot", "medi");
+            if (!Directory.Exists(directoryPath))
+            {
+                Directory.CreateDirectory(directoryPath);
+            }
+            image_path = $"medi/{firstLogin.Id}.{imageType}";
+            var SaveimagePath = Path.Combine(directoryPath, $"{firstLogin.Id}.{imageType}");
+            await File.WriteAllBytesAsync(SaveimagePath, imageBytes);
         }
-        var image_path = $"medi/{firstLogin.Id}.{imageType}";
-        var SaveimagePath = Path.Combine(directoryPath, $"{firstLogin.Id}.{imageType}");
-        await File.WriteAllBytesAsync(SaveimagePath, imageBytes);
 
         var user = await GetUserById(firstLogin.Id);
         var newUser = new User
