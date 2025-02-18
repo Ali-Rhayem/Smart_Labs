@@ -17,8 +17,9 @@ public class LabService
     private readonly RoomService _roomService;
     private readonly SessionService _sessionService;
     private readonly KafkaProducer _kafkaProducer;
+    private readonly NotificationService _notificationService;
 
-    public LabService(IMongoDatabase database, LabHelper labHelper, UserService userService, SemesterService semesterService, PPEService ppeService, SessionService sessionService, KafkaProducer kafkaProducer, RoomService roomService)
+    public LabService(IMongoDatabase database, LabHelper labHelper, UserService userService, SemesterService semesterService, PPEService ppeService, SessionService sessionService, KafkaProducer kafkaProducer, RoomService roomService, NotificationService notificationService)
     {
         _labs = database.GetCollection<Lab>("Labs");
         _labHelper = labHelper;
@@ -28,6 +29,7 @@ public class LabService
         _sessionService = sessionService;
         _kafkaProducer = kafkaProducer;
         _roomService = roomService;
+        _notificationService = notificationService;
     }
 
     public async Task<List<Lab>> GetAllLabsAsync()
@@ -345,6 +347,14 @@ public class LabService
         var updateDefinition = Builders<Lab>.Update.Push(lab => lab.Announcements, announcement);
         var result = await _labs.UpdateOneAsync(lab => lab.Id == id, updateDefinition);
 
+        await _notificationService.SendNotificationAsync(new NotificationModel
+        {
+            Title = $"{lab.LabName} Announcement",
+            Body = announcement.Message,
+            Data = new Dictionary<string, string> { { "lab_id", id.ToString() } },
+            TargetFcmTokens = lab.Students.Select(studentId => _userService.GetUserById(studentId).Result.FcmToken).Where(token => token != null).Cast<string>().ToList()
+        });
+
         AnnouncementDTO announcementDTO = new AnnouncementDTO
         {
             Id = announcement.Id,
@@ -390,6 +400,14 @@ public class LabService
             new BsonDocumentArrayFilterDefinition<BsonDocument>(new BsonDocument("a._id", announcementId))
         };
         var result = await _labs.UpdateOneAsync(lab => lab.Id == lab_id, updateDefinition, new UpdateOptions { ArrayFilters = arrayFilters });
+
+        await _notificationService.SendNotificationAsync(new NotificationModel
+        {
+            Title = $"{lab.LabName} comment",
+            Body = comment.Message,
+            Data = new Dictionary<string, string> { { "lab_id", lab_id.ToString() } },
+            TargetFcmTokens = lab.Instructors.Select(instructorId => _userService.GetUserById(instructorId).Result.FcmToken).Where(token => token != null).Cast<string>().ToList()
+        });
 
         CommentDTO commentDTO = new()
         {
@@ -627,6 +645,7 @@ public class LabService
         result["ppe_compliance_bytime"] = ppe_compliance_bysesions;
         result["people"] = people;
         result["people_bytime"] = people_bysession;
+        result["xaxis"] = xaxis;
 
         return result;
     }
