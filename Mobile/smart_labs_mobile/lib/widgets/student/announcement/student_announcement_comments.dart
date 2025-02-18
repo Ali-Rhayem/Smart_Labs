@@ -5,6 +5,11 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:smart_labs_mobile/providers/announcement_provider.dart';
 import 'package:smart_labs_mobile/providers/user_provider.dart';
+import 'dart:io';
+import 'package:dio/dio.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:open_filex/open_filex.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 String formatDateTime(DateTime dateTime) {
   final hour = dateTime.hour > 12
@@ -41,6 +46,27 @@ class _AnnouncementCommentsScreenState
   static const Color kNeonAccent = Color(0xFFFFFF00);
   final TextEditingController _commentController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeNotifications();
+  }
+
+  Future<void> _initializeNotifications() async {
+    const androidSettings =
+        AndroidInitializationSettings('@mipmap/ic_launcher');
+    const iosSettings = DarwinInitializationSettings();
+
+    const initializationSettings = InitializationSettings(
+      android: androidSettings,
+      iOS: iosSettings,
+    );
+
+    await flutterLocalNotificationsPlugin.initialize(initializationSettings);
+  }
 
   Future<void> _addComment() async {
     if (_commentController.text.trim().isEmpty) return;
@@ -92,6 +118,153 @@ class _AnnouncementCommentsScreenState
           SnackBar(content: Text('Error: $e')),
         );
       }
+    }
+  }
+
+  IconData _getFileIcon(String fileName) {
+    final extension = fileName.split('.').last.toLowerCase();
+    switch (extension) {
+      case 'pdf':
+        return Icons.picture_as_pdf;
+      case 'doc':
+      case 'docx':
+        return Icons.description;
+      case 'jpg':
+      case 'jpeg':
+      case 'png':
+        return Icons.image;
+      default:
+        return Icons.insert_drive_file;
+    }
+  }
+
+  Future<void> _downloadAndOpenFile(String fileUrl, String fileName) async {
+    try {
+      final Dio dio = Dio();
+      Directory? directory;
+
+      if (Platform.isAndroid) {
+        directory = Directory('/storage/emulated/0/Download');
+      } else if (Platform.isIOS) {
+        directory = await getApplicationDocumentsDirectory();
+      } else {
+        directory = await getTemporaryDirectory();
+      }
+
+      final String filePath = '${directory.path}/$fileName';
+
+      // Show initial download notification
+      const androidDetails = AndroidNotificationDetails(
+        'download_channel',
+        'File Downloads',
+        channelDescription: 'Shows file download progress',
+        importance: Importance.low,
+        priority: Priority.low,
+        showProgress: true,
+        maxProgress: 100,
+        progress: 0,
+        ongoing: true,
+        autoCancel: false,
+      );
+
+      const iosDetails = DarwinNotificationDetails();
+
+      const notificationDetails = NotificationDetails(
+        android: androidDetails,
+        iOS: iosDetails,
+      );
+
+      await flutterLocalNotificationsPlugin.show(
+        0,
+        'Downloading $fileName',
+        'Download starting...',
+        notificationDetails,
+      );
+
+      await dio.download(
+        fileUrl,
+        filePath,
+        onReceiveProgress: (received, total) async {
+          if (total != -1) {
+            final progress = (received / total * 100).toInt();
+
+            final androidProgressDetails = AndroidNotificationDetails(
+              'download_channel',
+              'File Downloads',
+              channelDescription: 'Shows file download progress',
+              importance: Importance.low,
+              priority: Priority.low,
+              showProgress: true,
+              maxProgress: 100,
+              progress: progress,
+              ongoing: true,
+              autoCancel: false,
+            );
+
+            final progressNotificationDetails = NotificationDetails(
+              android: androidProgressDetails,
+              iOS: const DarwinNotificationDetails(),
+            );
+
+            await flutterLocalNotificationsPlugin.show(
+              0,
+              'Downloading $fileName',
+              '$progress% completed',
+              progressNotificationDetails,
+            );
+          }
+        },
+      );
+
+      // Show completion notification
+      const completedAndroidDetails = AndroidNotificationDetails(
+        'download_channel',
+        'File Downloads',
+        channelDescription: 'Shows file download progress',
+        importance: Importance.high,
+        priority: Priority.high,
+      );
+
+      const completedNotificationDetails = NotificationDetails(
+        android: completedAndroidDetails,
+        iOS: iosDetails,
+      );
+
+      await flutterLocalNotificationsPlugin.show(
+        1,
+        'Download Complete',
+        '$fileName has been downloaded',
+        completedNotificationDetails,
+      );
+
+      // Try to open the file
+      final file = File(filePath);
+      if (await file.exists()) {
+        await OpenFilex.open(filePath);
+      }
+    } catch (e) {
+      debugPrint("Error downloading file: $e");
+
+      // Show error notification
+      const errorAndroidDetails = AndroidNotificationDetails(
+        'download_channel',
+        'File Downloads',
+        channelDescription: 'Shows file download progress',
+        importance: Importance.high,
+        priority: Priority.high,
+      );
+
+      const errorNotificationDetails = NotificationDetails(
+        android: errorAndroidDetails,
+        iOS: const DarwinNotificationDetails(),
+      );
+
+      await flutterLocalNotificationsPlugin.show(
+        2,
+        'Download Failed',
+        'Failed to download $fileName: $e',
+        errorNotificationDetails,
+      );
     }
   }
 
@@ -157,12 +330,123 @@ class _AnnouncementCommentsScreenState
                     Text(
                       formatDateTime(widget.announcement.time),
                       style: TextStyle(
-                        color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                        color:
+                            theme.colorScheme.onSurface.withValues(alpha: 0.7),
                         fontSize: 14,
                       ),
                     ),
                   ],
                 ),
+                if (widget.announcement.isAssignment) ...[
+                  const SizedBox(height: 16),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: isDark ? Colors.grey[800] : Colors.grey[200],
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(Icons.assignment,
+                                color: isDark
+                                    ? kNeonAccent
+                                    : theme.colorScheme.primary),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Assignment',
+                              style: TextStyle(
+                                color: theme.colorScheme.onSurface,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                        if (widget.announcement.deadline != null) ...[
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              Icon(Icons.timer,
+                                  size: 16,
+                                  color: isDark
+                                      ? kNeonAccent
+                                      : theme.colorScheme.primary),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Deadline: ${formatDateTime(widget.announcement.deadline!)}',
+                                style: TextStyle(
+                                  color: theme.colorScheme.onSurface
+                                      .withValues(alpha: 0.7),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ],
+                if (widget.announcement.files.isNotEmpty) ...[
+                  const SizedBox(height: 16),
+                  SizedBox(
+                    height: 40,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: widget.announcement.files.length,
+                      itemBuilder: (context, index) {
+                        final fileName =
+                            widget.announcement.files[index].split('/').last;
+                        return Padding(
+                          padding: const EdgeInsets.only(right: 8),
+                          child: InkWell(
+                            onTap: () async {
+                              final fileUrl =
+                                  '${dotenv.env['BASE_URL']}${widget.announcement.files[index]}';
+                              await _downloadAndOpenFile(fileUrl, fileName);
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: isDark
+                                    ? Colors.grey[800]
+                                    : Colors.grey[200],
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(
+                                  color:
+                                      isDark ? Colors.white24 : Colors.black12,
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    _getFileIcon(fileName),
+                                    size: 16,
+                                    color: isDark
+                                        ? kNeonAccent
+                                        : theme.colorScheme.primary,
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    fileName,
+                                    style: TextStyle(
+                                      color: theme.colorScheme.onSurface
+                                          .withValues(alpha: 0.7),
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
@@ -309,7 +593,8 @@ class _AnnouncementCommentsScreenState
                     decoration: InputDecoration(
                       hintText: 'Add a comment...',
                       hintStyle: TextStyle(
-                        color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                        color:
+                            theme.colorScheme.onSurface.withValues(alpha: 0.5),
                       ),
                       filled: true,
                       fillColor:
@@ -317,13 +602,15 @@ class _AnnouncementCommentsScreenState
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(25),
                         borderSide: BorderSide(
-                          color: theme.colorScheme.onSurface.withValues(alpha: 0.1),
+                          color: theme.colorScheme.onSurface
+                              .withValues(alpha: 0.1),
                         ),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(25),
                         borderSide: BorderSide(
-                          color: theme.colorScheme.onSurface.withValues(alpha: 0.1),
+                          color: theme.colorScheme.onSurface
+                              .withValues(alpha: 0.1),
                         ),
                       ),
                       focusedBorder: OutlineInputBorder(
