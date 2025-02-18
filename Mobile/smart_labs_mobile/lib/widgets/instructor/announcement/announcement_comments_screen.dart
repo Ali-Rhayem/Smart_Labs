@@ -9,6 +9,7 @@ import 'package:smart_labs_mobile/providers/announcement_provider.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:smart_labs_mobile/screens/instructor/submissions_screen.dart';
 
 String formatDateTime(DateTime dateTime) {
   final hour = dateTime.hour > 12
@@ -80,6 +81,25 @@ class _AnnouncementCommentsScreenState
         backgroundColor:
             isDark ? const Color(0xFF1C1C1C) : theme.colorScheme.surface,
         elevation: 0,
+        actions: [
+          if (widget.announcement.isAssignment)
+            IconButton(
+              icon: const Icon(Icons.assignment),
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => SubmissionsScreen(
+                    announcement: widget.announcement,
+                    labId: widget.labId,
+                  ),
+                ),
+              ),
+            ),
+          IconButton(
+            icon: const Icon(Icons.delete, color: Colors.red),
+            onPressed: () => _showDeleteConfirmation(context),
+          ),
+        ],
       ),
       backgroundColor:
           isDark ? const Color(0xFF121212) : theme.colorScheme.background,
@@ -571,6 +591,45 @@ class _AnnouncementCommentsScreenState
         'Failed to download $fileName: $e',
         errorNotificationDetails,
       );
+    }
+  }
+
+  Future<void> _showDeleteConfirmation(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Announcement'),
+        content:
+            const Text('Are you sure you want to delete this announcement?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && mounted) {
+      try {
+        await ref
+            .read(labAnnouncementsProvider(widget.labId).notifier)
+            .deleteAnnouncement(widget.announcement.id.toString());
+
+        if (mounted) {
+          Navigator.pop(context, true);
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error: $e')),
+          );
+        }
+      }
     }
   }
 }
