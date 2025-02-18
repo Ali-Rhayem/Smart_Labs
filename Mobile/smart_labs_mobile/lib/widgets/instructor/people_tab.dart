@@ -70,7 +70,6 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
               ],
             ),
           ),
-
           studentsAsync.when(
             loading: () => Center(
               child: CircularProgressIndicator(
@@ -133,19 +132,23 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
                                         width: 48,
                                         height: 48,
                                         fit: BoxFit.cover,
-                                        // The errorBuilder lets us handle 404 or other loading issues
                                         errorBuilder:
                                             (context, error, stackTrace) {
-                                          return Container(
-                                            color: theme.colorScheme.primary,
-                                            alignment: Alignment.center,
-                                            child: Text(
-                                              student.name[0].toUpperCase(),
-                                              style: TextStyle(
-                                                color: isDark
-                                                    ? Colors.black
-                                                    : Colors.white,
-                                                fontWeight: FontWeight.bold,
+                                          return SizedBox(
+                                            width: 48,
+                                            height: 48,
+                                            child: CircleAvatar(
+                                              radius: 24,
+                                              backgroundColor:
+                                                  theme.colorScheme.primary,
+                                              child: Text(
+                                                student.name[0].toUpperCase(),
+                                                style: TextStyle(
+                                                  color: isDark
+                                                      ? Colors.black
+                                                      : Colors.white,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
                                               ),
                                             ),
                                           );
@@ -154,6 +157,7 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
                                     ),
                                   )
                                 : CircleAvatar(
+                                    radius: 24,
                                     backgroundColor: theme.colorScheme.primary,
                                     child: Text(
                                       student.name[0].toUpperCase(),
@@ -206,19 +210,23 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
                                           width: 48,
                                           height: 48,
                                           fit: BoxFit.cover,
-                                          // The errorBuilder lets us handle 404 or other loading issues
                                           errorBuilder:
                                               (context, error, stackTrace) {
-                                            return Container(
-                                              color: theme.colorScheme.primary,
-                                              alignment: Alignment.center,
-                                              child: Text(
-                                                student.name[0].toUpperCase(),
-                                                style: TextStyle(
-                                                  color: isDark
-                                                      ? Colors.black
-                                                      : Colors.white,
-                                                  fontWeight: FontWeight.bold,
+                                            return SizedBox(
+                                              width: 48,
+                                              height: 48,
+                                              child: CircleAvatar(
+                                                radius: 24,
+                                                backgroundColor:
+                                                    theme.colorScheme.primary,
+                                                child: Text(
+                                                  student.name[0].toUpperCase(),
+                                                  style: TextStyle(
+                                                    color: isDark
+                                                        ? Colors.black
+                                                        : Colors.white,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
                                                 ),
                                               ),
                                             );
@@ -227,6 +235,7 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
                                       ),
                                     )
                                   : CircleAvatar(
+                                      radius: 24,
                                       backgroundColor:
                                           theme.colorScheme.primary,
                                       child: Text(
@@ -389,19 +398,24 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
                                         width: 48,
                                         height: 48,
                                         fit: BoxFit.cover,
-                                        // The errorBuilder lets us handle 404 or other loading issues
                                         errorBuilder:
                                             (context, error, stackTrace) {
-                                          return Container(
-                                            color: theme.colorScheme.primary,
-                                            alignment: Alignment.center,
-                                            child: Text(
-                                              instructor.name[0].toUpperCase(),
-                                              style: TextStyle(
-                                                color: isDark
-                                                    ? Colors.black
-                                                    : Colors.white,
-                                                fontWeight: FontWeight.bold,
+                                          return SizedBox(
+                                            width: 48,
+                                            height: 48,
+                                            child: CircleAvatar(
+                                              radius: 24,
+                                              backgroundColor:
+                                                  theme.colorScheme.primary,
+                                              child: Text(
+                                                instructor.name[0]
+                                                    .toUpperCase(),
+                                                style: TextStyle(
+                                                  color: isDark
+                                                      ? Colors.black
+                                                      : Colors.white,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
                                               ),
                                             ),
                                           );
@@ -410,6 +424,7 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
                                     ),
                                   )
                                 : CircleAvatar(
+                                    radius: 24,
                                     backgroundColor: theme.colorScheme.primary,
                                     child: Text(
                                       instructor.name[0].toUpperCase(),
@@ -463,20 +478,24 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
                                           width: 48,
                                           height: 48,
                                           fit: BoxFit.cover,
-                                          // The errorBuilder lets us handle 404 or other loading issues
                                           errorBuilder:
                                               (context, error, stackTrace) {
-                                            return Container(
-                                              color: theme.colorScheme.primary,
-                                              alignment: Alignment.center,
-                                              child: Text(
-                                                instructor.name[0]
-                                                    .toUpperCase(),
-                                                style: TextStyle(
-                                                  color: isDark
-                                                      ? Colors.black
-                                                      : Colors.white,
-                                                  fontWeight: FontWeight.bold,
+                                            return SizedBox(
+                                              width: 48,
+                                              height: 48,
+                                              child: CircleAvatar(
+                                                radius: 24,
+                                                backgroundColor:
+                                                    theme.colorScheme.primary,
+                                                child: Text(
+                                                  instructor.name[0]
+                                                      .toUpperCase(),
+                                                  style: TextStyle(
+                                                    color: isDark
+                                                        ? Colors.black
+                                                        : Colors.white,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
                                                 ),
                                               ),
                                             );
@@ -485,6 +504,7 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
                                       ),
                                     )
                                   : CircleAvatar(
+                                      radius: 24,
                                       backgroundColor:
                                           theme.colorScheme.primary,
                                       child: Text(
