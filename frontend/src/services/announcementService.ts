@@ -1,10 +1,5 @@
 import { smart_labs } from "../utils/axios";
-import {
-	Announcement,
-	AnnouncementDTO,
-	CommentDTO,
-	Comment,
-} from "../types/announcements";
+import { AnnouncementDTO, CommentDTO, Comment } from "../types/announcements";
 import { labService } from "./labService";
 
 export const announcementService = {
@@ -54,5 +49,16 @@ export const announcementService = {
 					"Content-Type": "multipart/form-data",
 				},
 			}
+		),
+
+	submitGrade: (
+		lab_id: number,
+		announcement_id: number,
+		user_id: number,
+		grade: number
+	) =>
+		smart_labs.postAPI<void, void>(
+			`/lab/${lab_id}/assignment/${announcement_id}/user/${user_id}/grade/${grade}`,
+			undefined
 		),
 };
