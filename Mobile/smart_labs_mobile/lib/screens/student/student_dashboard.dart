@@ -20,82 +20,90 @@ class StudentDashboardScreen extends ConsumerWidget {
         title: const Text('Student Dashboard'),
         backgroundColor: isDark ? const Color(0xFF1C1C1C) : null,
       ),
-      body: analyticsAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) => Center(
-          child: Text('Error: $error',
-              style: TextStyle(color: theme.colorScheme.error)),
-        ),
-        data: (analytics) => SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              GridView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 16.0,
-                  mainAxisSpacing: 16.0,
-                  childAspectRatio: 1.3,
+      body: RefreshIndicator(
+        color: isDark ? const Color(0xFFFFFF00) : theme.colorScheme.primary,
+        onRefresh: () async {
+          // Invalidate the provider to force a refresh
+          ref.invalidate(dashboardAnalyticsProvider);
+        },
+        child: analyticsAsync.when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (error, stack) => Center(
+            child: Text('Error: $error',
+                style: TextStyle(color: theme.colorScheme.error)),
+          ),
+          data: (analytics) => SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 16.0,
+                    mainAxisSpacing: 16.0,
+                    childAspectRatio: 1.3,
+                  ),
+                  itemCount: 4,
+                  itemBuilder: (context, index) {
+                    final items = [
+                      (
+                        'Total Labs',
+                        analytics.totalLabs.toString(),
+                        Icons.science,
+                        Colors.blue
+                      ),
+                      (
+                        'Avg Attendance',
+                        '${analytics.avgAttendance.toStringAsFixed(1)}%',
+                        Icons.people,
+                        Colors.green
+                      ),
+                      (
+                        'PPE Compliance',
+                        '${analytics.ppeCompliance.toStringAsFixed(1)}%',
+                        Icons.health_and_safety,
+                        Colors.orange
+                      ),
+                      (
+                        'Total Sessions',
+                        analytics.totalStudents.toString(),
+                        Icons.calendar_today,
+                        Colors.purple
+                      ),
+                    ];
+                    final item = items[index];
+                    return _buildSummaryCard(
+                      item.$1,
+                      item.$2,
+                      item.$3,
+                      item.$4,
+                      isDark,
+                      theme,
+                    );
+                  },
                 ),
-                itemCount: 4,
-                itemBuilder: (context, index) {
-                  final items = [
-                    (
-                      'Total Labs',
-                      analytics.totalLabs.toString(),
-                      Icons.science,
-                      Colors.blue
-                    ),
-                    (
-                      'Avg Attendance',
-                      '${analytics.avgAttendance.toStringAsFixed(1)}%',
-                      Icons.people,
-                      Colors.green
-                    ),
-                    (
-                      'PPE Compliance',
-                      '${analytics.ppeCompliance.toStringAsFixed(1)}%',
-                      Icons.health_and_safety,
-                      Colors.orange
-                    ),
-                    (
-                      'Total Students',
-                      analytics.totalStudents.toString(),
-                      Icons.school,
-                      Colors.purple
-                    ),
-                  ];
-                  final item = items[index];
-                  return _buildSummaryCard(
-                    item.$1,
-                    item.$2,
-                    item.$3,
-                    item.$4,
-                    isDark,
-                    theme,
-                  );
-                },
-              ),
-              const SizedBox(height: 24),
-              ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: analytics.labs
-                    .where(
-                        (lab) => lab.labId.isNotEmpty && lab.labName.isNotEmpty)
-                    .length,
-                itemBuilder: (context, index) {
-                  final validLabs = analytics.labs
+                const SizedBox(height: 24),
+                ListView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: analytics.labs
                       .where((lab) =>
                           lab.labId.isNotEmpty && lab.labName.isNotEmpty)
-                      .toList();
-                  return _buildLabCard(validLabs[index], isDark, theme);
-                },
-              ),
-            ],
+                      .length,
+                  itemBuilder: (context, index) {
+                    final validLabs = analytics.labs
+                        .where((lab) =>
+                            lab.labId.isNotEmpty && lab.labName.isNotEmpty)
+                        .toList();
+                    return _buildLabCard(validLabs[index], isDark, theme);
+                  },
+                ),
+              ],
+            ),
           ),
         ),
       ),
