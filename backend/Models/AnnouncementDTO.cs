@@ -1,4 +1,5 @@
 using backend.Models;
+using backend.Services;
 
 public class AnnouncementDTO
 {
@@ -37,5 +38,26 @@ public class SubmissionDTO
 
     public DateTime Time { get; set; }
 
+    public bool Submitted { get; set; } = false;
+
     public int? Grade { get; set; }
+
+
+    public static async Task<List<SubmissionDTO>> FromSubmissionAsync(List<Submission> v, UserService userService)
+    {
+        List<SubmissionDTO> results = [];
+        foreach (var submission in v)
+        {
+            results.Add(new SubmissionDTO
+            {
+                UserId = submission.UserId,
+                User = (UserDTO)await userService.GetUserById(submission.UserId),
+                Message = submission.Message,
+                Files = submission.Files,
+                Time = submission.Time,
+                Grade = submission.Grade,
+            });
+        }
+        return results;
+    }
 }
