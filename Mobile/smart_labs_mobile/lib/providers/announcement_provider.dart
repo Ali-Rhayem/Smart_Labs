@@ -43,23 +43,20 @@ class LabAnnouncementsNotifier
     }
   }
 
-  Future<void> addAnnouncement(String message, List<File> files) async {
+  Future<void> addAnnouncement(
+      Map<String, dynamic> data, List<File> files) async {
     try {
-      print('Uploading files:');
-      for (var file in files) {
-        print('File path: ${file.path}');
-        print('File name: ${file.path.split('/').last}');
-        print('File size: ${await file.length()} bytes');
-        print('File exists: ${await file.exists()}');
-      }
-
       var request = http.MultipartRequest(
         'POST',
         Uri.parse('${_apiService.baseUrl}/Lab/$labId/announcement'),
       );
 
-      // Add message field
-      request.fields['message'] = message;
+      // Add all fields from data
+      data.forEach((key, value) {
+        if (value != null) {
+          request.fields[key] = value.toString();
+        }
+      });
 
       // Add files
       for (var file in files) {
@@ -84,15 +81,8 @@ class LabAnnouncementsNotifier
       request.headers['Authorization'] = 'Bearer $token';
       request.headers['Content-Type'] = 'multipart/form-data';
 
-      print('Request URL: ${request.url}');
-      print('Request headers: ${request.headers}');
-      print('Number of files being sent: ${request.files.length}');
-
       var response = await request.send();
       var responseData = await response.stream.bytesToString();
-
-      print('Response status code: ${response.statusCode}');
-      print('Response data: $responseData');
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         await fetchAnnouncements();
@@ -100,7 +90,6 @@ class LabAnnouncementsNotifier
         throw Exception('Failed to add announcement: $responseData');
       }
     } catch (e) {
-      print('Error details: $e');
       throw Exception('Failed to add announcement: $e');
     }
   }
