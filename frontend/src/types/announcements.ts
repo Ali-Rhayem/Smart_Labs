@@ -16,6 +16,11 @@ export interface AnnouncementDTO {
 	files: string[];
 	time: Date;
 	comments: CommentDTO[];
+	assignment: boolean;
+	canSubmit: boolean;
+	deadline?: Date;
+	grade?: number;
+	submissions: SubmissionDTO[];
 }
 
 export interface CommentDTO {
@@ -23,4 +28,23 @@ export interface CommentDTO {
 	user: UserDTO;
 	message: string;
 	time: Date;
+}
+
+export interface SubmissionDTO {
+	userId: number;
+	user: UserDTO;
+	message: string;
+	files: string[];
+	time: Date;
+	Submitted: boolean;
+	grade: number;
+}
+
+export interface Submission {
+	userId: number;
+	message: string;
+	files: string[];
+	time: Date;
+	grade: number;
+	Submitted: boolean;
 }
