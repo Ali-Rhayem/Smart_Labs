@@ -202,97 +202,119 @@ class _SubmissionsScreenState extends ConsumerState<SubmissionsScreen> {
                   color: isDark
                       ? const Color(0xFF1C1C1C)
                       : theme.colorScheme.surface,
-                  child: ExpansionTile(
-                    leading: CircleAvatar(
-                      backgroundColor:
-                          isDark ? kNeonAccent : theme.colorScheme.primary,
-                      child: Text(
-                        submission.user.name[0].toUpperCase(),
+                  clipBehavior: Clip.antiAlias,
+                  child: Theme(
+                    data: Theme.of(context)
+                        .copyWith(dividerColor: Colors.transparent),
+                    child: ExpansionTile(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        side: BorderSide(
+                          color: isDark ? Colors.white12 : Colors.black12,
+                          width: 0,
+                        ),
+                      ),
+                      collapsedShape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        side: BorderSide(
+                          color: isDark ? Colors.white12 : Colors.black12,
+                          width: 0,
+                        ),
+                      ),
+                      maintainState: true,
+                      leading: CircleAvatar(
+                        backgroundColor:
+                            isDark ? kNeonAccent : theme.colorScheme.primary,
+                        child: Text(
+                          submission.user.name[0].toUpperCase(),
+                          style: TextStyle(
+                            color: isDark ? Colors.black : Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      title: Text(
+                        submission.user.name,
                         style: TextStyle(
-                          color: isDark ? Colors.black : Colors.white,
+                          color: theme.colorScheme.onSurface,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                    ),
-                    title: Text(
-                      submission.user.name,
-                      style: TextStyle(
-                        color: theme.colorScheme.onSurface,
-                        fontWeight: FontWeight.bold,
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Submitted: ${DateFormat('MMM d, y HH:mm').format(submission.submittedAt)}',
+                            style: TextStyle(
+                              color:
+                                  theme.colorScheme.onSurface.withOpacity(0.7),
+                            ),
+                          ),
+                          Text(
+                            'Grade: ${submission.grade ?? "Not graded"}/${widget.announcement.grade}',
+                            style: TextStyle(
+                              color: submission.grade != null
+                                  ? Colors.green
+                                  : theme.colorScheme.onSurface
+                                      .withOpacity(0.7),
+                              fontWeight: submission.grade != null
+                                  ? FontWeight.bold
+                                  : null,
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      trailing: IconButton(
+                        icon: const Icon(Icons.grade),
+                        color: isDark ? kNeonAccent : theme.colorScheme.primary,
+                        onPressed: () => _showGradeDialog(
+                          submission.user.id.toString(),
+                          submission.user.name,
+                          submission.grade,
+                        ),
+                      ),
                       children: [
-                        Text(
-                          'Submitted: ${DateFormat('MMM d, y HH:mm').format(submission.submittedAt)}',
-                          style: TextStyle(
-                            color: theme.colorScheme.onSurface.withOpacity(0.7),
+                        if (submission.message.isNotEmpty)
+                          Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Text(
+                              submission.message,
+                              style:
+                                  TextStyle(color: theme.colorScheme.onSurface),
+                            ),
                           ),
-                        ),
-                        Text(
-                          'Grade: ${submission.grade ?? "Not graded"}/${widget.announcement.grade}',
-                          style: TextStyle(
-                            color: submission.grade != null
-                                ? Colors.green
-                                : theme.colorScheme.onSurface.withOpacity(0.7),
-                            fontWeight: submission.grade != null
-                                ? FontWeight.bold
-                                : null,
+                        if (submission.files.isNotEmpty)
+                          Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Submitted Files:',
+                                  style: TextStyle(
+                                    color: theme.colorScheme.onSurface,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                ...submission.files.map((file) => ListTile(
+                                      leading: const Icon(Icons.attachment),
+                                      title: Text(
+                                        file.split('/').last,
+                                        style: TextStyle(
+                                          color: theme.colorScheme.onSurface,
+                                        ),
+                                      ),
+                                      onTap: () => _downloadAndOpenFile(
+                                        '${dotenv.env['BASE_URL']}/$file',
+                                        file.split('/').last,
+                                      ),
+                                    )),
+                              ],
+                            ),
                           ),
-                        ),
                       ],
                     ),
-                    trailing: IconButton(
-                      icon: const Icon(Icons.grade),
-                      color: isDark ? kNeonAccent : theme.colorScheme.primary,
-                      onPressed: () => _showGradeDialog(
-                        submission.user.id.toString(),
-                        submission.user.name,
-                        submission.grade,
-                      ),
-                    ),
-                    children: [
-                      if (submission.message.isNotEmpty)
-                        Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Text(
-                            submission.message,
-                            style:
-                                TextStyle(color: theme.colorScheme.onSurface),
-                          ),
-                        ),
-                      if (submission.files.isNotEmpty)
-                        Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Submitted Files:',
-                                style: TextStyle(
-                                  color: theme.colorScheme.onSurface,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              ...submission.files.map((file) => ListTile(
-                                    leading: const Icon(Icons.attachment),
-                                    title: Text(
-                                      file.split('/').last,
-                                      style: TextStyle(
-                                        color: theme.colorScheme.onSurface,
-                                      ),
-                                    ),
-                                    onTap: () => _downloadAndOpenFile(
-                                      '${dotenv.env['BASE_URL']}/$file',
-                                      file.split('/').last,
-                                    ),
-                                  )),
-                            ],
-                          ),
-                        ),
-                    ],
                   ),
                 );
               },
