@@ -113,6 +113,13 @@ const InputField: React.FC<InputFieldProps> = ({
 							borderColor: "var(--color-background)",
 						},
 					},
+						"& input[type=number]": {
+							MozAppearance: "textfield",
+							"&::-webkit-outer-spin-button, &::-webkit-inner-spin-button": {
+								WebkitAppearance: "none",
+								margin: 0,
+							},
+						},
 					"& .MuiInputLabel-root": {
 						WebkitTextFillColor: disabled
 							? "var(--color-text-secondary)"
