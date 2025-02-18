@@ -23,7 +23,7 @@ apiClient.interceptors.request.use(
 
 interface SmartLabs {
 	getAPI: <T>(api_url: string) => Promise<T>;
-	postAPI: <T, D>(api_url: string, api_data: D) => Promise<T>;
+	postAPI: <T, D>(api_url: string, api_data: D, config?: object) => Promise<T>;
 	putAPI: <T, D>(api_url: string, api_data: D) => Promise<T>;
 	deleteAPI: <T, D = Record<string, never>>(api_url: string, api_data?: D) => Promise<T>;
 }
@@ -31,8 +31,22 @@ interface SmartLabs {
 export const smart_labs: SmartLabs = {
 	getAPI: <T>(api_url: string) =>
 		apiClient.get<T>(api_url).then((response) => response.data),
-	postAPI: <T, D>(api_url: string, api_data: D) =>
-		apiClient.post<T>(api_url, api_data).then((response) => response.data),
+	postAPI: <T, D>(api_url: string, api_data: D, config = {}) => {
+		const defaultConfig = {
+			headers: {
+				'Content-Type': 'application/json',
+			},
+		};
+
+		// Override content-type if FormData is being sent
+		if (api_data instanceof FormData) {
+			defaultConfig.headers['Content-Type'] = 'multipart/form-data';
+		}
+
+		return apiClient
+			.post<T>(api_url, api_data, { ...defaultConfig, ...config })
+			.then((response) => response.data);
+	},
 	putAPI: <T, D>(api_url: string, api_data: D) =>
 		apiClient.put<T>(api_url, api_data).then((response) => response.data),
 	deleteAPI: <T, D = Record<string, never>>(api_url: string, api_data?: D) =>
