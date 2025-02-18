@@ -4,7 +4,13 @@ import 'package:smart_labs_mobile/models/lab_model.dart';
 
 class LabHeader extends StatefulWidget {
   final Lab lab;
-  const LabHeader({super.key, required this.lab});
+  final bool disableToggle;
+
+  const LabHeader({
+    super.key,
+    required this.lab,
+    this.disableToggle = false,
+  });
 
   @override
   State<LabHeader> createState() => _LabHeaderState();
@@ -65,7 +71,9 @@ class _LabHeaderState extends State<LabHeader> {
                   _isExpanded ? Icons.expand_less : Icons.expand_more,
                   color: theme.colorScheme.onSurface,
                 ),
-                onPressed: () => setState(() => _isExpanded = !_isExpanded),
+                onPressed: widget.disableToggle
+                    ? null
+                    : () => setState(() => _isExpanded = !_isExpanded),
               ),
             ],
           ),
