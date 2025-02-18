@@ -34,6 +34,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import DeleteConfirmDialog from "../components/DeleteConfirmDialog";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import StopIcon from "@mui/icons-material/Stop";
+import AnalyticsTab from '../components/tabs/AnalyticsTab';
 
 interface TabPanelProps {
 	children?: React.ReactNode;
@@ -459,6 +460,10 @@ const LabPage: React.FC = () => {
 										sx={{
 											bgcolor: "var(--color-success)",
 											color: "var(--color-text-button)",
+											whiteSpace: "nowrap",
+											"& .MuiButton-startIcon": {
+												marginRight: 1
+											},
 											"&:hover": {
 												bgcolor:
 													"rgb(from var(--color-success) r g b / 0.8)",
@@ -612,7 +617,7 @@ const LabPage: React.FC = () => {
 				/>
 			</TabPanel>
 			<TabPanel value={tabValue} index={2}>
-				Analytics
+				<AnalyticsTab labId={lab.id} />
 			</TabPanel>
 			<TabPanel value={tabValue} index={3}>
 				<AnnouncementsTab labId={lab.id} />

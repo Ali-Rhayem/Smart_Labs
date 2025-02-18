@@ -13,7 +13,7 @@ import AnalyticsIcon from "@mui/icons-material/Analytics";
 import { format } from "date-fns";
 import { Session } from "../types/sessions";
 import PeopleSection from "../components/PeopleSection";
-import AnalyticsSection from "../components/analytics/AnalyticsSection";
+import AnalyticsSession from "../components/analytics/AnalyticsSession";
 
 interface TabPanelProps {
 	children?: React.ReactNode;
@@ -187,7 +187,7 @@ const SessionPage: React.FC = () => {
 			</TabPanel>
 
 			<TabPanel value={tabValue} index={1}>
-				<AnalyticsSection
+				<AnalyticsSession
 					results={session.result}
 					totalPPECompliance={session.totalPPECompliance}
 					ppE_compliance_bytime={session.ppE_compliance_bytime}
