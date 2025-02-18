@@ -33,7 +33,8 @@ public class RoomService
     public async Task<Rooms> UpdateRoomAsync(string name, Rooms room)
     {
         var _labService = _serviceProvider.GetRequiredService<LabService>();
-        await _rooms.ReplaceOneAsync(r => r.Name == name, room);
+
+        await _rooms.UpdateOneAsync(r => r.Name == name, Builders<Rooms>.Update.Set(r => r.Name, room.Name));
         var labs = await _labService.GetLabsByRoomAsync(name);
         foreach (var lab in labs)
         {
