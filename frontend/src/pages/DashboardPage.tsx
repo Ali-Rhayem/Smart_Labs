@@ -36,6 +36,7 @@ import LabOverview from "../components/LabOverview";
 const DashboardPage: React.FC = () => {
 	const { user: authUser } = useUser();
 	const { data: dashboardData, isLoading } = useDashboard();
+	const isStudent = authUser?.role === "student";
 	console.log(dashboardData);
 	// Move useMemo before any conditional returns
 	const validLabs = React.useMemo(
@@ -74,7 +75,7 @@ const DashboardPage: React.FC = () => {
 		() =>
 			validLabs
 				.map((lab: Lab) => ({
-					date: lab.xaxis[0],
+					date: lab.xaxis?.[0] ?? "",
 					attendance: lab.total_attendance,
 					ppe_compliance: lab.total_ppe_compliance,
 				}))
@@ -125,7 +126,9 @@ const DashboardPage: React.FC = () => {
 							<Typography
 								sx={{ color: "var(--color-text-secondary)" }}
 							>
-								Total Students
+								{isStudent
+									? "Total Sessions"
+									: "Total Students"}
 							</Typography>
 						</Box>
 					</Card>
@@ -288,7 +291,7 @@ const DashboardPage: React.FC = () => {
 						>
 							Top Performers
 						</Typography>
-						{validLabs[0]?.people
+						{(validLabs[0]?.people ?? [])
 							.sort(
 								(a, b) =>
 									b.attendance_percentage -
@@ -382,25 +385,27 @@ const DashboardPage: React.FC = () => {
 				{Object.entries(
 					validLabs.reduce(
 						(acc, lab) => {
-							const labId = lab.lab_id;
+							const labId = lab.lab_id ?? "unknown";
 							if (!acc[labId]) {
 								acc[labId] = {
 									id: labId,
-									name: lab.lab_name,
+									name: lab.lab_name || "",
 									sessions: [],
 									totalAttendance: 0,
 									totalPPE: 0,
 								};
 							}
 							acc[labId].sessions.push(lab);
-							acc[labId].totalAttendance += lab.total_attendance;
-							acc[labId].totalPPE += lab.total_ppe_compliance;
+							acc[labId].totalAttendance +=
+								lab.total_attendance ?? 0;
+							acc[labId].totalPPE +=
+								lab.total_ppe_compliance ?? 0;
 							return acc;
 						},
 						{} as Record<
 							string,
 							{
-								id: number;
+								id: string | number;
 								name: string;
 								sessions: (typeof validLabs)[0][];
 								totalAttendance: number;
