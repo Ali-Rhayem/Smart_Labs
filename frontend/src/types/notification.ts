@@ -8,3 +8,10 @@ export interface Notification {
 	isRead: boolean;
 	isDeleted: boolean;
 }
+
+export interface NotificationDTO {
+	TargetFcmTokens: string[];
+	Title: string;
+	Body: string;
+	Data: { [key: string]: string };
+}
