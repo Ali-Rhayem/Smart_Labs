@@ -1,5 +1,6 @@
 import React, { createContext, useContext, ReactNode, useState } from "react";
 import { Role } from "../types/user";
+import { useQueryClient } from '@tanstack/react-query';
 
 export interface User {
 	id: number;
@@ -28,6 +29,8 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
 			: null;
 	});
 
+	const queryClient = useQueryClient();
+
 	const login = (userData: User) => {
 		setUser(userData);
 		localStorage.setItem("token", userData.token);
@@ -40,6 +43,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
 		localStorage.removeItem("token");
 		localStorage.removeItem("userId");
 		localStorage.removeItem("userRole");
+		queryClient.clear(); // Clear all queries
 	};
 
 	return (
