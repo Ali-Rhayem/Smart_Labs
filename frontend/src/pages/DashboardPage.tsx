@@ -30,15 +30,28 @@ import SchoolIcon from "@mui/icons-material/School";
 import GroupsIcon from "@mui/icons-material/Groups";
 import AssignmentTurnedInIcon from "@mui/icons-material/AssignmentTurnedIn";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import { Lab, PPEComplianceData } from "../types/dashboard";
+import { Lab } from "../types/dashboard";
 import LabOverview from "../components/LabOverview";
 
 const DashboardPage: React.FC = () => {
 	const { user: authUser } = useUser();
 	const { data: dashboardData, isLoading } = useDashboard();
 	const isStudent = authUser?.role === "student";
-	console.log(dashboardData);
-	// Move useMemo before any conditional returns
+
+	const chart_colors = [
+		"#8884d8",
+		"#82ca9d",
+		"#ffc658",
+		"#ff7f50",
+		"#ff6b81",
+		"#a05195",
+		"#d45087",
+		"#f95d6a",
+		"#ff7c43",
+		"#ffa600",
+		"#003f5c",
+		"#2f4b7c",
+	];
 	const validLabs = React.useMemo(
 		() =>
 			(dashboardData?.labs || []).filter(
@@ -296,13 +309,13 @@ const DashboardPage: React.FC = () => {
 										`${name}: ${value}%`
 									}
 								>
-									{ppeComplianceData.map((entry, index) => (
+									{ppeComplianceData.map((_entry, index) => (
 										<Cell
 											key={index}
 											fill={
-												index === 0
-													? "#8884d8"
-													: "#82ca9d"
+												chart_colors[
+													index % chart_colors.length
+												]
 											}
 										/>
 									))}
