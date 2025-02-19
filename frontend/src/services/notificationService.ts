@@ -1,5 +1,5 @@
 import { smart_labs } from "../utils/axios";
-import { Notification } from "../types/notification";
+import { Notification, NotificationDTO } from "../types/notification";
 
 export const notificationService = {
 	getNotifications: (id: number) =>
@@ -16,4 +16,10 @@ export const notificationService = {
 
 	deleteAllNotifications: () =>
 		smart_labs.putAPI(`/notification/mark-all-as-deleted`, {}),
+
+	sendNotification: (notification: NotificationDTO) =>
+		smart_labs.postAPI<NotificationDTO, NotificationDTO>(
+			`/notification/send`,
+			notification
+		),
 };
