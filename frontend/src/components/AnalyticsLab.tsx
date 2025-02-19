@@ -23,18 +23,18 @@ import {
 import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
 
 interface LabAnalytics {
-	total_attendance: number;
-	total_attendance_bytime: number[];
-	total_ppe_compliance: number;
-	total_ppe_compliance_bytime: number[];
-	ppe_compliance: Record<string, number>;
-	ppe_compliance_bytime: Record<string, number[]>;
-	people: Array<{
+	total_attendance?: number;
+	total_attendance_bytime?: number[];
+	total_ppe_compliance?: number;
+	total_ppe_compliance_bytime?: number[];
+	ppe_compliance?: Record<string, number>;
+	ppe_compliance_bytime?: Record<string, number[]>;
+	people?: Array<{
 		name: string;
 		attendance_percentage: number;
 		ppE_compliance: Record<string, number>;
 	}>;
-	people_bytime: Array<{
+	people_bytime?: Array<{
 		name: string;
 		attendance_percentage: number[];
 	}>;
@@ -53,15 +53,26 @@ const AnalyticsLab: React.FC<AnalyticsLabProps> = ({
 	people_bytime,
 }) => {
 	const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
-	const ppeTypes = Object.keys(people[0]?.ppE_compliance || {});
 
-	// Add state for visibility
+	// Safe access to PPE types with fallback
+	const ppeTypes =
+		people && people.length > 0
+			? Object.keys(people[0]?.ppE_compliance || {})
+			: Object.keys({});
+
+	// Initialize state with safe defaults
 	const [visibleRadars, setVisibleRadars] = useState<Record<string, boolean>>(
 		() => {
 			const initial: Record<string, boolean> = {
 				attendance_percentage: true,
 			};
-			Object.keys(ppe_compliance).forEach((type) => {
+			// Use ppe_compliance if people array is empty
+			const typesSource =
+				people && people.length > 0
+					? people[0]?.ppE_compliance || {}
+					: {};
+
+			Object.keys(typesSource).forEach((type) => {
 				initial[`ppE_compliance.${type}`] = true;
 			});
 			return initial;
@@ -80,15 +91,19 @@ const AnalyticsLab: React.FC<AnalyticsLabProps> = ({
 	const [visibleLines, setVisibleLines] = useState<Record<string, boolean>>(
 		() => {
 			const initial: Record<string, boolean> = {};
-			people_bytime.forEach((person) => {
-				initial[person.name] = true;
-			});
+			if (people_bytime && Array.isArray(people_bytime)) {
+				people_bytime.forEach((person) => {
+					if (person && person.name) {
+						initial[person.name] = true;
+					}
+				});
+			}
 			return initial;
 		}
 	);
 
 	// Add handler
-	const handleLineLegendClick = (e: any) => {
+	const handleLineLegendClick = (e: { value: string }) => {
 		setVisibleLines((prev) => ({
 			...prev,
 			[e.value]: !prev[e.value],
@@ -99,7 +114,7 @@ const AnalyticsLab: React.FC<AnalyticsLabProps> = ({
 	const [visiblePPETypes, setVisiblePPETypes] = useState<
 		Record<string, boolean>
 	>(() => {
-		return Object.keys(ppe_compliance_bytime).reduce(
+		return Object.keys(ppe_compliance_bytime || {}).reduce(
 			(acc, key) => ({
 				...acc,
 				[key]: true,
@@ -125,7 +140,7 @@ const AnalyticsLab: React.FC<AnalyticsLabProps> = ({
 		"Low (<50%)": 0,
 	};
 
-	people.forEach((person) => {
+	people?.forEach((person) => {
 		if (person.attendance_percentage > 75)
 			attendanceGroups["High (>75%)"]++;
 		else if (person.attendance_percentage > 50)
@@ -141,21 +156,25 @@ const AnalyticsLab: React.FC<AnalyticsLabProps> = ({
 	);
 
 	// Prepare time series data
-	const timeSeriesData = total_ppe_compliance_bytime.map((value, index) => ({
-		time: `Time ${index + 1}`,
-		attendance: total_attendance_bytime[index],
-		ppe_compliance: value,
-		...Object.keys(ppe_compliance_bytime).reduce(
-			(acc, key) => ({
-				...acc,
-				[key]: ppe_compliance_bytime[key][index],
-			}),
-			{}
-		),
-	}));
+	const timeSeriesData = (total_ppe_compliance_bytime || []).map(
+		(value, index) => ({
+			time: `Time ${index + 1}`,
+			attendance: total_attendance_bytime
+				? total_attendance_bytime[index]
+				: 0,
+			ppe_compliance: value,
+			...Object.keys(ppe_compliance_bytime || {}).reduce(
+				(acc, key) => ({
+					...acc,
+					[key]: (ppe_compliance_bytime?.[key] ?? [])[index],
+				}),
+				{}
+			),
+		})
+	);
 
 	// First, prepare the time series data for each student
-	const studentTimeData = people_bytime
+	const studentTimeData = (people_bytime ?? [])
 		.map((person) => {
 			return person.attendance_percentage.map((value, timeIndex) => ({
 				name: person.name,
@@ -179,8 +198,8 @@ const AnalyticsLab: React.FC<AnalyticsLabProps> = ({
 						</Typography>
 						<Box sx={{ width: 200, height: 200, margin: "auto" }}>
 							<CircularProgressbar
-								value={total_attendance}
-								text={`${total_attendance}%`}
+								value={total_attendance ?? 0}
+								text={`${total_attendance ?? 0}%`}
 								styles={buildStyles({
 									pathColor: `var(--color-primary)`,
 									textColor: "var(--color-text)",
@@ -202,8 +221,8 @@ const AnalyticsLab: React.FC<AnalyticsLabProps> = ({
 						</Typography>
 						<Box sx={{ width: 200, height: 200, margin: "auto" }}>
 							<CircularProgressbar
-								value={total_ppe_compliance}
-								text={`${total_ppe_compliance}%`}
+								value={total_ppe_compliance ?? 0}
+								text={`${total_ppe_compliance ?? 0}%`}
 								styles={buildStyles({
 									pathColor: `var(--color-success)`,
 									textColor: "var(--color-text)",
@@ -257,7 +276,7 @@ const AnalyticsLab: React.FC<AnalyticsLabProps> = ({
 									cursor={{ fill: "transparent" }}
 								/>
 								<Legend />
-								{Object.keys(ppe_compliance).map(
+								{Object.keys(ppe_compliance || {}).map(
 									(ppeType, index) => (
 										<Bar
 											key={ppeType}
@@ -468,7 +487,7 @@ const AnalyticsLab: React.FC<AnalyticsLabProps> = ({
 									onClick={handleLineLegendClick}
 									wrapperStyle={{ cursor: "pointer" }}
 								/>
-								{people_bytime.map((person, index) => (
+								{people_bytime?.map((person, index) => (
 									<Line
 										key={person.name}
 										type="monotone"
@@ -526,7 +545,7 @@ const AnalyticsLab: React.FC<AnalyticsLabProps> = ({
 									onClick={handlePPELegendClick}
 									wrapperStyle={{ cursor: "pointer" }}
 								/>
-								{Object.keys(ppe_compliance_bytime).map(
+								{Object.keys(ppe_compliance_bytime || {}).map(
 									(key, index) => (
 										<Line
 											key={key}
