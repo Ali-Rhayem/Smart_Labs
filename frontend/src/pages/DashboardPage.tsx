@@ -236,7 +236,7 @@ const DashboardPage: React.FC = () => {
 
 			{/* PPE Compliance by Type */}
 			<Grid container spacing={3} sx={{ mb: 3 }}>
-				<Grid item xs={12} md={6}>
+				<Grid item xs={12} md={isStudent ? 12 : 6}>
 					<Card sx={{ p: 3, bgcolor: "var(--color-card)" }}>
 						<Typography
 							variant="h6"
@@ -282,62 +282,65 @@ const DashboardPage: React.FC = () => {
 					</Card>
 				</Grid>
 
-				{/* Top Performers */}
-				<Grid item xs={12} md={6}>
-					<Card sx={{ p: 3, bgcolor: "var(--color-card)" }}>
-						<Typography
-							variant="h6"
-							sx={{ mb: 2, color: "var(--color-text)" }}
-						>
-							Top Performers
-						</Typography>
-						{(validLabs[0]?.people ?? [])
-							.sort(
-								(a, b) =>
-									b.attendance_percentage -
-									a.attendance_percentage
-							)
-							.slice(0, 3)
-							.map((student, index) => (
-								<Box
-									key={student.id}
-									sx={{
-										display: "flex",
-										alignItems: "center",
-										mb: 2,
-										p: 2,
-										bgcolor: "var(--color-card-hover)",
-										borderRadius: 1,
-									}}
-								>
-									<Typography
+				{!isStudent && (
+					<Grid item xs={12} md={6}>
+						<Card sx={{ p: 3, bgcolor: "var(--color-card)" }}>
+							<Typography
+								variant="h6"
+								sx={{ mb: 2, color: "var(--color-text)" }}
+							>
+								Top Performers
+							</Typography>
+							{(validLabs[0]?.people ?? [])
+								.sort(
+									(a, b) =>
+										b.attendance_percentage -
+										a.attendance_percentage
+								)
+								.slice(0, 3)
+								.map((student, index) => (
+									<Box
+										key={student.id}
 										sx={{
-											color: "var(--color-primary)",
-											mr: 2,
-											fontWeight: "bold",
+											display: "flex",
+											alignItems: "center",
+											mb: 2,
+											p: 2,
+											bgcolor: "var(--color-card-hover)",
+											borderRadius: 1,
 										}}
 									>
-										#{index + 1}
-									</Typography>
-									<Box sx={{ flexGrow: 1 }}>
-										<Typography
-											sx={{ color: "var(--color-text)" }}
-										>
-											{student.name}
-										</Typography>
 										<Typography
 											sx={{
-												color: "var(--color-text-secondary)",
+												color: "var(--color-primary)",
+												mr: 2,
+												fontWeight: "bold",
 											}}
 										>
-											Attendance:{" "}
-											{student.attendance_percentage}%
+											#{index + 1}
 										</Typography>
+										<Box sx={{ flexGrow: 1 }}>
+											<Typography
+												sx={{
+													color: "var(--color-text)",
+												}}
+											>
+												{student.name}
+											</Typography>
+											<Typography
+												sx={{
+													color: "var(--color-text-secondary)",
+												}}
+											>
+												Attendance:{" "}
+												{student.attendance_percentage}%
+											</Typography>
+										</Box>
 									</Box>
-								</Box>
-							))}
-					</Card>
-				</Grid>
+								))}
+						</Card>
+					</Grid>
+				)}
 			</Grid>
 
 			{/* Attendance by Day */}
@@ -391,6 +394,7 @@ const DashboardPage: React.FC = () => {
 									id: labId,
 									name: lab.lab_name || "",
 									sessions: [],
+									sessionCount: lab.xaxis?.length ?? 0,
 									totalAttendance: 0,
 									totalPPE: 0,
 								};
@@ -408,6 +412,7 @@ const DashboardPage: React.FC = () => {
 								id: string | number;
 								name: string;
 								sessions: (typeof validLabs)[0][];
+								sessionCount: number;
 								totalAttendance: number;
 								totalPPE: number;
 							}
@@ -459,7 +464,7 @@ const DashboardPage: React.FC = () => {
 										<Typography
 											sx={{ color: "var(--color-text)" }}
 										>
-											{labData.sessions.length}
+											{labData.sessionCount}
 										</Typography>
 									</Box>
 									<Box sx={{ textAlign: "center" }}>
