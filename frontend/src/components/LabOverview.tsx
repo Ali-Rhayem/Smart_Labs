@@ -20,10 +20,9 @@ import { Lab } from "../types/dashboard";
 
 interface LabOverviewProps {
 	lab: Lab;
-	index: number;
 }
 
-const LabOverview: React.FC<LabOverviewProps> = ({ lab, index }) => {
+const LabOverview: React.FC<LabOverviewProps> = ({ lab }) => {
 	return (
 		<Box>
 			<Typography variant="h6" sx={{ mb: 2, color: "var(--color-text)" }}>
