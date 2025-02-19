@@ -4,13 +4,13 @@ export interface Session {
 	id: number;
 	lab_id: number;
 	date: string;
-	outputs: Output[];
+	outputs?: Output[];
 	result: ObjectResult[];
 	report: string | null;
-	totalAttendance: number;
-	totalPPECompliance: { [key: string]: number };
-	ppE_compliance_bytime: { [key: string]: number[] };
-	total_ppe_compliance_bytime: number[];
+	totalAttendance?: number;
+	totalPPECompliance?: { [key: string]: number };
+	ppE_compliance_bytime?: { [key: string]: number[] };
+	total_ppe_compliance_bytime?: number[];
 }
 
 export interface ObjectResult {
