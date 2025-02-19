@@ -19,6 +19,7 @@ import { useUser } from "../contexts/UserContext";
 import MenuIcon from "@mui/icons-material/Menu";
 import MenuOpenIcon from "@mui/icons-material/MenuOpen";
 import { useTheme } from "../themes/ThemeContext";
+import Logo from "./Logo";
 
 interface SideBarProps {
 	userRole: Role;
@@ -28,7 +29,9 @@ const SideBar: React.FC<SideBarProps> = ({ userRole }) => {
 	const location = useLocation();
 	const { logout } = useUser();
 	const navigate = useNavigate();
-	const [isMiniVariant, setIsMiniVariant] = useState(window.innerWidth <= 1200);
+	const [isMiniVariant, setIsMiniVariant] = useState(
+		window.innerWidth <= 1200
+	);
 	const [isOpen, setIsOpen] = useState(window.innerWidth > 1200);
 	const { themeMode } = useTheme();
 
@@ -74,6 +77,30 @@ const SideBar: React.FC<SideBarProps> = ({ userRole }) => {
 				},
 			}}
 		>
+			<Box
+				sx={{
+					p: 0.5,
+					display: "flex",
+					justifyContent: "center",
+					alignItems: "center",
+					opacity: isOpen ? 1 : 0,
+					transition: "opacity 0.2s ease-in-out",
+					height: 40,
+				}}
+			>
+				<Box
+					sx={{ 
+						maxWidth: 80,
+						maxHeight: 8,
+						'& svg': {
+							width: '100%',
+							height: 'auto'
+						}
+					}}
+				>
+					<Logo />
+				</Box>
+			</Box>
 			<Box sx={{ p: 2, display: "flex", justifyContent: "flex-end" }}>
 				<IconButton
 					onClick={toggleDrawer}
