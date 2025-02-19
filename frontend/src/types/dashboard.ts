@@ -9,15 +9,15 @@ export interface dashboard {
 }
 
 export interface Lab {
-	lab_id: number;
-	lab_name: string;
-	xaxis: string[];
-	total_attendance: number;
-	total_ppe_compliance: number;
-	ppe_compliance: {
+	lab_id?: number;
+	lab_name?: string;
+	xaxis?: string[];
+	total_attendance?: number;
+	total_ppe_compliance?: number;
+	ppe_compliance?: {
 		[key: string]: number;
 	};
-	people: People[];
+	people?: People[];
 }
 
 export interface PPEComplianceData {
