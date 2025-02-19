@@ -9,7 +9,7 @@ import NotFoundPage from "./pages/NotFoundPage";
 import { useUser } from "./contexts/UserContext";
 import UnauthorizedPage from "./pages/UnauthorizedPage";
 import ProtectedRoute from "./contexts/ProtectedRoute";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClient } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import LabPage from "./pages/LabPage";
 import SessionPage from "./pages/SessionPage";
@@ -22,14 +22,12 @@ import SemesterPage from "./pages/SemesterPage";
 import RoomPage from "./pages/RoomPage";
 import UsersPage from "./pages/UsersPage";
 
-const queryClient = new QueryClient();
-
 const App: React.FC = () => {
 	const { user } = useUser();
 	const currentUserRole: Role = user?.role as Role;
 
 	return (
-		<QueryClientProvider client={queryClient}>
+		<>
 			<Router>
 				<Routes>
 					<Route element={<PublicLayout />}>
@@ -175,7 +173,7 @@ const App: React.FC = () => {
 				buttonPosition="bottom-right"
 				initialIsOpen={false}
 			/>
-		</QueryClientProvider>
+		</>
 	);
 };
 
