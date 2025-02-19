@@ -74,7 +74,7 @@ const LabPage: React.FC = () => {
 		students,
 		isLoading: usersLoading,
 	} = useLabUsers(lab.id);
-	const { data: allPPEs = [] } = useAllPPEs();
+	const { data: allPPEs = [] } = user!.role !== "student" ? useAllPPEs() : {};
 	const queryClient = useQueryClient();
 	const { data: ppes = [], isLoading: ppesLoading } = usePPE(lab.ppe);
 
