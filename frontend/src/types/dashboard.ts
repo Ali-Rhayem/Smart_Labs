@@ -1,11 +1,11 @@
-import { User, UserDTO } from "./user";
+import { UserDTO } from "./user";
 
 export interface dashboard {
-	total_students: number;
-	labs: Lab[];
-	total_labs: number;
-	avg_attandance: number;
-	ppe_compliance: number;
+	total_students?: number;
+	labs?: Lab[];
+	total_labs?: number;
+	avg_attandance?: number;
+	ppe_compliance?: number;
 }
 
 export interface Lab {
