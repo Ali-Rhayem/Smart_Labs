@@ -71,17 +71,55 @@ const DashboardPage: React.FC = () => {
 		});
 	}, [validLabs]);
 
-	const trendsData = React.useMemo(
-		() =>
-			validLabs
-				.map((lab: Lab) => ({
-					date: lab.xaxis?.[0] ?? "",
-					attendance: lab.total_attendance,
-					ppe_compliance: lab.total_ppe_compliance,
-				}))
-				.reverse(),
-		[validLabs]
-	);
+	const trendsData = React.useMemo(() => {
+		// Group by month and calculate averages
+		const monthlyData = validLabs.reduce((acc, lab) => {
+			// Loop through all dates in xaxis
+			lab.xaxis?.forEach((date, index) => {
+				const monthDate = new Date(date);
+				const monthKey = `${monthDate.getFullYear()}-${
+					monthDate.getMonth() + 1
+				}`;
+
+				if (!acc[monthKey]) {
+					acc[monthKey] = {
+						count: 0,
+						totalAttendance: 0,
+						totalPPE: 0,
+					};
+				}
+
+				acc[monthKey].count += 1;
+				acc[monthKey].totalAttendance +=
+					lab.total_attendance_bytime?.[index] ?? 0;
+				acc[monthKey].totalPPE +=
+					lab.total_ppe_compliance_bytime?.[index] ?? 0;
+			});
+
+			return acc;
+		}, {} as Record<string, { count: number; totalAttendance: number; totalPPE: number }>);
+
+		// Convert to array and calculate averages
+		return Object.entries(monthlyData)
+			.map(([monthKey, data]) => {
+				const [year, month] = monthKey.split("-");
+				return {
+					date: new Date(
+						parseInt(year),
+						parseInt(month) - 1
+					).toLocaleDateString("en-US", {
+						year: "numeric",
+						month: "short",
+					}),
+					attendance: Math.round(data.totalAttendance / data.count),
+					ppe_compliance: Math.round(data.totalPPE / data.count),
+				};
+			})
+			.sort(
+				(a, b) =>
+					new Date(a.date).getTime() - new Date(b.date).getTime()
+			);
+	}, [validLabs]);
 
 	if (isLoading || !dashboardData) {
 		return (
@@ -284,7 +322,13 @@ const DashboardPage: React.FC = () => {
 
 				{!isStudent && (
 					<Grid item xs={12} md={6}>
-						<Card sx={{ p: 3, bgcolor: "var(--color-card)" }}>
+						<Card
+							sx={{
+								p: 3,
+								bgcolor: "var(--color-card)",
+								height: "100%",
+							}}
+						>
 							<Typography
 								variant="h6"
 								sx={{ mb: 2, color: "var(--color-text)" }}
@@ -370,6 +414,11 @@ const DashboardPage: React.FC = () => {
 									dataKey="attendance"
 									fill="#8884d8"
 									name="Attendance %"
+								/>
+								<Bar
+									dataKey="ppe_compliance"
+									fill="#82ca9d"
+									name="PPE %"
 								/>
 							</BarChart>
 						</ResponsiveContainer>
@@ -536,11 +585,7 @@ const DashboardPage: React.FC = () => {
 						</AccordionSummary>
 						<AccordionDetails>
 							{labData.sessions.map((session, index) => (
-								<LabOverview
-									key={index}
-									lab={session}
-									index={index}
-								/>
+								<LabOverview key={index} lab={session} />
 							))}
 						</AccordionDetails>
 					</Accordion>
