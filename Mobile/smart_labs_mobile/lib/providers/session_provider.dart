@@ -34,11 +34,12 @@ class LabSessionsNotifier extends StateNotifier<AsyncValue<List<Session>>> {
     }
   }
 
-  Future<void> startSession() async {
+  Future<Map<String, dynamic>> startSession() async {
     try {
-      final response = await _apiService.post('/Sessions/lab/$labId/start', {});
+      final response = await _apiService.post('/Lab/$labId/startSession', {});
       if (response['success'] != false) {
         await fetchSessions();
+        return response;
       } else {
         throw Exception(response['message'] ?? 'Failed to start session');
       }
@@ -47,11 +48,12 @@ class LabSessionsNotifier extends StateNotifier<AsyncValue<List<Session>>> {
     }
   }
 
-  Future<void> endSession() async {
+  Future<Map<String, dynamic>> endSession() async {
     try {
-      final response = await _apiService.post('/Sessions/lab/$labId/end', {});
+      final response = await _apiService.post('/Lab/$labId/endSession', {});
       if (response['success'] != false) {
         await fetchSessions();
+        return response;
       } else {
         throw Exception(response['message'] ?? 'Failed to end session');
       }
