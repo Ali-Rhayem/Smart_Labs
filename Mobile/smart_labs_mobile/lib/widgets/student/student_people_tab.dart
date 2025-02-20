@@ -58,7 +58,8 @@ class PeopleTab extends ConsumerWidget {
                   child: Text(
                     'No students enrolled',
                     style: TextStyle(
-                      color: theme.colorScheme.onBackground.withValues(alpha: 0.7),
+                      color:
+                          theme.colorScheme.onBackground.withValues(alpha: 0.7),
                       fontSize: 16,
                     ),
                   ),
@@ -93,6 +94,22 @@ class PeopleTab extends ConsumerWidget {
                                 ? CircleAvatar(
                                     backgroundImage: NetworkImage(
                                       '${dotenv.env['IMAGE_BASE_URL']}/${student.imageUrl}',
+                                    ),
+                                    backgroundColor: isDark
+                                        ? kNeonAccent
+                                        : theme.colorScheme.primary,
+                                    onBackgroundImageError: (_, __) {
+                                      // If image fails to load, it will show the fallback initial
+                                      return;
+                                    },
+                                    child: Text(
+                                      student.name[0].toUpperCase(),
+                                      style: TextStyle(
+                                        color: isDark
+                                            ? Colors.black
+                                            : Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
                                   )
                                 : CircleAvatar(
@@ -134,6 +151,22 @@ class PeopleTab extends ConsumerWidget {
                                   ? CircleAvatar(
                                       backgroundImage: NetworkImage(
                                         '${dotenv.env['IMAGE_BASE_URL']}/${student.imageUrl}',
+                                      ),
+                                      backgroundColor: isDark
+                                          ? kNeonAccent
+                                          : theme.colorScheme.primary,
+                                      onBackgroundImageError: (_, __) {
+                                        // If image fails to load, it will show the fallback initial
+                                        return;
+                                      },
+                                      child: Text(
+                                        student.name[0].toUpperCase(),
+                                        style: TextStyle(
+                                          color: isDark
+                                              ? Colors.black
+                                              : Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                        ),
                                       ),
                                     )
                                   : CircleAvatar(
@@ -243,7 +276,8 @@ class PeopleTab extends ConsumerWidget {
                   child: Text(
                     'No instructors enrolled',
                     style: TextStyle(
-                      color: theme.colorScheme.onBackground.withValues(alpha: 0.7),
+                      color:
+                          theme.colorScheme.onBackground.withValues(alpha: 0.7),
                       fontSize: 16,
                     ),
                   ),
@@ -281,6 +315,20 @@ class PeopleTab extends ConsumerWidget {
                                 backgroundImage: NetworkImage(
                                   '${dotenv.env['IMAGE_BASE_URL']}/${instructor.imageUrl}',
                                 ),
+                                backgroundColor: isDark
+                                    ? kNeonAccent
+                                    : theme.colorScheme.primary,
+                                onBackgroundImageError: (_, __) {
+                                  // If image fails to load, it will show the fallback initial
+                                  return;
+                                },
+                                child: Text(
+                                  instructor.name[0].toUpperCase(),
+                                  style: TextStyle(
+                                    color: isDark ? Colors.black : Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
                               )
                             : CircleAvatar(
                                 backgroundColor: isDark
@@ -304,7 +352,8 @@ class PeopleTab extends ConsumerWidget {
                         subtitle: Text(
                           instructor.email,
                           style: TextStyle(
-                            color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                            color: theme.colorScheme.onSurface
+                                .withValues(alpha: 0.7),
                           ),
                         ),
                         shape: RoundedRectangleBorder(
