@@ -17,10 +17,10 @@
     <uses-permission android:name="android.permission.CAMERA" />
 
     <application
-        android:label="smart_labs_mobile"
+        android:label="Smart Labs"
         android:name="${applicationName}"
         android:requestLegacyExternalStorage="true"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/launcher_icon">
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -64,6 +64,14 @@
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="http" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="https" />
         </intent>
     </queries>
 </manifest>
