@@ -157,6 +157,25 @@ class LabNotifier extends StateNotifier<AsyncValue<List<Lab>>> {
           }
         }
 
+        // Get PPE IDs from lab data
+        final ppeIds = (labData['ppe'] as List<dynamic>? ?? [])
+            .map((e) => e.toString())
+            .toList();
+
+        // Fetch PPE names if there are any PPE IDs
+        Map<String, String> ppeIdToName = {};
+        if (ppeIds.isNotEmpty) {
+          final ppeResponse = await _apiService.postRaw(
+              '/PPE/list', ppeIds.map(int.parse).toList());
+          if (ppeResponse['success']) {
+            final ppeList =
+                (ppeResponse['data'] as List).map((ppe) => PPE.fromJson(ppe));
+            for (var ppe in ppeList) {
+              ppeIdToName[ppe.id.toString()] = ppe.name;
+            }
+          }
+        }
+
         // Convert schedules from JSON
         final scheduleList = (labData['schedule'] as List<dynamic>? ?? [])
             .map((schedule) => LabSchedule(
@@ -166,18 +185,14 @@ class LabNotifier extends StateNotifier<AsyncValue<List<Lab>>> {
                 ))
             .toList();
 
-        // Create updated lab object
+        // Create updated lab object with proper PPE names
         final updatedLab = Lab(
           labId: labData['id'].toString(),
           labCode: labData['labCode'],
           labName: labData['labName'],
           description: labData['description'],
-          ppeIds: (labData['ppe'] as List<dynamic>? ?? [])
-              .map((e) => e.toString())
-              .toList(),
-          ppeNames: (labData['ppe'] as List<dynamic>? ?? [])
-              .map((e) => e.toString())
-              .toList(),
+          ppeIds: ppeIds,
+          ppeNames: ppeIds.map((id) => ppeIdToName[id] ?? id).toList(),
           instructors: (labData['instructors'] as List<dynamic>? ?? [])
               .map((s) => s.toString())
               .toList(),
@@ -235,5 +250,33 @@ class LabNotifier extends StateNotifier<AsyncValue<List<Lab>>> {
         'message': e.toString(),
       };
     }
+  }
+
+  void updateLabStatus(String labId, bool started) {
+    state.whenData((labs) {
+      final updatedLabs = labs.map((lab) {
+        if (lab.labId == labId) {
+          return Lab(
+            labId: lab.labId,
+            labCode: lab.labCode,
+            labName: lab.labName,
+            description: lab.description,
+            ppeIds: lab.ppeIds,
+            ppeNames: lab.ppeNames,
+            room: lab.room,
+            instructors: lab.instructors,
+            students: lab.students,
+            schedule: lab.schedule,
+            report: lab.report,
+            semesterId: lab.semesterId,
+            semesterName: lab.semesterName,
+            sessions: lab.sessions,
+            started: started,
+          );
+        }
+        return lab;
+      }).toList();
+      state = AsyncValue.data(updatedLabs);
+    });
   }
 }
