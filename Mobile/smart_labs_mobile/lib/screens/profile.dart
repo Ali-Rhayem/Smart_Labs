@@ -40,17 +40,17 @@ class ProfileScreen extends ConsumerWidget {
         backgroundColor: theme.colorScheme.surface,
         elevation: 0,
         iconTheme: IconThemeData(color: theme.colorScheme.onSurface),
-        actions: [
-          IconButton(
-            icon: Icon(
-              Icons.settings,
-              color: theme.colorScheme.onSurface,
-            ),
-            onPressed: () {
-              // TODO: Handle settings button tap
-            },
-          ),
-        ],
+        // actions: [
+        //   IconButton(
+        //     icon: Icon(
+        //       Icons.settings,
+        //       color: theme.colorScheme.onSurface,
+        //     ),
+        //     onPressed: () {
+        //       // TODO: Handle settings button tap
+        //     },
+        //   ),
+        // ],
       ),
       backgroundColor: theme.colorScheme.surface,
       body: SingleChildScrollView(
@@ -131,14 +131,6 @@ class ProfileScreen extends ConsumerWidget {
             const SizedBox(height: 32),
             _buildProfileOption(
               context: context,
-              icon: Icons.settings,
-              title: 'Settings',
-              onTap: () {
-                // TODO: Navigate to settings
-              },
-            ),
-            _buildProfileOption(
-              context: context,
               icon: Icons.lock_outline,
               title: 'Change Password',
               onTap: () {
@@ -148,22 +140,6 @@ class ProfileScreen extends ConsumerWidget {
                     builder: (context) => const ChangePasswordScreen(),
                   ),
                 );
-              },
-            ),
-            _buildProfileOption(
-              context: context,
-              icon: Icons.account_balance_wallet_outlined,
-              title: 'Billing Details',
-              onTap: () {
-                // TODO: Navigate to billing details
-              },
-            ),
-            _buildProfileOption(
-              context: context,
-              icon: Icons.group_outlined,
-              title: 'User Management',
-              onTap: () {
-                // TODO: Navigate to user management
               },
             ),
             _buildProfileOption(
