@@ -89,6 +89,8 @@ class LabCard extends StatelessWidget {
                         style: theme.textTheme.bodyMedium?.copyWith(
                           color: colorScheme.onSurface.withValues(alpha: 0.7),
                         ),
+                        overflow: TextOverflow
+                            .ellipsis, // Show ... when text overflows
                       ),
                     ],
                   ),
