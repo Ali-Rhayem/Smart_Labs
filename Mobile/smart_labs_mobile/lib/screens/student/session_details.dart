@@ -223,13 +223,27 @@ class SessionDetailScreen extends StatelessWidget {
                               backgroundImage: NetworkImage(
                                 '${dotenv.env['IMAGE_BASE_URL']}/${data.user.imageUrl}',
                               ),
+                              backgroundColor: isDark
+                                  ? kNeonAccent
+                                  : theme.colorScheme.primary,
+                              onBackgroundImageError: (_, __) {
+                                // If image fails to load, it will show the fallback initial
+                                return;
+                              },
+                              child: Text(
+                                data.user.name[0].toUpperCase(),
+                                style: TextStyle(
+                                  color: isDark ? Colors.black : Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                             )
                           : CircleAvatar(
                               backgroundColor: isDark
                                   ? kNeonAccent
                                   : theme.colorScheme.primary,
                               child: Text(
-                                data.name[0].toUpperCase(),
+                                data.user.name[0].toUpperCase(),
                                 style: TextStyle(
                                   color: isDark ? Colors.black : Colors.white,
                                   fontWeight: FontWeight.bold,
@@ -249,7 +263,8 @@ class SessionDetailScreen extends StatelessWidget {
                         child: Text(
                           'Attendance: ${data.attendancePercentage}%',
                           style: TextStyle(
-                            color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                            color: theme.colorScheme.onSurface
+                                .withValues(alpha: 0.7),
                             fontSize: 14,
                           ),
                         ),
