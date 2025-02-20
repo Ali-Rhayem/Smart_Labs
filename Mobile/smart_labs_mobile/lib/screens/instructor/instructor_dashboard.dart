@@ -17,7 +17,7 @@ class InstructorDashboardScreen extends ConsumerWidget {
       backgroundColor:
           isDark ? const Color(0xFF121212) : theme.colorScheme.background,
       appBar: AppBar(
-        title: const Text('Student Dashboard'),
+        title: const Text('Instructor Dashboard'),
         backgroundColor: isDark ? const Color(0xFF1C1C1C) : null,
       ),
       body: analyticsAsync.when(
