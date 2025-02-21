@@ -9,6 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:smart_labs_mobile/screens/forgot_password.dart';
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:smart_labs_mobile/utils/snackbar_helper.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
@@ -291,12 +292,14 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         ref.read(userProvider.notifier).setUser(user);
         await ref.read(labsProvider.notifier).fetchLabs();
 
-        showTopSnackBar(
-          context: context,
-          title: 'Success',
-          message: 'Login successful',
-          contentType: ContentType.success,
-        );
+        Fluttertoast.showToast(
+            msg: "Login successful",
+            toastLength: Toast.LENGTH_LONG,
+            gravity: ToastGravity.TOP,
+            timeInSecForIosWeb: 2,
+            backgroundColor: Colors.green,
+            textColor: Colors.white,
+            fontSize: 16.0);
 
         if (user.firstLogin) {
           Navigator.pushReplacementNamed(context, '/firstLogin');
@@ -309,20 +312,24 @@ class _LoginPageState extends ConsumerState<LoginPage> {
           }
         }
       } else {
-        showTopSnackBar(
-          context: context,
-          title: 'Error',
-          message: userResult['message'] ?? 'Failed to fetch user details',
-          contentType: ContentType.failure,
-        );
+        Fluttertoast.showToast(
+            msg: userResult['message'] ?? 'Failed to fetch user details',
+            toastLength: Toast.LENGTH_LONG,
+            gravity: ToastGravity.TOP,
+            timeInSecForIosWeb: 2,
+            backgroundColor: Colors.red,
+            textColor: Colors.white,
+            fontSize: 16.0);
       }
     } else {
-      showTopSnackBar(
-        context: context,
-        title: 'Error',
-        message: result['message'],
-        contentType: ContentType.failure,
-      );
+      Fluttertoast.showToast(
+          msg: result['message'],
+          toastLength: Toast.LENGTH_LONG,
+          gravity: ToastGravity.TOP,
+          timeInSecForIosWeb: 2,
+          backgroundColor: Colors.red,
+          textColor: Colors.white,
+          fontSize: 16.0);
     }
 
     setState(() => _isLoading = false);
