@@ -1,3 +1,4 @@
+import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import 'package:smart_labs_mobile/controllers/create_lab_controller.dart';
@@ -10,6 +11,7 @@ import 'package:smart_labs_mobile/widgets/lab_schedules_list.dart';
 import 'package:smart_labs_mobile/widgets/lab_student_input.dart';
 import 'package:smart_labs_mobile/widgets/ppe_dropdwon.dart';
 import 'package:smart_labs_mobile/widgets/week_day_selector.dart';
+import 'package:smart_labs_mobile/utils/snackbar_helper.dart';
 
 import '../../widgets/time_selectors.dart';
 
@@ -279,19 +281,60 @@ class _CreateLabScreenState extends ConsumerState<CreateLabScreen> {
   }
 
   Future<void> _submitForm() async {
-    await _controller.handleSubmission(
-      ref: ref,
-      context: context,
-      formKey: _formKey,
-      selectedPPE: _selectedPPE,
-      selectedStudents: _selectedStudents,
-      schedules: _schedules,
-      labCode: _labCodeController.text,
-      labName: _labNameController.text,
-      description: _descriptionController.text,
-      room: _roomController.text,
-      selectedPPEIds: _selectedPPEIds,
-      selectedSemesterId: _selectedSemesterId,
-    );
+    if (_selectedPPE.isEmpty) {
+      showTopSnackBar(
+        context: context,
+        title: 'Warning',
+        message: 'Please select required PPE',
+        contentType: ContentType.warning,
+      );
+      return;
+    }
+
+    if (_selectedStudents.isEmpty) {
+      showTopSnackBar(
+        context: context,
+        title: 'Warning',
+        message: 'Please add at least one student',
+        contentType: ContentType.warning,
+      );
+      return;
+    }
+
+    if (_schedules.isEmpty) {
+      showTopSnackBar(
+        context: context,
+        title: 'Warning',
+        message: 'Please add at least one schedule',
+        contentType: ContentType.warning,
+      );
+      return;
+    }
+
+    try {
+      await _controller.handleSubmission(
+        ref: ref,
+        context: context,
+        formKey: _formKey,
+        selectedPPE: _selectedPPE,
+        selectedStudents: _selectedStudents,
+        schedules: _schedules,
+        labCode: _labCodeController.text,
+        labName: _labNameController.text,
+        description: _descriptionController.text,
+        room: _roomController.text,
+        selectedPPEIds: _selectedPPEIds,
+        selectedSemesterId: _selectedSemesterId,
+      );
+    } catch (e) {
+      if (context.mounted) {
+        showTopSnackBar(
+          context: context,
+          title: 'Error',
+          message: 'Failed to create lab: $e',
+          contentType: ContentType.failure,
+        );
+      }
+    }
   }
 }
