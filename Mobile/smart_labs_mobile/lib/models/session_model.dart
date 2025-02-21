@@ -34,6 +34,8 @@ class Session {
   final List<StudentSessionData> result;
   final int totalAttendance;
   final Map<String, num> totalPPECompliance;
+  final List<int> totalAttendanceByTime;
+  final Map<String, List<int>> ppeComplianceByTime;
 
   Session({
     required this.id,
@@ -43,6 +45,8 @@ class Session {
     required this.result,
     required this.totalAttendance,
     required this.totalPPECompliance,
+    this.totalAttendanceByTime = const [],
+    this.ppeComplianceByTime = const {},
   });
 
   factory Session.fromJson(Map<String, dynamic> json) {
@@ -61,6 +65,11 @@ class Session {
       totalAttendance: json['totalAttendance'] ?? 0,
       totalPPECompliance:
           Map<String, num>.from(json['totalPPECompliance'] ?? {}),
+      totalAttendanceByTime:
+          List<int>.from(json['total_attendance_bytime'] ?? []),
+      ppeComplianceByTime:
+          (json['ppE_compliance_bytime'] as Map<String, dynamic>? ?? {})
+              .map((key, value) => MapEntry(key, List<int>.from(value))),
     );
   }
 }
