@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:smart_labs_mobile/main.dart';
 import 'package:smart_labs_mobile/models/user_model.dart';
 import 'package:smart_labs_mobile/services/api_service.dart';
 
@@ -57,10 +58,11 @@ class LabInstructorsNotifier extends StateNotifier<AsyncValue<List<User>>> {
       if (response['success'] != false) {
         await fetchInstructors();
       } else {
-        throw Exception(response['message'] ?? 'Failed to add instructors');
+        logger.e('in the response i am returning ${response['message']}');
+        throw response['message'] ?? 'Failed to add instructors';
       }
     } catch (e) {
-      throw Exception('Failed to add instructors: $e');
+      throw e.toString().replaceAll('Exception: ', '');
     }
   }
 
@@ -71,10 +73,10 @@ class LabInstructorsNotifier extends StateNotifier<AsyncValue<List<User>>> {
       if (response['success'] != false) {
         await fetchInstructors();
       } else {
-        throw Exception(response['message'] ?? 'Failed to remove instructor');
+        throw response['message'] ?? 'Failed to remove instructor';
       }
     } catch (e) {
-      throw Exception('Failed to remove instructor: $e');
+      throw e.toString().replaceAll('Exception: ', '');
     }
   }
 
