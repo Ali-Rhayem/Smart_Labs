@@ -4,6 +4,8 @@ import 'package:smart_labs_mobile/models/lab_schedule.dart';
 import 'package:smart_labs_mobile/providers/lab_provider.dart';
 import 'package:smart_labs_mobile/services/api_service.dart';
 import 'package:smart_labs_mobile/utils/date_time_utils.dart';
+import 'package:smart_labs_mobile/utils/snackbar_helper.dart';
+import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 
 class CreateLabController {
   final ApiService _apiService = ApiService();
@@ -129,20 +131,31 @@ class CreateLabController {
       if (response['success']) {
         if (context.mounted) {
           await ref.read(labsProvider.notifier).fetchLabs();
+          showTopSnackBar(
+            context: context,
+            title: 'Success',
+            message: 'Lab created successfully',
+            contentType: ContentType.success,
+          );
           Navigator.pop(context);
         }
       } else {
         if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-                content: Text(response['message'] ?? 'Failed to create lab')),
+          showTopSnackBar(
+            context: context,
+            title: 'Error',
+            message: response['message'] ?? 'Failed to create lab',
+            contentType: ContentType.failure,
           );
         }
       }
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to create lab: $e')),
+        showTopSnackBar(
+          context: context,
+          title: 'Error',
+          message: 'Failed to create lab: $e',
+          contentType: ContentType.failure,
         );
       }
     }
