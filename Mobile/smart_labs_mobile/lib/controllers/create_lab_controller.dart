@@ -4,8 +4,7 @@ import 'package:smart_labs_mobile/models/lab_schedule.dart';
 import 'package:smart_labs_mobile/providers/lab_provider.dart';
 import 'package:smart_labs_mobile/services/api_service.dart';
 import 'package:smart_labs_mobile/utils/date_time_utils.dart';
-import 'package:smart_labs_mobile/utils/snackbar_helper.dart';
-import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class CreateLabController {
   final ApiService _apiService = ApiService();
@@ -131,32 +130,38 @@ class CreateLabController {
       if (response['success']) {
         if (context.mounted) {
           await ref.read(labsProvider.notifier).fetchLabs();
-          showTopSnackBar(
-            context: context,
-            title: 'Success',
-            message: 'Lab created successfully',
-            contentType: ContentType.success,
-          );
+          Fluttertoast.showToast(
+              msg: "Lab created successfully",
+              toastLength: Toast.LENGTH_LONG,
+              gravity: ToastGravity.TOP,
+              timeInSecForIosWeb: 2,
+              backgroundColor: Colors.green,
+              textColor: Colors.white,
+              fontSize: 16.0);
           Navigator.pop(context);
         }
       } else {
         if (context.mounted) {
-          showTopSnackBar(
-            context: context,
-            title: 'Error',
-            message: response['message'] ?? 'Failed to create lab',
-            contentType: ContentType.failure,
-          );
+          Fluttertoast.showToast(
+              msg: response['message'] ?? 'Failed to create lab',
+              toastLength: Toast.LENGTH_LONG,
+              gravity: ToastGravity.TOP,
+              timeInSecForIosWeb: 2,
+              backgroundColor: Colors.red,
+              textColor: Colors.white,
+              fontSize: 16.0);
         }
       }
     } catch (e) {
       if (context.mounted) {
-        showTopSnackBar(
-          context: context,
-          title: 'Error',
-          message: 'Failed to create lab: $e',
-          contentType: ContentType.failure,
-        );
+        Fluttertoast.showToast(
+            msg: 'Failed to create lab: $e',
+            toastLength: Toast.LENGTH_LONG,
+            gravity: ToastGravity.TOP,
+            timeInSecForIosWeb: 2,
+            backgroundColor: Colors.red,
+            textColor: Colors.white,
+            fontSize: 16.0);
       }
     }
   }
