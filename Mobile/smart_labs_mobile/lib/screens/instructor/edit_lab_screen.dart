@@ -12,6 +12,7 @@ import 'package:smart_labs_mobile/widgets/week_day_selector.dart';
 import 'package:smart_labs_mobile/providers/room_provider.dart';
 import 'package:smart_labs_mobile/utils/date_time_utils.dart';
 import 'package:smart_labs_mobile/providers/semester_provider.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 var logger = Logger();
 
@@ -40,6 +41,7 @@ class _EditLabScreenState extends ConsumerState<EditLabScreen> {
 
   final List<String> _selectedPPEIds = [];
   late int _selectedSemesterId;
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -201,7 +203,7 @@ class _EditLabScreenState extends ConsumerState<EditLabScreen> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: _submitForm,
+                  onPressed: _isLoading ? null : _submitForm,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: isDark
                         ? const Color(0xFFFFFF00)
@@ -213,15 +215,25 @@ class _EditLabScreenState extends ConsumerState<EditLabScreen> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-                  child: Text(
-                    'Save Changes',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color:
-                          isDark ? Colors.black : theme.colorScheme.onPrimary,
-                    ),
-                  ),
+                  child: _isLoading
+                      ? SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: isDark ? Colors.black : Colors.white,
+                          ),
+                        )
+                      : Text(
+                          'Save Changes',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: isDark
+                                ? Colors.black
+                                : theme.colorScheme.onPrimary,
+                          ),
+                        ),
                 ),
               ),
               const SizedBox(height: 16),
@@ -458,38 +470,43 @@ class _EditLabScreenState extends ConsumerState<EditLabScreen> {
 
   Future<void> _submitForm() async {
     if (_formKey.currentState?.validate() ?? false) {
-      if (_selectedPPEIds.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please select required PPE')),
-        );
-        return;
-      }
-      if (_schedules.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please add at least one schedule')),
-        );
-        return;
-      }
-
-      // Check if any changes were made to the lab data
-      bool hasLabChanges = _labNameController.text != widget.lab.labName ||
-          _labCodeController.text != widget.lab.labCode ||
-          _descriptionController.text != widget.lab.description ||
-          _roomController.text != (widget.lab.room ?? '') ||
-          _selectedSemesterId != int.parse(widget.lab.semesterId) ||
-          !_areSchedulesEqual(_schedules, widget.lab.schedule);
-
-      // Check if PPE changed
-      bool hasPPEChanges = !_areListsEqual(_selectedPPEIds, widget.lab.ppeIds);
-
-      if (!hasLabChanges && !hasPPEChanges) {
-        if (mounted) {
-          Navigator.pop(context);
-        }
-        return;
-      }
+      setState(() => _isLoading = true);
 
       try {
+        if (_selectedPPEIds.isEmpty) {
+          Fluttertoast.showToast(
+              msg: 'Please select required PPE',
+              toastLength: Toast.LENGTH_LONG,
+              gravity: ToastGravity.TOP,
+              timeInSecForIosWeb: 2,
+              backgroundColor: Colors.orange,
+              textColor: Colors.white,
+              fontSize: 16.0);
+          return;
+        }
+
+        // Check if any changes were made to the lab data
+        bool hasLabChanges = _labNameController.text != widget.lab.labName ||
+            _labCodeController.text != widget.lab.labCode ||
+            _descriptionController.text != widget.lab.description ||
+            _roomController.text != (widget.lab.room ?? '') ||
+            _selectedSemesterId != int.parse(widget.lab.semesterId) ||
+            !_areSchedulesEqual(_schedules, widget.lab.schedule);
+
+        // Check if PPE changed
+        bool hasPPEChanges =
+            !_areListsEqual(_selectedPPEIds, widget.lab.ppeIds);
+
+        if (!hasLabChanges && !hasPPEChanges) {
+          if (mounted) {
+            Navigator.pop(context);
+          }
+          return;
+        }
+
+        bool success = true;
+        String errorMessage = '';
+
         // Only update lab details if there are changes
         if (hasLabChanges) {
           final labData = {
@@ -505,46 +522,63 @@ class _EditLabScreenState extends ConsumerState<EditLabScreen> {
           final labResponse =
               await _apiService.put('/Lab/${widget.lab.labId}', labData);
           if (!labResponse['success']) {
-            if (mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                    content:
-                        Text(labResponse['message'] ?? 'Failed to update lab')),
-              );
-            }
-            return;
+            success = false;
+            errorMessage = labResponse['message'] ?? 'Failed to update lab';
           }
         }
 
-        // Only update PPE if there are changes
-        if (hasPPEChanges) {
+        // Only update PPE if there are changes and lab update was successful
+        if (success && hasPPEChanges) {
           final ppeResponse = await _apiService.postRaw(
             '/Lab/${widget.lab.labId}/ppe',
             _selectedPPEIds,
           );
 
           if (!ppeResponse['success']) {
-            if (mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                    content:
-                        Text(ppeResponse['message'] ?? 'Failed to update PPE')),
-              );
-            }
-            return;
+            success = false;
+            errorMessage = ppeResponse['message'] ?? 'Failed to update PPE';
           }
         }
 
-        // If we reach here, all updates were successful
-        if (mounted) {
-          await ref.read(labsProvider.notifier).fetchLabs();
-          Navigator.pop(context);
+        if (success) {
+          if (mounted) {
+            await ref.read(labsProvider.notifier).fetchLabs();
+            Navigator.pop(context);
+            Fluttertoast.showToast(
+                msg: "Lab updated successfully",
+                toastLength: Toast.LENGTH_LONG,
+                gravity: ToastGravity.TOP,
+                timeInSecForIosWeb: 2,
+                backgroundColor: Colors.green,
+                textColor: Colors.white,
+                fontSize: 16.0);
+          }
+        } else {
+          if (mounted) {
+            Fluttertoast.showToast(
+                msg: errorMessage,
+                toastLength: Toast.LENGTH_LONG,
+                gravity: ToastGravity.TOP,
+                timeInSecForIosWeb: 2,
+                backgroundColor: Colors.red,
+                textColor: Colors.white,
+                fontSize: 16.0);
+          }
         }
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to update lab: $e')),
-          );
+          Fluttertoast.showToast(
+              msg: 'Failed to update lab: $e',
+              toastLength: Toast.LENGTH_LONG,
+              gravity: ToastGravity.TOP,
+              timeInSecForIosWeb: 2,
+              backgroundColor: Colors.red,
+              textColor: Colors.white,
+              fontSize: 16.0);
+        }
+      } finally {
+        if (mounted) {
+          setState(() => _isLoading = false);
         }
       }
     }
@@ -611,11 +645,6 @@ class _EditLabScreenState extends ConsumerState<EditLabScreen> {
       try {
         if (!context.mounted) return;
 
-        // Show loading indicator
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Deleting lab...')),
-        );
-
         final response =
             await ref.read(labsProvider.notifier).deleteLab(widget.lab.labId);
 
@@ -623,17 +652,34 @@ class _EditLabScreenState extends ConsumerState<EditLabScreen> {
 
         if (response['success']) {
           Navigator.of(context).popUntil((route) => route.isFirst);
+          Fluttertoast.showToast(
+              msg: response['message'] ?? 'Lab deleted successfully',
+              toastLength: Toast.LENGTH_LONG,
+              gravity: ToastGravity.TOP,
+              timeInSecForIosWeb: 2,
+              backgroundColor: Colors.green,
+              textColor: Colors.white,
+              fontSize: 16.0);
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-                content: Text(response['message'] ?? 'Failed to delete lab')),
-          );
+          Fluttertoast.showToast(
+              msg: response['message'] ?? 'Failed to delete lab',
+              toastLength: Toast.LENGTH_LONG,
+              gravity: ToastGravity.TOP,
+              timeInSecForIosWeb: 2,
+              backgroundColor: Colors.red,
+              textColor: Colors.white,
+              fontSize: 16.0);
         }
       } catch (e) {
         if (!context.mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
+        Fluttertoast.showToast(
+            msg: 'Error: $e',
+            toastLength: Toast.LENGTH_LONG,
+            gravity: ToastGravity.TOP,
+            timeInSecForIosWeb: 2,
+            backgroundColor: Colors.red,
+            textColor: Colors.white,
+            fontSize: 16.0);
       }
     }
   }
