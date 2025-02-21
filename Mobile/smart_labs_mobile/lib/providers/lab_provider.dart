@@ -220,7 +220,10 @@ class LabNotifier extends StateNotifier<AsyncValue<List<Lab>>> {
 
         return response;
       } else {
-        return response;
+        return {
+          'success': false,
+          'message': response['message'] ?? 'Failed to fetch lab details',
+        };
       }
     } catch (e) {
       return {
@@ -232,18 +235,23 @@ class LabNotifier extends StateNotifier<AsyncValue<List<Lab>>> {
 
   Future<Map<String, dynamic>> deleteLab(String labId) async {
     try {
-      // Make the API call first
       final response = await _apiService.delete('/Lab/$labId');
 
       if (response['success']) {
-        // Only update the state if the API call was successful
         state.whenData((labs) {
           state =
               AsyncValue.data(labs.where((lab) => lab.labId != labId).toList());
         });
+        return {
+          'success': true,
+          'message': 'Lab deleted successfully',
+        };
+      } else {
+        return {
+          'success': false,
+          'message': response['message'] ?? 'Failed to delete lab',
+        };
       }
-
-      return response;
     } catch (e) {
       return {
         'success': false,
