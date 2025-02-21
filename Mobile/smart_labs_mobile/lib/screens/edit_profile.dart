@@ -12,6 +12,7 @@ import '../providers/user_provider.dart';
 import '../providers/faculty_provider.dart';
 import 'dart:io';
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class EditProfileScreen extends ConsumerStatefulWidget {
   final User user;
@@ -98,33 +99,42 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
 
         if (!mounted) return;
 
-        showTopSnackBar(
-          context: context,
-          title: 'Success',
-          message: 'Profile updated successfully',
-          contentType: ContentType.success,
-        );
-        Navigator.pop(context);
+        Navigator.of(context).pop();
+
+        Fluttertoast.showToast(
+            msg: "Profile updated successfully",
+            toastLength: Toast.LENGTH_LONG,
+            gravity: ToastGravity.TOP,
+            timeInSecForIosWeb: 2,
+            backgroundColor: Colors.green,
+            textColor: Colors.white,
+            fontSize: 16.0);
       } else {
         if (!mounted) return;
-        showTopSnackBar(
-          context: context,
-          title: 'Error',
-          message: response['message'] ?? 'Failed to update profile',
-          contentType: ContentType.failure,
-        );
+        Fluttertoast.showToast(
+            msg: response['message'] ?? 'Failed to update profile',
+            toastLength: Toast.LENGTH_LONG,
+            gravity: ToastGravity.TOP,
+            timeInSecForIosWeb: 2,
+            backgroundColor: Colors.red,
+            textColor: Colors.white,
+            fontSize: 16.0);
       }
     } catch (e) {
       if (!mounted) return;
-      showTopSnackBar(
-        context: context,
-        title: 'Error',
-        message: e.toString(),
-        contentType: ContentType.failure,
-      );
+      Fluttertoast.showToast(
+          msg: e.toString(),
+          toastLength: Toast.LENGTH_LONG,
+          gravity: ToastGravity.TOP,
+          timeInSecForIosWeb: 2,
+          backgroundColor: Colors.red,
+          textColor: Colors.white,
+          fontSize: 16.0);
     }
 
-    setState(() => _isLoading = false);
+    if (mounted) {
+      setState(() => _isLoading = false);
+    }
   }
 
   void _updateFaculty(String? value, List<Faculty> faculties) {
