@@ -5,11 +5,14 @@ import 'package:smart_labs_mobile/models/faculty_model.dart';
 import 'package:smart_labs_mobile/providers/lab_instructor_provider.dart';
 import 'package:smart_labs_mobile/providers/lab_provider.dart';
 import 'package:smart_labs_mobile/providers/lab_student_provider.dart';
+import 'package:smart_labs_mobile/utils/snackbar_helper.dart';
 import 'package:smart_labs_mobile/widgets/edit_profile_widgets.dart';
 import '../models/user_model.dart';
 import '../providers/user_provider.dart';
 import '../providers/faculty_provider.dart';
 import 'dart:io';
+import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
+
 class EditProfileScreen extends ConsumerStatefulWidget {
   final User user;
 
@@ -88,7 +91,6 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
         final labProviders = ref.read(labsProvider);
         if (labProviders is AsyncData) {
           for (final lab in labProviders.value!) {
-            // Refresh students and instructors for each lab
             ref.refresh(labStudentsProvider(lab.labId));
             ref.refresh(labInstructorsProvider(lab.labId));
           }
@@ -96,21 +98,29 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
 
         if (!mounted) return;
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Profile updated successfully')),
+        showTopSnackBar(
+          context: context,
+          title: 'Success',
+          message: 'Profile updated successfully',
+          contentType: ContentType.success,
         );
         Navigator.pop(context);
       } else {
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text(response['message'] ?? 'Failed to update profile')),
+        showTopSnackBar(
+          context: context,
+          title: 'Error',
+          message: response['message'] ?? 'Failed to update profile',
+          contentType: ContentType.failure,
         );
       }
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: ${e.toString()}')),
+      showTopSnackBar(
+        context: context,
+        title: 'Error',
+        message: e.toString(),
+        contentType: ContentType.failure,
       );
     }
 
