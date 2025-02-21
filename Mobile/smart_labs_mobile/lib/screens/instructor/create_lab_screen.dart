@@ -1,4 +1,3 @@
-import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import 'package:smart_labs_mobile/controllers/create_lab_controller.dart';
@@ -11,7 +10,7 @@ import 'package:smart_labs_mobile/widgets/lab_schedules_list.dart';
 import 'package:smart_labs_mobile/widgets/lab_student_input.dart';
 import 'package:smart_labs_mobile/widgets/ppe_dropdwon.dart';
 import 'package:smart_labs_mobile/widgets/week_day_selector.dart';
-import 'package:smart_labs_mobile/utils/snackbar_helper.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 import '../../widgets/time_selectors.dart';
 
@@ -282,32 +281,38 @@ class _CreateLabScreenState extends ConsumerState<CreateLabScreen> {
 
   Future<void> _submitForm() async {
     if (_selectedPPE.isEmpty) {
-      showTopSnackBar(
-        context: context,
-        title: 'Warning',
-        message: 'Please select required PPE',
-        contentType: ContentType.warning,
-      );
+      Fluttertoast.showToast(
+          msg: "Please select required PPE",
+          toastLength: Toast.LENGTH_LONG,
+          gravity: ToastGravity.TOP,
+          timeInSecForIosWeb: 2,
+          backgroundColor: Colors.orange,
+          textColor: Colors.white,
+          fontSize: 16.0);
       return;
     }
 
     if (_selectedStudents.isEmpty) {
-      showTopSnackBar(
-        context: context,
-        title: 'Warning',
-        message: 'Please add at least one student',
-        contentType: ContentType.warning,
-      );
+      Fluttertoast.showToast(
+          msg: "Please add at least one student",
+          toastLength: Toast.LENGTH_LONG,
+          gravity: ToastGravity.TOP,
+          timeInSecForIosWeb: 2,
+          backgroundColor: Colors.orange,
+          textColor: Colors.white,
+          fontSize: 16.0);
       return;
     }
 
     if (_schedules.isEmpty) {
-      showTopSnackBar(
-        context: context,
-        title: 'Warning',
-        message: 'Please add at least one schedule',
-        contentType: ContentType.warning,
-      );
+      Fluttertoast.showToast(
+          msg: "Please add at least one schedule",
+          toastLength: Toast.LENGTH_LONG,
+          gravity: ToastGravity.TOP,
+          timeInSecForIosWeb: 2,
+          backgroundColor: Colors.orange,
+          textColor: Colors.white,
+          fontSize: 16.0);
       return;
     }
 
@@ -328,12 +333,14 @@ class _CreateLabScreenState extends ConsumerState<CreateLabScreen> {
       );
     } catch (e) {
       if (context.mounted) {
-        showTopSnackBar(
-          context: context,
-          title: 'Error',
-          message: 'Failed to create lab: $e',
-          contentType: ContentType.failure,
-        );
+        Fluttertoast.showToast(
+            msg: 'Failed to create lab: $e',
+            toastLength: Toast.LENGTH_LONG,
+            gravity: ToastGravity.TOP,
+            timeInSecForIosWeb: 2,
+            backgroundColor: Colors.red,
+            textColor: Colors.white,
+            fontSize: 16.0);
       }
     }
   }
