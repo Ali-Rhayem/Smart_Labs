@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:smart_labs_mobile/main.dart';
 import 'package:smart_labs_mobile/models/lab_model.dart';
 import 'package:smart_labs_mobile/models/user_model.dart';
 import 'package:smart_labs_mobile/providers/lab_instructor_provider.dart';
@@ -10,8 +9,7 @@ import 'package:smart_labs_mobile/utils/secure_storage.dart';
 import 'package:smart_labs_mobile/widgets/instructor/row_details.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:smart_labs_mobile/widgets/email_input_dialog.dart';
-import 'package:smart_labs_mobile/utils/snackbar_helper.dart';
-import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class PeopleTab extends ConsumerStatefulWidget {
   final Lab lab;
@@ -590,35 +588,51 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
 
   Future<void> _showAddStudentsDialog(
       BuildContext context, WidgetRef ref) async {
+    bool isLoading = false;
     return showDialog(
       context: context,
-      builder: (BuildContext dialogContext) => EmailInputDialog(
-        title: 'Add Students',
-        onSubmit: (emails) async {
-          try {
-            await ref
-                .read(labStudentsProvider(widget.lab.labId).notifier)
-                .addStudents(emails);
-            if (dialogContext.mounted) {
-              showTopSnackBar(
-                context: dialogContext,
-                title: 'Success',
-                message: 'Students added successfully',
-                contentType: ContentType.success,
-              );
-              Navigator.pop(dialogContext);
+      builder: (BuildContext dialogContext) => StatefulBuilder(
+        builder: (BuildContext context, StateSetter setDialogState) =>
+            EmailInputDialog(
+          title: 'Add Students',
+          isLoading: isLoading,
+          onSubmit: (emails) async {
+            setDialogState(() => isLoading = true);
+            try {
+              await ref
+                  .read(labStudentsProvider(widget.lab.labId).notifier)
+                  .addStudents(emails);
+              if (dialogContext.mounted) {
+                Fluttertoast.showToast(
+                  msg: 'Students added successfully',
+                  toastLength: Toast.LENGTH_LONG,
+                  gravity: ToastGravity.TOP,
+                  timeInSecForIosWeb: 2,
+                  backgroundColor: Colors.green,
+                  textColor: Colors.white,
+                  fontSize: 16.0,
+                );
+                Navigator.pop(dialogContext);
+              }
+            } catch (e) {
+              if (dialogContext.mounted) {
+                Fluttertoast.showToast(
+                  msg: e.toString(),
+                  toastLength: Toast.LENGTH_LONG,
+                  gravity: ToastGravity.TOP,
+                  timeInSecForIosWeb: 2,
+                  backgroundColor: Colors.red,
+                  textColor: Colors.white,
+                  fontSize: 16.0,
+                );
+              }
+            } finally {
+              if (dialogContext.mounted) {
+                setDialogState(() => isLoading = false);
+              }
             }
-          } catch (e) {
-            if (dialogContext.mounted) {
-              showTopSnackBar(
-                context: dialogContext,
-                title: 'Error',
-                message: e.toString(),
-                contentType: ContentType.failure,
-              );
-            }
-          }
-        },
+          },
+        ),
       ),
     );
   }
@@ -658,21 +672,27 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
                     .read(labStudentsProvider(widget.lab.labId).notifier)
                     .removeStudent(student.id.toString());
                 if (dialogContext.mounted) {
-                  showTopSnackBar(
-                    context: dialogContext,
-                    title: 'Success',
-                    message: 'Student removed successfully',
-                    contentType: ContentType.success,
+                  Fluttertoast.showToast(
+                    msg: 'Student removed successfully',
+                    toastLength: Toast.LENGTH_LONG,
+                    gravity: ToastGravity.TOP,
+                    timeInSecForIosWeb: 2,
+                    backgroundColor: Colors.green,
+                    textColor: Colors.white,
+                    fontSize: 16.0,
                   );
                   Navigator.pop(dialogContext);
                 }
               } catch (e) {
                 if (dialogContext.mounted) {
-                  showTopSnackBar(
-                    context: dialogContext,
-                    title: 'Error',
-                    message: e.toString(),
-                    contentType: ContentType.failure,
+                  Fluttertoast.showToast(
+                    msg: e.toString(),
+                    toastLength: Toast.LENGTH_LONG,
+                    gravity: ToastGravity.TOP,
+                    timeInSecForIosWeb: 2,
+                    backgroundColor: Colors.red,
+                    textColor: Colors.white,
+                    fontSize: 16.0,
                   );
                 }
               }
@@ -686,35 +706,51 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
 
   Future<void> _showAddInstructorsDialog(
       BuildContext context, WidgetRef ref) async {
+    bool isLoading = false;
     return showDialog(
       context: context,
-      builder: (BuildContext dialogContext) => EmailInputDialog(
-        title: 'Add Instructors',
-        onSubmit: (emails) async {
-          try {
-            await ref
-                .read(labInstructorsProvider(widget.lab.labId).notifier)
-                .addInstructors(emails);
-            if (dialogContext.mounted) {
-              showTopSnackBar(
-                context: dialogContext,
-                title: 'Success',
-                message: 'Instructors added successfully',
-                contentType: ContentType.success,
-              );
-              Navigator.pop(dialogContext);
+      builder: (BuildContext dialogContext) => StatefulBuilder(
+        builder: (BuildContext context, StateSetter setDialogState) =>
+            EmailInputDialog(
+          title: 'Add Instructors',
+          isLoading: isLoading,
+          onSubmit: (emails) async {
+            setDialogState(() => isLoading = true);
+            try {
+              await ref
+                  .read(labInstructorsProvider(widget.lab.labId).notifier)
+                  .addInstructors(emails);
+              if (dialogContext.mounted) {
+                Fluttertoast.showToast(
+                  msg: 'Instructors added successfully',
+                  toastLength: Toast.LENGTH_LONG,
+                  gravity: ToastGravity.TOP,
+                  timeInSecForIosWeb: 2,
+                  backgroundColor: Colors.green,
+                  textColor: Colors.white,
+                  fontSize: 16.0,
+                );
+                Navigator.pop(dialogContext);
+              }
+            } catch (e) {
+              if (dialogContext.mounted) {
+                Fluttertoast.showToast(
+                  msg: e.toString(),
+                  toastLength: Toast.LENGTH_LONG,
+                  gravity: ToastGravity.TOP,
+                  timeInSecForIosWeb: 2,
+                  backgroundColor: Colors.red,
+                  textColor: Colors.white,
+                  fontSize: 16.0,
+                );
+              }
+            } finally {
+              if (dialogContext.mounted) {
+                setDialogState(() => isLoading = false);
+              }
             }
-          } catch (e) {
-            if (dialogContext.mounted) {
-              showTopSnackBar(
-                context: dialogContext,
-                title: 'Error',
-                message: e.toString(),
-                contentType: ContentType.failure,
-              );
-            }
-          }
-        },
+          },
+        ),
       ),
     );
   }
@@ -769,11 +805,14 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
                 }
               } catch (e) {
                 if (dialogContext.mounted) {
-                  showTopSnackBar(
-                    context: dialogContext,
-                    title: 'Error',
-                    message: e.toString(),
-                    contentType: ContentType.failure,
+                  Fluttertoast.showToast(
+                    msg: e.toString(),
+                    toastLength: Toast.LENGTH_LONG,
+                    gravity: ToastGravity.TOP,
+                    timeInSecForIosWeb: 2,
+                    backgroundColor: Colors.red,
+                    textColor: Colors.white,
+                    fontSize: 16.0,
                   );
                 }
               }
