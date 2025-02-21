@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:smart_labs_mobile/main.dart';
 import 'package:smart_labs_mobile/models/user_model.dart';
 import 'package:smart_labs_mobile/services/api_service.dart';
 
@@ -53,13 +54,13 @@ class LabStudentsNotifier extends StateNotifier<AsyncValue<List<User>>> {
       final response =
           await _apiService.postRaw('/Lab/$labId/students', emails);
       if (response['success'] != false) {
-        // Refresh the students list
         await fetchStudents();
       } else {
-        throw Exception(response['message'] ?? 'Failed to add students');
+        logger.e(response['message']);
+        throw response['message'] ?? 'Failed to add students';
       }
     } catch (e) {
-      throw Exception('Failed to add students: $e');
+      throw e.toString().replaceAll('Exception: ', '');
     }
   }
 
@@ -68,13 +69,12 @@ class LabStudentsNotifier extends StateNotifier<AsyncValue<List<User>>> {
       final response =
           await _apiService.delete('/Lab/$labId/students/$studentId');
       if (response['success'] != false) {
-        // Refresh the students list
         await fetchStudents();
       } else {
-        throw Exception(response['message'] ?? 'Failed to remove student');
+        throw response['message'] ?? 'Failed to remove student';
       }
     } catch (e) {
-      throw Exception('Failed to remove student: $e');
+      throw e.toString().replaceAll('Exception: ', '');
     }
   }
 
