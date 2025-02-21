@@ -96,7 +96,11 @@ class ApiService {
 
   Map<String, dynamic> _handleResponse(http.Response response) {
     try {
-      if (response.body.isEmpty && response.statusCode != 204) {
+      if (response.statusCode == 204) {
+        return {'success': true};
+      }
+
+      if (response.body.isEmpty) {
         return {
           'success': false,
           'message': 'Empty response body',
@@ -104,10 +108,6 @@ class ApiService {
         };
       }
 
-      logger.w('response: ${response.body}');
-      if (response.statusCode == 204) {
-        return {'success': true};
-      }
       final body = json.decode(response.body);
 
       if (response.statusCode >= 200 && response.statusCode < 300) {
@@ -115,7 +115,7 @@ class ApiService {
       } else {
         return {
           'success': false,
-          'message': body['errors'] ?? 'Request failed',
+          'message': body['errors'] ?? body['message'] ?? 'Request failed',
           'statusCode': response.statusCode,
         };
       }
@@ -141,7 +141,6 @@ class ApiService {
         headers: headers,
         body: json.encode(body),
       );
-      logger.w('response: ${response.body}');
       return _handleResponse(response);
     } catch (e) {
       return {'success': false, 'message': 'Network error: $e'};
