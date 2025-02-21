@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:smart_labs_mobile/main.dart';
 import 'package:smart_labs_mobile/models/lab_model.dart';
 import 'package:smart_labs_mobile/models/user_model.dart';
 import 'package:smart_labs_mobile/providers/lab_instructor_provider.dart';
@@ -9,6 +10,8 @@ import 'package:smart_labs_mobile/utils/secure_storage.dart';
 import 'package:smart_labs_mobile/widgets/instructor/row_details.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:smart_labs_mobile/widgets/email_input_dialog.dart';
+import 'package:smart_labs_mobile/utils/snackbar_helper.dart';
+import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 
 class PeopleTab extends ConsumerStatefulWidget {
   final Lab lab;
@@ -596,10 +599,22 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
             await ref
                 .read(labStudentsProvider(widget.lab.labId).notifier)
                 .addStudents(emails);
+            if (dialogContext.mounted) {
+              showTopSnackBar(
+                context: dialogContext,
+                title: 'Success',
+                message: 'Students added successfully',
+                contentType: ContentType.success,
+              );
+              Navigator.pop(dialogContext);
+            }
           } catch (e) {
             if (dialogContext.mounted) {
-              ScaffoldMessenger.of(dialogContext).showSnackBar(
-                SnackBar(content: Text(e.toString())),
+              showTopSnackBar(
+                context: dialogContext,
+                title: 'Error',
+                message: e.toString(),
+                contentType: ContentType.failure,
               );
             }
           }
@@ -643,12 +658,21 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
                     .read(labStudentsProvider(widget.lab.labId).notifier)
                     .removeStudent(student.id.toString());
                 if (dialogContext.mounted) {
+                  showTopSnackBar(
+                    context: dialogContext,
+                    title: 'Success',
+                    message: 'Student removed successfully',
+                    contentType: ContentType.success,
+                  );
                   Navigator.pop(dialogContext);
                 }
               } catch (e) {
                 if (dialogContext.mounted) {
-                  ScaffoldMessenger.of(dialogContext).showSnackBar(
-                    SnackBar(content: Text(e.toString())),
+                  showTopSnackBar(
+                    context: dialogContext,
+                    title: 'Error',
+                    message: e.toString(),
+                    contentType: ContentType.failure,
                   );
                 }
               }
@@ -672,20 +696,21 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
                 .read(labInstructorsProvider(widget.lab.labId).notifier)
                 .addInstructors(emails);
             if (dialogContext.mounted) {
-              ScaffoldMessenger.of(dialogContext).showSnackBar(
-                const SnackBar(
-                  content: Text('Instructors added successfully'),
-                  backgroundColor: Colors.green,
-                ),
+              showTopSnackBar(
+                context: dialogContext,
+                title: 'Success',
+                message: 'Instructors added successfully',
+                contentType: ContentType.success,
               );
+              Navigator.pop(dialogContext);
             }
           } catch (e) {
             if (dialogContext.mounted) {
-              ScaffoldMessenger.of(dialogContext).showSnackBar(
-                SnackBar(
-                  content: Text(e.toString()),
-                  backgroundColor: Colors.red,
-                ),
+              showTopSnackBar(
+                context: dialogContext,
+                title: 'Error',
+                message: e.toString(),
+                contentType: ContentType.failure,
               );
             }
           }
@@ -744,8 +769,11 @@ class _PeopleTabState extends ConsumerState<PeopleTab> {
                 }
               } catch (e) {
                 if (dialogContext.mounted) {
-                  ScaffoldMessenger.of(dialogContext).showSnackBar(
-                    SnackBar(content: Text(e.toString())),
+                  showTopSnackBar(
+                    context: dialogContext,
+                    title: 'Error',
+                    message: e.toString(),
+                    contentType: ContentType.failure,
                   );
                 }
               }
