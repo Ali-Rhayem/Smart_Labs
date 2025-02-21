@@ -1,16 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 
+OverlayEntry? _currentOverlay;
+
 void showTopSnackBar({
   required BuildContext context,
   required String title,
   required String message,
   ContentType contentType = ContentType.success,
 }) {
-  OverlayEntry? overlayEntry;
-  bool isRemoved = false;
+  // Remove existing overlay if any
+  _currentOverlay?.remove();
 
-  overlayEntry = OverlayEntry(
+  final overlay = Overlay.of(context, rootOverlay: true);
+  if (overlay == null) return;
+
+  final overlayEntry = OverlayEntry(
     builder: (context) => Positioned(
       top: 0,
       left: 0,
@@ -24,7 +29,7 @@ void showTopSnackBar({
               end: Offset.zero,
             ).animate(CurvedAnimation(
               parent: AnimationController(
-                vsync: Navigator.of(context),
+                vsync: Navigator.of(context, rootNavigator: true),
                 duration: const Duration(milliseconds: 300),
               )..forward(),
               curve: Curves.easeOut,
@@ -66,10 +71,8 @@ void showTopSnackBar({
                     IconButton(
                       icon: const Icon(Icons.close, color: Colors.white),
                       onPressed: () {
-                        if (!isRemoved) {
-                          isRemoved = true;
-                          overlayEntry?.remove();
-                        }
+                        _currentOverlay?.remove();
+                        _currentOverlay = null;
                       },
                     ),
                   ],
@@ -82,12 +85,13 @@ void showTopSnackBar({
     ),
   );
 
-  Overlay.of(context).insert(overlayEntry);
+  _currentOverlay = overlayEntry;
+  overlay.insert(overlayEntry);
 
   Future.delayed(const Duration(seconds: 3), () {
-    if (!isRemoved) {
-      isRemoved = true;
-      overlayEntry?.remove();
+    if (_currentOverlay == overlayEntry) {
+      overlayEntry.remove();
+      _currentOverlay = null;
     }
   });
 }
