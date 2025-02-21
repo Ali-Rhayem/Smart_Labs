@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 class EmailInputDialog extends StatefulWidget {
   final String title;
   final Function(List<String>) onSubmit;
+  final bool isLoading;
 
   const EmailInputDialog({
     super.key,
     required this.title,
     required this.onSubmit,
+    this.isLoading = false,
   });
 
   @override
@@ -219,8 +221,9 @@ class _EmailInputDialogState extends State<EmailInputDialog> {
                 ),
                 const SizedBox(width: 12),
                 ElevatedButton(
-                  onPressed:
-                      _emails.isEmpty ? null : () => widget.onSubmit(_emails),
+                  onPressed: widget.isLoading || _emails.isEmpty
+                      ? null
+                      : () => widget.onSubmit(_emails),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: isDark
                         ? const Color(0xFFFFFF00)
@@ -233,10 +236,19 @@ class _EmailInputDialogState extends State<EmailInputDialog> {
                     ),
                     elevation: 0,
                   ),
-                  child: const Text(
-                    'Add',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
+                  child: widget.isLoading
+                      ? SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: isDark ? Colors.black : Colors.white,
+                          ),
+                        )
+                      : const Text(
+                          'Add',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
                 ),
               ],
             ),
