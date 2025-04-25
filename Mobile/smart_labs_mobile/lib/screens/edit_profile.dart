@@ -5,13 +5,11 @@ import 'package:smart_labs_mobile/models/faculty_model.dart';
 import 'package:smart_labs_mobile/providers/lab_instructor_provider.dart';
 import 'package:smart_labs_mobile/providers/lab_provider.dart';
 import 'package:smart_labs_mobile/providers/lab_student_provider.dart';
-import 'package:smart_labs_mobile/utils/snackbar_helper.dart';
 import 'package:smart_labs_mobile/widgets/edit_profile_widgets.dart';
 import '../models/user_model.dart';
 import '../providers/user_provider.dart';
 import '../providers/faculty_provider.dart';
 import 'dart:io';
-import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 class EditProfileScreen extends ConsumerStatefulWidget {

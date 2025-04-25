@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:smart_labs_mobile/services/api_service.dart';
+import 'package:smart_labs_mobile/controllers/forgot_password_controller.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -9,26 +9,17 @@ class ForgotPasswordScreen extends StatefulWidget {
 }
 
 class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
-  final _formKey = GlobalKey<FormState>();
-  final _emailController = TextEditingController();
-  bool _isLoading = false;
-  final _apiService = ApiService();
+  final _controller = ForgotPasswordController();
 
-  Future<void> _resetPassword() async {
-    if (!_formKey.currentState!.validate()) return;
-
-    setState(() => _isLoading = true);
+  Future<void> _handleResetPassword() async {
+    setState(() => _controller.isLoading = true);
 
     try {
-      final response = await _apiService.post(
-        '/User/resetPassword',
-        {'email': _emailController.text.trim()},
-        requiresAuth: false,
-      );
+      final result = await _controller.resetPassword();
 
       if (!mounted) return;
 
-      if (response['success']) {
+      if (result['success']) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Password reset instructions sent to your email'),
@@ -39,29 +30,21 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(response['message'] ?? 'Failed to reset password'),
+            content: Text(result['message']),
             backgroundColor: Colors.red,
           ),
         );
       }
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error: ${e.toString()}'),
-          backgroundColor: Colors.red,
-        ),
-      );
     } finally {
       if (mounted) {
-        setState(() => _isLoading = false);
+        setState(() => _controller.isLoading = false);
       }
     }
   }
 
   @override
   void dispose() {
-    _emailController.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
@@ -86,7 +69,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(24.0),
             child: Form(
-              key: _formKey,
+              key: _controller.formKey,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -115,7 +98,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   ),
                   const SizedBox(height: 32),
                   TextFormField(
-                    controller: _emailController,
+                    controller: _controller.emailController,
                     style: TextStyle(
                         color: isDark ? Colors.white : Colors.black87),
                     decoration: InputDecoration(
@@ -149,22 +132,14 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                         ),
                       ),
                     ),
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'Please enter your email';
-                      }
-                      if (!RegExp(r'^[^@]+@[^@]+\.[^@]+')
-                          .hasMatch(value.trim())) {
-                        return 'Please enter a valid email address';
-                      }
-                      return null;
-                    },
+                    validator: _controller.validateEmail,
                   ),
                   const SizedBox(height: 24),
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: _isLoading ? null : _resetPassword,
+                      onPressed:
+                          _controller.isLoading ? null : _handleResetPassword,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: isDark
                             ? const Color(0xFFFFFF00)
@@ -175,7 +150,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                           borderRadius: BorderRadius.circular(8),
                         ),
                       ),
-                      child: _isLoading
+                      child: _controller.isLoading
                           ? SizedBox(
                               height: 20,
                               width: 20,

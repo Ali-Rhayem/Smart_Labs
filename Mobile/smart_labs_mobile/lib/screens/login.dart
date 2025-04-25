@@ -7,8 +7,6 @@ import 'package:smart_labs_mobile/utils/secure_storage.dart';
 import 'package:smart_labs_mobile/providers/lab_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:smart_labs_mobile/screens/forgot_password.dart';
-import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
-import 'package:smart_labs_mobile/utils/snackbar_helper.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 class LoginPage extends ConsumerStatefulWidget {

@@ -501,12 +501,6 @@ class _AnnouncementsTabState extends ConsumerState<AnnouncementsTab> {
                                       ],
                                     ),
                                   ),
-                                  IconButton(
-                                    icon: const Icon(Icons.delete,
-                                        color: Colors.red),
-                                    onPressed: () => _deleteAnnouncement(
-                                        announcement.id.toString()),
-                                  ),
                                 ],
                               ),
                             ),

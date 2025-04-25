@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:smart_labs_mobile/controllers/edit_profile_controller.dart';
 import 'package:smart_labs_mobile/models/faculty_model.dart';
-import 'package:smart_labs_mobile/models/user_model.dart';
 import 'package:smart_labs_mobile/widgets/edit_profile_widgets.dart';
 import 'package:smart_labs_mobile/providers/faculty_provider.dart';
 import 'package:smart_labs_mobile/providers/user_provider.dart';
-import 'package:smart_labs_mobile/services/api_service.dart';
 import 'dart:io';
+import '../controllers/first_login_controller.dart';
+import '../widgets/firstLogin/password_field.dart';
 
 class FirstLoginScreen extends ConsumerStatefulWidget {
   const FirstLoginScreen({super.key});
@@ -21,8 +21,8 @@ class _FirstLoginScreenState extends ConsumerState<FirstLoginScreen> {
   final _nameController = TextEditingController();
   final _newPasswordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
-  final _controller = EditProfileController();
-  final _apiService = ApiService();
+  final _imageController = EditProfileController();
+  final _firstLoginController = FirstLoginController();
 
   bool _isLoading = false;
   bool _obscureNewPassword = true;
@@ -54,23 +54,6 @@ class _FirstLoginScreenState extends ConsumerState<FirstLoginScreen> {
     });
   }
 
-  String _getMimeType(String filePath) {
-    final extension = filePath.split('.').last.toLowerCase();
-    switch (extension) {
-      case 'png':
-        return 'image/png';
-      case 'jpg':
-      case 'jpeg':
-        return 'image/jpeg';
-      case 'gif':
-        return 'image/gif';
-      case 'webp':
-        return 'image/webp';
-      default:
-        return 'image/jpeg';
-    }
-  }
-
   Future<void> _submitForm() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -80,42 +63,23 @@ class _FirstLoginScreenState extends ConsumerState<FirstLoginScreen> {
       final user = ref.read(userProvider);
       if (user == null) throw Exception('User not found');
 
-      final response = await _apiService.post('/User/firstlogin', {
-        'id': user.id,
-        'name': _nameController.text,
-        'password': _newPasswordController.text,
-        'confirmPassword': _confirmPasswordController.text,
-        'major': _selectedMajor,
-        'faculty': _selectedFaculty,
-        'image': _base64Image != null && _imageFile != null
-            ? 'data:${_getMimeType(_imageFile!.path)};base64,$_base64Image'
-            : "",
-        'first_login': false,
-        'email': user.email,
-      });
+      final response = await _firstLoginController.submitFirstLogin(
+        currentUser: user,
+        name: _nameController.text,
+        password: _newPasswordController.text,
+        confirmPassword: _confirmPasswordController.text,
+        selectedMajor: _selectedMajor,
+        selectedFaculty: _selectedFaculty,
+        imageFile: _imageFile,
+        base64Image: _base64Image,
+      );
 
       if (!mounted) return;
 
       if (response['success']) {
-        final userResponse = await _apiService.get('/User/${user.id}');
-
-        if (!userResponse['success']) {
-          throw Exception(
-              userResponse['message'] ?? 'Failed to fetch updated user data');
-        }
-
-        final userDetails = userResponse['data'];
-        final updatedUser = User(
-          id: userDetails['id'],
-          name: userDetails['name'],
-          email: userDetails['email'],
-          password: '',
-          major: userDetails['major'],
-          faculty: userDetails['faculty'],
-          imageUrl: userDetails['image'],
-          role: user.role,
-          faceIdentityVector: userDetails['faceIdentityVector'],
-          firstLogin: false,
+        final updatedUser = _firstLoginController.createUpdatedUser(
+          response['data'],
+          user,
         );
 
         ref.read(userProvider.notifier).setUser(updatedUser);
@@ -126,7 +90,7 @@ class _FirstLoginScreenState extends ConsumerState<FirstLoginScreen> {
           Navigator.pushReplacementNamed(context, '/studentMain');
         }
       } else {
-        throw Exception(response['message'] ?? 'Failed to update profile');
+        throw Exception(response['message']);
       }
     } catch (e) {
       if (!mounted) return;
@@ -170,7 +134,7 @@ class _FirstLoginScreenState extends ConsumerState<FirstLoginScreen> {
                 userImageUrl: null,
                 onImagePick: () async {
                   try {
-                    await _controller.pickImage(
+                    await _imageController.pickImage(
                       (file) => setState(() => _imageFile = file),
                       (base64) => _base64Image = base64,
                     );
@@ -195,7 +159,7 @@ class _FirstLoginScreenState extends ConsumerState<FirstLoginScreen> {
                 },
               ),
               const SizedBox(height: 24),
-              _buildPasswordField(
+              PasswordField(
                 controller: _newPasswordController,
                 label: 'New Password',
                 obscure: _obscureNewPassword,
@@ -213,7 +177,7 @@ class _FirstLoginScreenState extends ConsumerState<FirstLoginScreen> {
                 },
               ),
               const SizedBox(height: 24),
-              _buildPasswordField(
+              PasswordField(
                 controller: _confirmPasswordController,
                 label: 'Confirm Password',
                 obscure: _obscureConfirmPassword,
@@ -292,56 +256,6 @@ class _FirstLoginScreenState extends ConsumerState<FirstLoginScreen> {
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildPasswordField({
-    required TextEditingController controller,
-    required String label,
-    required bool obscure,
-    required VoidCallback onToggleVisibility,
-    String? Function(String?)? validator,
-  }) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
-    return TextFormField(
-      controller: controller,
-      obscureText: obscure,
-      style: TextStyle(color: theme.colorScheme.onSurface),
-      decoration: InputDecoration(
-        labelText: label,
-        labelStyle:
-            TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.7)),
-        filled: true,
-        fillColor: isDark ? const Color(0xFF1C1C1C) : theme.colorScheme.surface,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide(
-            color: theme.colorScheme.onSurface.withValues(alpha: 0.2),
-          ),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide(
-            color: theme.colorScheme.onSurface.withValues(alpha: 0.2),
-          ),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide(
-            color: isDark ? const Color(0xFFFFEB00) : theme.colorScheme.primary,
-          ),
-        ),
-        suffixIcon: IconButton(
-          icon: Icon(
-            obscure ? Icons.visibility_off : Icons.visibility,
-            color: isDark ? const Color(0xFFFFEB00) : theme.colorScheme.primary,
-          ),
-          onPressed: onToggleVisibility,
-        ),
-      ),
-      validator: validator,
     );
   }
 }
