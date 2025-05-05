@@ -12,9 +12,9 @@ namespace backend.Controllers
     public class SessionsController : ControllerBase
     {
 
-        private readonly SessionService _sessionService;
+        private readonly ISessionService _sessionService;
 
-        public SessionsController(SessionService sessionService)
+        public SessionsController(ISessionService sessionService)
         {
             _sessionService = sessionService;
         }
