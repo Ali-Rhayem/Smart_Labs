@@ -14,7 +14,7 @@ using Google.Apis.Util.Store;
 
 namespace backend.helpers;
 
-public class LabHelper
+public class LabHelper : ILabHelper
 {
     private readonly IMongoCollection<Lab> _labs;
     private readonly IConfiguration _configuration;
