@@ -10,9 +10,9 @@ namespace backend.Controllers
     [ApiController]
     public class PPEController : ControllerBase
     {
-        private readonly PPEService _ppeService;
+        private readonly IPPEService _ppeService;
 
-        public PPEController(PPEService ppeService)
+        public PPEController(IPPEService ppeService)
         {
             _ppeService = ppeService;
         }
