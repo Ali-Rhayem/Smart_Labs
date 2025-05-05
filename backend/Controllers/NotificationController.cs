@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using backend.helpers;
 using backend.Services;
 using FirebaseAdmin.Messaging;
 using Microsoft.AspNetCore.Authorization;
@@ -13,10 +14,10 @@ namespace backend.Controllers
     public class NotificationController : ControllerBase
     {
 
-        private readonly NotificationService _notificationService;
-        private readonly JwtTokenHelper _jwtTokenHelper;
+        private readonly INotificationService _notificationService;
+        private readonly IJwtTokenHelper _jwtTokenHelper;
 
-        public NotificationController(NotificationService notificationService, JwtTokenHelper jwtTokenHelper)
+        public NotificationController(INotificationService notificationService, IJwtTokenHelper jwtTokenHelper)
         {
             _notificationService = notificationService;
             _jwtTokenHelper = jwtTokenHelper;
