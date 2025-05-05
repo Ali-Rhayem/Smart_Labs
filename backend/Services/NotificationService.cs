@@ -7,12 +7,12 @@ using MongoDB.Driver;
 
 namespace backend.Services;
 
-public class NotificationService
+public class NotificationService : INotificationService
 {
     private readonly IMongoCollection<Notifications> _notifications;
-    private readonly UserService _users;
+    private readonly IUserService _users;
 
-    public NotificationService(IMongoDatabase database, UserService user)
+    public NotificationService(IMongoDatabase database, IUserService user)
     {
         _notifications = database.GetCollection<Notifications>("Notifications");
         _users = user;
