@@ -9,7 +9,7 @@ import {
 	TextField,
 	Divider,
 } from "@mui/material";
-import { AnnouncementDTO, SubmissionDTO } from "../types/announcements";
+import { AnnouncementDTO } from "../types/announcements";
 import { useUser } from "../contexts/UserContext";
 import { announcementService } from "../services/announcementService";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -35,7 +35,6 @@ const AssignmentView: React.FC<AssignmentViewProps> = ({
 	const { user } = useUser();
 	const [message, setMessage] = useState("");
 	const [files, setFiles] = useState<File[]>([]);
-	const [grade, setGrade] = useState<string>("");
 	const [submissionGrades, setSubmissionGrades] = useState<Record<number, string>>(() => {
 		const initialGrades: Record<number, string> = {};
 		assignment.submissions.forEach(submission => {
