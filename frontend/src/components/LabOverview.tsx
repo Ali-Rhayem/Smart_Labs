@@ -238,7 +238,7 @@ const LabOverview: React.FC<LabOverviewProps> = ({ lab }) => {
 																%
 															</TableCell>
 															{Object.entries(
-																	student.ppe_compliance ||
+																	student.ppE_compliance ||
 																		{}
 																).map(
 																	([
