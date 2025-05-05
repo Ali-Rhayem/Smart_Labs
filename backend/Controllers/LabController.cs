@@ -14,10 +14,10 @@ namespace backend.Controllers
     [ApiController]
     public class LabController : ControllerBase
     {
-        private readonly LabService _labService;
-        private readonly UserService _userService;
+        private readonly ILabService _labService;
+        private readonly IUserService _userService;
 
-        public LabController(LabService labService, UserService userService)
+        public LabController(ILabService labService, IUserService userService)
         {
             _labService = labService;
             _userService = userService;
@@ -545,12 +545,13 @@ namespace backend.Controllers
         public async Task<ActionResult<List<AnnouncementDTO>>> GetAnnouncements(int labId)
         {
             var UserIdClaim = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier);
+            var userRoleClaim = HttpContext.User.FindFirst(ClaimTypes.Role);
             var lab = await _labService.GetLabByIdAsync(labId);
             if (lab == null)
             {
                 return NotFound(new { errors = "Lab not found." });
             }
-            if (!lab.Instructors.Contains(int.Parse(UserIdClaim!.Value)) && !lab.Students.Contains(int.Parse(UserIdClaim!.Value)))
+            if (userRoleClaim!.Value != "admin" && !lab.Instructors.Contains(int.Parse(UserIdClaim!.Value)) && !lab.Students.Contains(int.Parse(UserIdClaim!.Value)))
             {
                 return Unauthorized(new { errors = "User not in lab." });
             }
@@ -613,7 +614,7 @@ namespace backend.Controllers
 
         // GET: api/lab/5/analyze
         [HttpGet("{id}/analyze")]
-        [Authorize(Roles = "instructor, admin")]
+        [Authorize(Roles = "instructor, admin, student")]
         public async Task<ActionResult> AnalyzeLab(int id)
         {
             var userIdClaim = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier);
@@ -626,7 +627,7 @@ namespace backend.Controllers
             if (userRoleClaim!.Value == "instructor" && !lab.Instructors.Contains(int.Parse(userIdClaim!.Value)))
                 return Unauthorized(new { errors = "User not authorized." });
 
-            var result = await _labService.AnalyzeLabAsync(id);
+            var result = await _labService.AnalyzeLabAsync(id, userRoleClaim!.Value, int.Parse(userIdClaim!.Value));
 
             return Ok(result);
         }
@@ -634,7 +635,7 @@ namespace backend.Controllers
         // POST: api/lab/{labId}/assignment/{assignmentId}/submit
         [HttpPost("{labId}/assignment/{assignmentId}/submit")]
         [Authorize(Roles = "student")]
-        public async Task<ActionResult> SubmitSolution(int labId, int assignmentId, Submission submission)
+        public async Task<ActionResult> SubmitSolution(int labId, int assignmentId, [FromForm] Submission submission)
         {
             var userIdClaim = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier);
             var lab = await _labService.GetLabByIdAsync(labId);
@@ -685,10 +686,10 @@ namespace backend.Controllers
             if (!lab.Instructors.Contains(int.Parse(userIdClaim!.Value)))
                 return Unauthorized(new { errors = "User not authorized." });
 
-            var announcements = await GetAnnouncements(labId);
+            var announcements = await _labService.GetAnnouncementsAsync(labId);
             if (announcements == null)
                 return NotFound(new { errors = "Assignment not found." });
-            var announcement = announcements.Value!.FirstOrDefault(a => a.Id == assignmentId);
+            var announcement = announcements.FirstOrDefault(a => a.Id == assignmentId);
             if (announcement == null)
                 return NotFound(new { errors = "Assignment not found." });
 
