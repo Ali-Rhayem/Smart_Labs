@@ -6,8 +6,8 @@ import PersonIcon from "@mui/icons-material/Person";
 import GroupIcon from "@mui/icons-material/Group";
 import SchoolIcon from "@mui/icons-material/School";
 import ApartmentIcon from "@mui/icons-material/Apartment";
-import MeetingRoomIcon from '@mui/icons-material/MeetingRoom';
-import SecurityIcon from '@mui/icons-material/Security';
+import MeetingRoomIcon from "@mui/icons-material/MeetingRoom";
+import SecurityIcon from "@mui/icons-material/Security";
 import { Role } from "../types/user";
 
 export interface NavItem {
@@ -34,7 +34,7 @@ export const navItems: NavItem[] = [
 		label: "Notifications",
 		path: "/notifications",
 		icon: <NotificationsIcon />,
-		roles: ["student", "instructor", "admin"],
+		roles: ["student", "instructor"],
 	},
 	{
 		label: "Profile",
