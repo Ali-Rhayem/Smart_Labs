@@ -3,7 +3,7 @@ using MongoDB.Driver;
 
 namespace backend.Services;
 
-public class PPEService
+public class PPEService : IPPEService
 {
     private readonly IMongoCollection<PPE> _PPEs;
 
