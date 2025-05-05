@@ -1,3 +1,4 @@
+using backend.helpers;
 using backend.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -10,10 +11,10 @@ namespace backend.Controllers
     [ApiController]
     public class SemesterController : ControllerBase
     {
-        private readonly JwtTokenHelper _jwtTokenHelper;
-        private readonly SemesterService _semesterService;
+        private readonly IJwtTokenHelper _jwtTokenHelper;
+        private readonly ISemesterService _semesterService;
 
-        public SemesterController(JwtTokenHelper jwtTokenHelper, SemesterService semesterService)
+        public SemesterController(IJwtTokenHelper jwtTokenHelper, ISemesterService semesterService)
         {
             _jwtTokenHelper = jwtTokenHelper;
             _semesterService = semesterService;
