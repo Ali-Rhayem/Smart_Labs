@@ -10,9 +10,9 @@ namespace backend.Controllers
     [ApiController]
     public class FacultyController : ControllerBase
     {
-        private readonly FacultyService _facultyService;
+        private readonly IFacultyService _facultyService;
 
-        public FacultyController(FacultyService facultyService)
+        public FacultyController(IFacultyService facultyService)
         {
             _facultyService = facultyService;
         }
