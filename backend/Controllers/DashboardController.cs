@@ -11,9 +11,9 @@ namespace backend.Controllers
     [ApiController]
     public class DashboardController : ControllerBase
     {
-        private readonly DashboardService _dashboardService;
+        private readonly IDashboardService _dashboardService;
 
-        public DashboardController(DashboardService DashboardService)
+        public DashboardController(IDashboardService DashboardService)
         {
             _dashboardService = DashboardService;
         }
@@ -31,7 +31,7 @@ namespace backend.Controllers
             int userId = int.Parse(userIdClaim.Value);
             var result = new Dictionary<string, object>();
 
-            result = await _dashboardService.GetDashboardAsync(userId, userRoleClaim.Value);
+            result = await _dashboardService.GetDashboardAsync(userId, userRoleClaim.Value, int.Parse(userIdClaim.Value));
 
             if (result == null)
             {
