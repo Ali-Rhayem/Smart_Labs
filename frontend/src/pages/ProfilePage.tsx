@@ -9,6 +9,7 @@ import {
 	CircularProgress,
 	IconButton,
 	AlertColor,
+	Skeleton,
 } from "@mui/material";
 import { useUser } from "../contexts/UserContext";
 import { UpdateUserDto } from "../types/user";
@@ -146,18 +147,7 @@ const ProfilePage: React.FC = () => {
 	}
 
 	if (isLoading) {
-		return (
-			<Box
-				sx={{
-					display: "flex",
-					justifyContent: "center",
-					alignItems: "center",
-					minHeight: "100vh",
-				}}
-			>
-				<CircularProgress />
-			</Box>
-		);
+		return renderLoadingSkeleton();
 	}
 
 	if (error || !userDetails) {
@@ -443,5 +433,74 @@ const ProfilePage: React.FC = () => {
 		</Box>
 	);
 };
+
+const renderLoadingSkeleton = () => (
+	<Box sx={{ p: 3 }}>
+		{/* Profile Header */}
+		<Card sx={{ p: 3, mb: 3, bgcolor: "var(--color-card)" }}>
+			<Box sx={{ display: "flex", alignItems: "center", gap: 3 }}>
+				<Skeleton
+					variant="circular"
+					width={120}
+					height={120}
+					sx={{ bgcolor: "var(--color-card-hover)" }}
+				/>
+				<Box sx={{ flex: 1 }}>
+					<Skeleton
+						variant="text"
+						width={200}
+						height={32}
+						sx={{ mb: 1, bgcolor: "var(--color-card-hover)" }}
+					/>
+					<Skeleton
+						variant="text"
+						width={150}
+						height={24}
+						sx={{ bgcolor: "var(--color-card-hover)" }}
+					/>
+				</Box>
+				<Skeleton
+					variant="rectangular"
+					width={120}
+					height={40}
+					sx={{
+						bgcolor: "var(--color-card-hover)",
+						borderRadius: 1,
+					}}
+				/>
+			</Box>
+		</Card>
+
+		{/* Personal Info Section */}
+		<Card sx={{ p: 3, mb: 3, bgcolor: "var(--color-card)" }}>
+			<Skeleton
+				variant="text"
+				width={200}
+				height={32}
+				sx={{ mb: 3, bgcolor: "var(--color-card-hover)" }}
+			/>
+			<Grid container spacing={3}>
+				{[1, 2, 3, 4].map((field) => (
+					<Grid item xs={12} sm={6} key={field}>
+						<Skeleton
+							variant="text"
+							width={120}
+							height={20}
+							sx={{ mb: 1, bgcolor: "var(--color-card-hover)" }}
+						/>
+						<Skeleton
+							variant="rectangular"
+							height={56}
+							sx={{
+								bgcolor: "var(--color-card-hover)",
+								borderRadius: 1,
+							}}
+						/>
+					</Grid>
+				))}
+			</Grid>
+		</Card>
+	</Box>
+);
 
 export default ProfilePage;
