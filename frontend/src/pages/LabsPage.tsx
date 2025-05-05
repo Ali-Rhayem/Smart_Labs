@@ -4,12 +4,12 @@ import {
 	Typography,
 	Box,
 	Grid,
-	CircularProgress,
 	FormControl,
 	InputLabel,
 	MenuItem,
 	Select,
 	Card,
+	Skeleton,
 } from "@mui/material";
 import { useUser } from "../contexts/UserContext";
 import LabCard from "../components/LabCard";
@@ -111,17 +111,129 @@ const LabsPage: React.FC = () => {
 		});
 	}, [filteredLabs, semesters]);
 
-	if (isLoading) {
-		return (
+	const renderLoadingSkeleton = () => (
+		<Box sx={{ p: 3 }}>
+			{/* Header Skeleton */}
 			<Box
-				display="flex"
-				justifyContent="center"
-				alignItems="center"
-				minHeight="80vh"
+				sx={{
+					display: "flex",
+					justifyContent: "space-between",
+					alignItems: "center",
+					mb: 3,
+					gap: 2,
+				}}
 			>
-				<CircularProgress />
+				<Skeleton
+					variant="rectangular"
+					width={120}
+					height={40}
+					sx={{ bgcolor: "var(--color-card-hover)" }}
+				/>
+				<Box sx={{ display: "flex", gap: 2 }}>
+					<Skeleton
+						variant="rectangular"
+						width={120}
+						height={40}
+						sx={{ bgcolor: "var(--color-card-hover)" }}
+					/>
+					<Skeleton
+						variant="rectangular"
+						width={200}
+						height={40}
+						sx={{ bgcolor: "var(--color-card-hover)" }}
+					/>
+				</Box>
 			</Box>
-		);
+
+			{/* Semester Groups */}
+			{[1, 2].map((semester) => (
+				<Box key={semester} sx={{ mb: 4 }}>
+					{/* Semester Header */}
+					<Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+						<Skeleton
+							variant="rectangular"
+							width={200}
+							height={32}
+							sx={{ bgcolor: "var(--color-card-hover)" }}
+						/>
+					</Box>
+
+					{/* Lab Cards Grid */}
+					<Grid container spacing={3}>
+						{[1, 2, 3, 4, 5, 6].map((card) => (
+							<Grid item xs={12} sm={6} md={4} key={card}>
+								<Card
+									sx={{
+										bgcolor: "var(--color-card)",
+										height: "100%",
+									}}
+								>
+									<Box sx={{ p: 2 }}>
+										{/* Lab Title */}
+										<Skeleton
+											variant="text"
+											width="80%"
+											sx={{
+												bgcolor: "var(--color-card-hover)",
+												mb: 1,
+											}}
+										/>
+
+										{/* Lab Code */}
+										<Skeleton
+											variant="text"
+											width="40%"
+											sx={{
+												bgcolor: "var(--color-card-hover)",
+												mb: 2,
+											}}
+										/>
+
+										{/* Lab Description */}
+										<Skeleton
+											variant="rectangular"
+											height={80}
+											sx={{
+												bgcolor: "var(--color-card-hover)",
+												mb: 2,
+											}}
+										/>
+
+										{/* Room & Schedule */}
+										<Box
+											sx={{
+												display: "flex",
+												justifyContent: "space-between",
+												mb: 1,
+											}}
+										>
+											<Skeleton
+												variant="text"
+												width="30%"
+												sx={{
+													bgcolor: "var(--color-card-hover)",
+												}}
+											/>
+											<Skeleton
+												variant="text"
+												width="30%"
+												sx={{
+													bgcolor: "var(--color-card-hover)",
+												}}
+											/>
+										</Box>
+									</Box>
+								</Card>
+							</Grid>
+						))}
+					</Grid>
+				</Box>
+			))}
+		</Box>
+	);
+
+	if (isLoading) {
+		return renderLoadingSkeleton();
 	}
 
 	if (error) {
