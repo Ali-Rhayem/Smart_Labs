@@ -6,14 +6,14 @@ using backend.helpers;
 
 namespace backend.Services;
 
-public class UserService
+public class UserService : IUserService
 {
     private readonly IMongoCollection<User> _users;
     private readonly IMongoCollection<UpdateUser> _UpdateUser;
-    private readonly FacultyService _facultyService;
-    private readonly LabHelper _labHelper;
+    private readonly IFacultyService _facultyService;
+    private readonly ILabHelper _labHelper;
 
-    public UserService(IMongoDatabase database, FacultyService facultyService, LabHelper labHelper)
+    public UserService(IMongoDatabase database, IFacultyService facultyService, ILabHelper labHelper)
     {
         _users = database.GetCollection<User>("Users");
         _UpdateUser = database.GetCollection<UpdateUser>("Users");
@@ -43,7 +43,7 @@ public class UserService
         return await _users.Find(_ => true).Project<User>(projection).ToListAsync();
     }
 
-    public async Task<User> GetUserById(int id)
+    public async Task<User?> GetUserById(int id)
     {
         var projection = Builders<User>.Projection
             .Exclude(u => u.Password);
@@ -130,7 +130,7 @@ public class UserService
         var result = await _UpdateUser.UpdateOneAsync(user => user.Id == id, update);
 
         var user = await GetUserById(id);
-        return result.IsAcknowledged ? user : new ErrorMessage { StatusCode = 500, Message = "Update failed." };
+        return result.IsAcknowledged ? user! : new ErrorMessage { StatusCode = 500, Message = "Update failed." };
 
     }
 
@@ -178,6 +178,11 @@ public class UserService
         }
 
         var user = await GetUserById(firstLogin.Id);
+        if (user == null)
+        {
+            return null;
+        }
+
         var newUser = new User
         {
             Id = firstLogin.Id,
@@ -219,7 +224,7 @@ public class UserService
         var user = await GetUserById(id);
         var subject = "Your Temporary Password";
         var message = "Dear User,\n\nYour temporary password is: " + password + "\n\nPlease log in and change your password immediately.\n\nBest regards,\nUniversity Team";
-        bool send_email = _labHelper.SendEmail(user.Email, message, subject);
+        bool send_email = _labHelper.SendEmail(user!.Email, message, subject);
         if (!send_email)
         {
             return false;
