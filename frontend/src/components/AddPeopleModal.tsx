@@ -22,7 +22,7 @@ export const AddPeopleModal: React.FC<AddPeopleModalProps> = ({
 	type,
 }) => {
 	const [emails, setEmails] = useState<string[]>([]);
-	const [errors, setErrors] = useState<string[]>([]);
+	const [errors] = useState<string[]>([]);
 
 	const validateEmail = (email: string) => {
 		return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
