@@ -3,7 +3,7 @@ using MongoDB.Driver;
 
 namespace backend.Services;
 
-public class SemesterService
+public class SemesterService : ISemesterService
 {
     private readonly IMongoCollection<Semester> _semesters;
 
