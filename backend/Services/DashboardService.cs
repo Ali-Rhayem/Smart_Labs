@@ -1,7 +1,7 @@
 using MongoDB.Driver;
 namespace backend.Services;
 
-public class DashboardService
+public class DashboardService : IDashboardService
 {
 
 
@@ -13,9 +13,9 @@ public class DashboardService
         _serviceProvider = serviceProvider;
     }
 
-    public async Task<Dictionary<string, object>> GetDashboardAsync(int id, string role)
+    public async Task<Dictionary<string, object>> GetDashboardAsync(int id, string role, int user_id)
     {
-        var _labService = _serviceProvider.GetRequiredService<LabService>();
+        var _labService = _serviceProvider.GetRequiredService<ILabService>();
         var result = new Dictionary<string, object>();
         List<Lab> labs = [];
         if (role == "instructor")
@@ -40,7 +40,7 @@ public class DashboardService
         foreach (var lab in labs)
         {
             total_students += lab.Students.Count;
-            var labResult = await _labService.AnalyzeLabAsync(lab.Id);
+            var labResult = await _labService.AnalyzeLabAsync(lab.Id, role, user_id);
             labs_result.Add(labResult);
             if (labResult.ContainsKey("xaxis"))
                 total_sessions += ((List<string>)labResult["xaxis"]).Count;
