@@ -15,9 +15,9 @@ public class AnnouncementDTO
 
     public List<CommentDTO> Comments { get; set; } = [];
 
-    public bool Assignment { get; set; } = false;
+    public bool Assignment { get; set; }
 
-    public bool CanSubmit { get; set; } = false;
+    public bool CanSubmit { get; set; }
 
     public DateTime Deadline { get; set; }
 
@@ -38,12 +38,12 @@ public class SubmissionDTO
 
     public DateTime Time { get; set; }
 
-    public bool Submitted { get; set; } = false;
+    public bool Submitted { get; set; }
 
     public int? Grade { get; set; }
 
 
-    public static async Task<List<SubmissionDTO>> FromSubmissionAsync(List<Submission> v, UserService userService)
+    public static async Task<List<SubmissionDTO>> FromSubmissionAsync(List<Submission> v, IUserService userService)
     {
         List<SubmissionDTO> results = [];
         foreach (var submission in v)
@@ -54,6 +54,7 @@ public class SubmissionDTO
                 User = (UserDTO)await userService.GetUserById(submission.UserId),
                 Message = submission.Message,
                 Files = submission.Files,
+                Submitted = submission.Submitted,
                 Time = submission.Time,
                 Grade = submission.Grade,
             });
