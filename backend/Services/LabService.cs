@@ -7,19 +7,19 @@ using System.Globalization;
 using MongoDB.Bson;
 using System.Text.Json;
 
-public class LabService
+public class LabService : ILabService
 {
     private readonly IMongoCollection<Lab> _labs;
-    private readonly LabHelper _labHelper;
-    private readonly UserService _userService;
-    private readonly SemesterService _semesterService;
-    private readonly PPEService _ppeService;
-    private readonly RoomService _roomService;
-    private readonly SessionService _sessionService;
-    private readonly KafkaProducer _kafkaProducer;
-    private readonly NotificationService _notificationService;
+    private readonly ILabHelper _labHelper;
+    private readonly IUserService _userService;
+    private readonly ISemesterService _semesterService;
+    private readonly IPPEService _ppeService;
+    private readonly IRoomService _roomService;
+    private readonly ISessionService _sessionService;
+    private readonly IKafkaProducer _kafkaProducer;
+    private readonly INotificationService _notificationService;
 
-    public LabService(IMongoDatabase database, LabHelper labHelper, UserService userService, SemesterService semesterService, PPEService ppeService, SessionService sessionService, KafkaProducer kafkaProducer, RoomService roomService, NotificationService notificationService)
+    public LabService(IMongoDatabase database, ILabHelper labHelper, IUserService userService, ISemesterService semesterService, IPPEService ppeService, ISessionService sessionService, IKafkaProducer kafkaProducer, IRoomService roomService, INotificationService notificationService)
     {
         _labs = database.GetCollection<Lab>("Labs");
         _labHelper = labHelper;
@@ -62,7 +62,10 @@ public class LabService
         foreach (var studentId in lab.Students)
         {
             var student = await _userService.GetUserById(studentId);
-            students.Add(student);
+            if (student != null)
+            {
+                students.Add(student);
+            }
         }
         return students;
     }
@@ -78,7 +81,10 @@ public class LabService
         foreach (var instructorId in lab.Instructors)
         {
             var instructor = await _userService.GetUserById(instructorId);
-            instructors.Add(instructor);
+            if (instructor != null)
+            {
+                instructors.Add(instructor);
+            }
         }
         return instructors;
     }
@@ -470,7 +476,12 @@ public class LabService
                 Message = announcement.Message,
                 Files = announcement.Files,
                 Time = announcement.Time,
-                Comments = comments
+                Comments = comments,
+                Assignment = announcement.Assignment,
+                CanSubmit = announcement.CanSubmit,
+                Deadline = announcement.Deadline,
+                Submissions = SubmissionDTO.FromSubmissionAsync(announcement.Submissions, _userService).Result,
+                Grade = announcement.Grade
             });
         }
         return announcements;
@@ -487,10 +498,15 @@ public class LabService
 
         // check if the lab is in schedule
         var currentDay = DateTime.Now.ToString("dddd", new CultureInfo("en-US"));
-        var currentTime = TimeOnly.FromDateTime(DateTime.Now.AddMinutes(-5));
+        // get Eastern European Standard Time time zone
+        TimeZoneInfo eetTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Europe/Helsinki");
+        DateTime utcNow = DateTime.UtcNow;
+        DateTime currentTime = TimeZoneInfo.ConvertTimeFromUtc(utcNow, eetTimeZone);
+        var currentTimeOnly = TimeOnly.FromDateTime(currentTime);
+        // var currentTime = TimeOnly.FromDateTime(DateTime.Now.AddMinutes(-5));
         foreach (var labTime in lab.Schedule)
         {
-            if (labTime.DayOfWeek == currentDay && labTime.StartTime <= currentTime && labTime.EndTime > currentTime)
+            if (labTime.DayOfWeek == currentDay && labTime.StartTime <= currentTimeOnly && labTime.EndTime > currentTimeOnly)
             {
                 Sessions session = await _sessionService.CreateSessionAsync(lab_id);
                 var updateDefinition = Builders<Lab>.Update.Set(l => l.Started, true);
@@ -516,7 +532,7 @@ public class LabService
             return new ErrorMessage { StatusCode = 400, Message = "lab is not started" };
         }
 
-        var kafka = await _kafkaProducer.ProduceAsync("recording_se", JsonSerializer.Serialize(new { room = lab.Room, command = "end" }));
+        var kafka = await _kafkaProducer.ProduceAsync("recording_se", JsonSerializer.Serialize(new { lab_id = lab.Id, room = lab.Room, command = "end" }));
         if (!kafka.success) return new ErrorMessage { StatusCode = 500, Message = "Connection error" };
         var updateDefinition = Builders<Lab>.Update.Set(l => l.Started, false);
         await _labs.UpdateOneAsync(l => l.Id == lab_id, updateDefinition);
@@ -529,12 +545,15 @@ public class LabService
         return await _labs.Find(l => l.Room == room && l.EndLab == false).ToListAsync();
     }
 
-    public async Task<Dictionary<string, object>> AnalyzeLabAsync(int lab_id)
+    public async Task<Dictionary<string, object>> AnalyzeLabAsync(int lab_id, string role, int id)
     {
+        var lab = await GetLabByIdAsync(lab_id);
         var result = new Dictionary<string, object>();
         var sessions = await _sessionService.GetSessionsOfLabAsync(lab_id);
         if (sessions == null || sessions.Count == 0)
             return result;
+        // sort the sessions by date
+        sessions.Sort((a, b) => a.Date.CompareTo(b.Date));
 
         int total_attendance = 0;
         List<int> total_attendance_bysession = [];
@@ -546,6 +565,7 @@ public class LabService
 
         int total_ppe_compliance = 0;
         List<int> total_ppe_compliance_bysession = [];
+        List<int> st_total_ppe_compliance_bysession = [];
 
         List<ObjectResultDTO> people = [];
         Dictionary<int, int> people_attandance = [];
@@ -553,8 +573,26 @@ public class LabService
         // loop over all sessions
         foreach (var session in sessions)
         {
-            total_attendance += session.TotalAttendance;
-            total_attendance_bysession.Add(session.TotalAttendance);
+            if (role == "student")
+            {
+                var person = session.Result.Find(p => p.Id == id);
+                if (person != null)
+                {
+                    total_attendance += person!.Attendance_percentage;
+                    total_attendance_bysession.Add(person!.Attendance_percentage);
+                }
+                else
+                {
+                    total_attendance += 0;
+                    total_attendance_bysession.Add(0);
+                }
+
+            }
+            else
+            {
+                total_attendance += session.TotalAttendance;
+                total_attendance_bysession.Add(session.TotalAttendance);
+            }
             xaxis.Add(session.Date.ToString());
             // loop over all ppe in the session
             foreach (var ppe in session.TotalPPECompliance)
@@ -572,59 +610,136 @@ public class LabService
                     count_of_ppe[ppe.Key] = 1;
                 }
             }
-            total_ppe_compliance += session.TotalPPECompliance.Sum(ppe => ppe.Value) / session.TotalPPECompliance.Count;
-            total_ppe_compliance_bysession.Add(session.TotalPPECompliance.Sum(ppe => ppe.Value) / session.TotalPPECompliance.Count);
-            // loop over all people in the session
-            foreach (var person in session.Result)
+            if (session.TotalPPECompliance.Count != 0)
             {
-                // check if the person is already in the people list
-                if (people.Any(p => p.Id == person.Id))
+                total_ppe_compliance += session.TotalPPECompliance.Sum(ppe => ppe.Value) / session.TotalPPECompliance.Count;
+                total_ppe_compliance_bysession.Add(session.TotalPPECompliance.Sum(ppe => ppe.Value) / session.TotalPPECompliance.Count);
+            }
+            // loop over all people in the session
+            if (role == "student")
+            {
+                var person = session.Result.Find(p => p.Id == id);
+                if (person != null)
                 {
-                    people_attandance[person.Id] += 1;
-                    var p = people.Find(p => p.Id == person.Id);
-                    var p_bytime = people_bysession.Find(p => ((dynamic)p).Id == person.Id);
-                    p!.Attendance_percentage += person.Attendance_percentage;
-                    ((dynamic)p_bytime!).Attendance_percentage.Add(person.Attendance_percentage);
-                    foreach (var ppe in person.PPE_compliance)
+                    if (people.Any(p => p.Id == id))
                     {
-                        if (p.PPE_compliance.ContainsKey(ppe.Key))
+                        people_attandance[person.Id] += 1;
+                        var p = people.Find(p => p.Id == id);
+                        var p_bytime = people_bysession.Find(p => ((dynamic)p).Id == id);
+                        p!.Attendance_percentage += person.Attendance_percentage;
+                        ((dynamic)p_bytime!).Attendance_percentage.Add(person.Attendance_percentage);
+                        var temp_total_ppe_compliance = 0;
+                        foreach (var ppe in person.PPE_compliance)
                         {
-                            p.PPE_compliance[ppe.Key] += ppe.Value;
-                            ((dynamic)p_bytime!).PPE_compliance[ppe.Key].Add(ppe.Value);
+                            if (p.PPE_compliance.ContainsKey(ppe.Key))
+                            {
+
+                                p.PPE_compliance[ppe.Key] += ppe.Value;
+                                ((dynamic)p_bytime!).PPE_compliance[ppe.Key].Add(ppe.Value);
+                            }
+                            else
+                            {
+                                p.PPE_compliance[ppe.Key] = ppe.Value;
+                                ((dynamic)p_bytime!).PPE_compliance[ppe.Key] = new List<int> { ppe.Value };
+                            }
+                            temp_total_ppe_compliance += ppe.Value;
                         }
-                        else
+                        if (person.PPE_compliance.Count != 0)
+                            temp_total_ppe_compliance /= person.PPE_compliance.Count;
+                        st_total_ppe_compliance_bysession.Add(temp_total_ppe_compliance);
+
+
+                    }
+                    else
+                    {
+                        people.Add(person);
+                        people_attandance[person.Id] = 1;
+                        var temp_ppe_compliance = new Dictionary<string, List<int>>();
+                        foreach (var ppe in person.PPE_compliance)
                         {
-                            p.PPE_compliance[ppe.Key] = ppe.Value;
-                            ((dynamic)p_bytime!).PPE_compliance[ppe.Key] = new List<int> { ppe.Value };
+                            temp_ppe_compliance[ppe.Key] = [ppe.Value];
                         }
+                        var p = new
+                        {
+                            Id = person.Id,
+                            Name = person.Name,
+                            user = person.User,
+                            Attendance_percentage = new List<int> { person.Attendance_percentage },
+                            PPE_compliance = temp_ppe_compliance
+                        };
+                        people_bysession.Add(p);
                     }
                 }
-                else
+            }
+            else
+            {
+
+                foreach (var person in session.Result)
                 {
-                    people.Add(person);
-                    people_attandance[person.Id] = 1;
-                    var temp_ppe_compliance = new Dictionary<string, List<int>>();
-                    foreach (var ppe in person.PPE_compliance)
+                    // check if the person is already in the people list
+                    if (people.Any(p => p.Id == person.Id))
                     {
-                        temp_ppe_compliance[ppe.Key] = [ppe.Value];
+                        people_attandance[person.Id] += 1;
+                        var p = people.Find(p => p.Id == person.Id);
+                        var p_bytime = people_bysession.Find(p => ((dynamic)p).Id == person.Id);
+                        p!.Attendance_percentage += person.Attendance_percentage;
+                        ((dynamic)p_bytime!).Attendance_percentage.Add(person.Attendance_percentage);
+                        foreach (var ppe in person.PPE_compliance)
+                        {
+                            if (p.PPE_compliance.ContainsKey(ppe.Key))
+                            {
+                                p.PPE_compliance[ppe.Key] += ppe.Value;
+                                ((dynamic)p_bytime!).PPE_compliance[ppe.Key].Add(ppe.Value);
+                            }
+                            else
+                            {
+                                p.PPE_compliance[ppe.Key] = ppe.Value;
+                                ((dynamic)p_bytime!).PPE_compliance[ppe.Key] = new List<int> { ppe.Value };
+                            }
+                        }
+
                     }
-                    var p = new
+                    else
                     {
-                        Id = person.Id,
-                        Name = person.Name,
-                        user = person.User,
-                        Attendance_percentage = new List<int> { person.Attendance_percentage },
-                        PPE_compliance = temp_ppe_compliance
-                    };
-                    people_bysession.Add(p);
+                        people.Add(person);
+                        people_attandance[person.Id] = 1;
+                        var temp_ppe_compliance = new Dictionary<string, List<int>>();
+                        foreach (var ppe in person.PPE_compliance)
+                        {
+                            temp_ppe_compliance[ppe.Key] = [ppe.Value];
+                        }
+                        var p = new
+                        {
+                            Id = person.Id,
+                            Name = person.Name,
+                            user = person.User,
+                            Attendance_percentage = new List<int> { person.Attendance_percentage },
+                            PPE_compliance = temp_ppe_compliance
+                        };
+                        people_bysession.Add(p);
+                    }
                 }
             }
         }
 
         // calculate the average of the ppe compliance
+        if (role == "student")
+        {
+            if (people.Count != 0)
+                ppe_compliance = people[0].PPE_compliance;
+            else
+                ppe_compliance = [];
+
+            if (people_bysession.Count != 0)
+                ppe_compliance_bysesions = ((dynamic)people_bysession[0]).PPE_compliance;
+            else
+                ppe_compliance_bysesions = [];
+
+        }
         foreach (var ppe in ppe_compliance)
         {
-            ppe_compliance[ppe.Key] /= count_of_ppe[ppe.Key];
+            if (count_of_ppe[ppe.Key] != 0)
+                ppe_compliance[ppe.Key] /= count_of_ppe[ppe.Key];
         }
         // calculate the average of people attendance and ppe compliance
         foreach (var person in people)
@@ -632,14 +747,31 @@ public class LabService
             person.Attendance_percentage /= sessions.Count;
             foreach (var ppe in person.PPE_compliance)
             {
-                person.PPE_compliance[ppe.Key] /= people_attandance[person.Id];
+                if (people_attandance[person.Id] != 0)
+                    person.PPE_compliance[ppe.Key] /= people_attandance[person.Id];
             }
         }
-        int sessions_count = sessions.Count == 0 ? sessions.Count : 1;
+        if (role == "student")
+        {
+            if (people.Count != 0)
+            {
+                people_attandance[people[0].Id] = people_attandance[people[0].Id] != 0 ? people_attandance[people[0].Id] : 1;
+                total_ppe_compliance /= people_attandance[people[0].Id];
+            }
+            else
+            {
+                people_attandance = [];
+                total_ppe_compliance = 0;
+                total_ppe_compliance_bysession = st_total_ppe_compliance_bysession;
+            }
+        }
+        int sessions_count = sessions.Count != 0 ? sessions.Count : 1;
         // save the result in the dictionary
-        result["total_attendance"] = total_attendance /= sessions.Count;
+        result["lab_id"] = lab_id;
+        result["lab_name"] = lab.LabName;
+        result["total_attendance"] = total_attendance /= sessions_count;
         result["total_attendance_bytime"] = total_attendance_bysession;
-        result["total_ppe_compliance"] = total_ppe_compliance /= sessions.Count;
+        result["total_ppe_compliance"] = total_ppe_compliance /= sessions_count;
         result["total_ppe_compliance_bytime"] = total_ppe_compliance_bysession;
         result["ppe_compliance"] = ppe_compliance;
         result["ppe_compliance_bytime"] = ppe_compliance_bysesions;
@@ -677,8 +809,9 @@ public class LabService
             foreach (var file in files)
             {
                 var timestamp = DateTime.Now.ToString("yyyyMMddHHmmssffff");
-                var file_path = $"files/{file.FileName}_${timestamp}.${file.FileName.Split('.').Last()}";
-                using (var stream = new FileStream(Path.Combine(directoryPath, file.FileName), FileMode.Create))
+                var new_file_name = $"{file.FileName}_{timestamp}.{file.FileName.Split('.').Last()}";
+                var file_path = $"files/{new_file_name}";
+                using (var stream = new FileStream(Path.Combine(directoryPath, new_file_name), FileMode.Create))
                 {
                     await file.CopyToAsync(stream);
                 }
