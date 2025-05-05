@@ -8,6 +8,7 @@ import {
 	Accordion,
 	AccordionSummary,
 	AccordionDetails,
+	Skeleton,
 } from "@mui/material";
 import { useUser } from "../contexts/UserContext";
 import { useDashboard } from "../hooks/useDashboard";
@@ -32,6 +33,137 @@ import AssignmentTurnedInIcon from "@mui/icons-material/AssignmentTurnedIn";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { Lab } from "../types/dashboard";
 import LabOverview from "../components/LabOverview";
+
+const renderLoadingSkeleton = () => (
+	<Box sx={{ p: 3 }}>
+		{/* Header */}
+		<Skeleton
+			variant="text"
+			width={300}
+			height={40}
+			sx={{ mb: 3, bgcolor: "var(--color-card-hover)" }}
+		/>
+
+		{/* Overview Cards */}
+		<Grid container spacing={3} sx={{ mb: 3 }}>
+			{[1, 2, 3].map((card) => (
+				<Grid item xs={12} md={4} key={`card-${card}`}>
+					<Card sx={{ p: 3, bgcolor: "var(--color-card)" }}>
+						<Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+							<Skeleton
+								variant="circular"
+								width={40}
+								height={40}
+								sx={{ bgcolor: "var(--color-card-hover)" }}
+							/>
+							<Box sx={{ flex: 1 }}>
+								<Skeleton
+									variant="text"
+									width="60%"
+									height={32}
+									sx={{ bgcolor: "var(--color-card-hover)" }}
+								/>
+								<Skeleton
+									variant="text"
+									width="40%"
+									height={24}
+									sx={{ bgcolor: "var(--color-card-hover)" }}
+								/>
+							</Box>
+						</Box>
+					</Card>
+				</Grid>
+			))}
+		</Grid>
+
+		{/* Charts */}
+		<Grid container spacing={3} sx={{ mb: 3 }}>
+			<Grid item xs={12}>
+				<Card sx={{ p: 3, bgcolor: "var(--color-card)" }}>
+					<Skeleton
+						variant="text"
+						width={200}
+						height={32}
+						sx={{ mb: 2, bgcolor: "var(--color-card-hover)" }}
+					/>
+					<Skeleton
+						variant="rectangular"
+						height={300}
+						sx={{ bgcolor: "var(--color-card-hover)", borderRadius: 1 }}
+					/>
+				</Card>
+			</Grid>
+		</Grid>
+
+		{/* PPE and Performance Grid */}
+		<Grid container spacing={3}>
+			<Grid item xs={12} md={6}>
+				<Card sx={{ p: 3, bgcolor: "var(--color-card)" }}>
+					<Skeleton
+						variant="text"
+						width={200}
+						height={32}
+						sx={{ mb: 2, bgcolor: "var(--color-card-hover)" }}
+					/>
+					<Box
+						sx={{
+							height: 300,
+							display: "flex",
+							alignItems: "center",
+							justifyContent: "center",
+						}}
+					>
+						<Skeleton
+							variant="circular"
+							width={250}
+							height={250}
+							sx={{ bgcolor: "var(--color-card-hover)" }}
+						/>
+					</Box>
+				</Card>
+			</Grid>
+			<Grid item xs={12} md={6}>
+				<Card sx={{ p: 3, bgcolor: "var(--color-card)" }}>
+					<Skeleton
+						variant="text"
+						width={200}
+						height={32}
+						sx={{ mb: 2, bgcolor: "var(--color-card-hover)" }}
+					/>
+					<Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+						{[1, 2, 3, 4].map((item) => (
+							<Box
+								key={item}
+								sx={{ display: "flex", alignItems: "center", gap: 2 }}
+							>
+								<Skeleton
+									variant="circular"
+									width={32}
+									height={32}
+									sx={{ bgcolor: "var(--color-card-hover)" }}
+								/>
+								<Box sx={{ flex: 1 }}>
+									<Skeleton
+										variant="text"
+										width="60%"
+										height={24}
+										sx={{ bgcolor: "var(--color-card-hover)" }}
+									/>
+									<Skeleton
+										variant="text"
+										width="40%"
+										height={20}
+										sx={{ bgcolor: "var(--color-card-hover)" }}
+									/>
+								</Box>
+							</Box>
+						))}
+					</Box>
+				</Card>
+			</Grid>
+		</Grid>
+	</Box>
+);
 
 const DashboardPage: React.FC = () => {
 	const { user: authUser } = useUser();
@@ -135,11 +267,7 @@ const DashboardPage: React.FC = () => {
 	}, [validLabs]);
 
 	if (isLoading || !dashboardData) {
-		return (
-			<Box sx={{ display: "flex", justifyContent: "center", p: 3 }}>
-				<CircularProgress />
-			</Box>
-		);
+		return renderLoadingSkeleton();
 	}
 
 	return (
