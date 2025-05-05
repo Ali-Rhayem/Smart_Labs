@@ -1,0 +1,52 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+	--color-secondary: #1c1c1c;
+	--color-therd: #252525;
+	--color-success: #28a745;
+	--color-danger: #f44336;
+	--color-warning: #ff9800;
+	--color-info: #17a2b8;
+
+	--color-dark-primary: #ffff00;
+	--color-background-light: #ffffff;
+	--secondary-background-light: #f8f9fa;
+	--color-card-light: #f5f5f5;
+	--color-card-hover-light: #e9ecef;
+	--color-text-light: #212529;
+	--color-text-button-light: #f1f1f1;
+	--secondary-text-light: #343a40;
+
+	--color-light-primary: #0d6efd;
+	--color-background-dark: #1c1c1c;
+	--secondary-background-dark: #252525;
+	--color-card-dark: #2f2f2f;
+	--color-card-hover-dark: #3a3a3a;
+	--color-text-dark: #f1f1f1;
+	--color-text-button-dark: #212529;
+	--secondary-text-dark: #a0a0a0; /* #E0E0E0; */
+}
+
+[data-theme="dark"] {
+	--color-primary: var(--color-dark-primary);
+	--color-background: var(--color-background-dark);
+	--color-background-secondary: var(--secondary-background-dark);
+	--color-card: var(--color-card-dark);
+	--color-card-hover: var(--color-card-hover-dark);
+	--color-text: var(--color-text-dark);
+	--color-text-button: var(--color-text-button-dark);
+	--color-text-secondary: var(--secondary-text-dark);
+}
+
+[data-theme="light"] {
+	--color-primary: var(--color-light-primary);
+	--color-background: var(--color-background-light);
+	--color-background-secondary: var(--secondary-background-light);
+	--color-card: var(--color-card-light);
+	--color-card-hover: var(--color-card-hover-light);
+	--color-text: var(--color-text-light);
+	--color-text-button: var(--color-text-button-light);
+	--color-text-secondary: var(--secondary-text-light);
+}

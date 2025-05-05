@@ -1,0 +1,125 @@
+{
+  "Version": 1,
+  "Hash": "F0sMOFYGNsTZa5g0LeZkhp8mhhyVmTpWGx8dzTLL07c=",
+  "Source": "backend",
+  "BasePath": "_content/backend",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [
+    {
+      "Name": "backend/wwwroot",
+      "Source": "backend",
+      "ContentRoot": "/Users/jawadalsayed/Desktop/fyp/Smart_Labs/backend/wwwroot/",
+      "BasePath": "_content/backend",
+      "Pattern": "**"
+    }
+  ],
+  "Assets": [
+    {
+      "Identity": "/Users/jawadalsayed/Desktop/fyp/Smart_Labs/backend/wwwroot/medi/smartlab-logo-3-2.png",
+      "SourceId": "backend",
+      "SourceType": "Discovered",
+      "ContentRoot": "/Users/jawadalsayed/Desktop/fyp/Smart_Labs/backend/wwwroot/",
+      "BasePath": "_content/backend",
+      "RelativePath": "medi/smartlab-logo-3-2#[.{fingerprint}]?.png",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "r5w6lxla6f",
+      "Integrity": "TxFrpZEUQCgsmhqITfP0lxTtLUU/tNhxT8mv2Bo3Hkk=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot/medi/smartlab-logo-3-2.png"
+    }
+  ],
+  "Endpoints": [
+    {
+      "Route": "medi/smartlab-logo-3-2.png",
+      "AssetFile": "/Users/jawadalsayed/Desktop/fyp/Smart_Labs/backend/wwwroot/medi/smartlab-logo-3-2.png",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "287738"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "image/png"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"TxFrpZEUQCgsmhqITfP0lxTtLUU/tNhxT8mv2Bo3Hkk=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Wed, 22 Jan 2025 19:14:21 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=3600, must-revalidate"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-TxFrpZEUQCgsmhqITfP0lxTtLUU/tNhxT8mv2Bo3Hkk="
+        }
+      ]
+    },
+    {
+      "Route": "medi/smartlab-logo-3-2.r5w6lxla6f.png",
+      "AssetFile": "/Users/jawadalsayed/Desktop/fyp/Smart_Labs/backend/wwwroot/medi/smartlab-logo-3-2.png",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "287738"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "image/png"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"TxFrpZEUQCgsmhqITfP0lxTtLUU/tNhxT8mv2Bo3Hkk=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Wed, 22 Jan 2025 19:14:21 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "r5w6lxla6f"
+        },
+        {
+          "Name": "label",
+          "Value": "medi/smartlab-logo-3-2.png"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-TxFrpZEUQCgsmhqITfP0lxTtLUU/tNhxT8mv2Bo3Hkk="
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+﻿<Project>
+  <ItemGroup>
+    <StaticWebAssetEndpoint Include="_content/backend/medi/smartlab-logo-3-2.png">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\medi\smartlab-logo-3-2.png'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-TxFrpZEUQCgsmhqITfP0lxTtLUU/tNhxT8mv2Bo3Hkk="}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=3600, must-revalidate"},{"Name":"Content-Length","Value":"287738"},{"Name":"Content-Type","Value":"image/png"},{"Name":"ETag","Value":"\u0022TxFrpZEUQCgsmhqITfP0lxTtLUU/tNhxT8mv2Bo3Hkk=\u0022"},{"Name":"Last-Modified","Value":"Wed, 22 Jan 2025 19:14:21 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/backend/medi/smartlab-logo-3-2.r5w6lxla6f.png">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\medi\smartlab-logo-3-2.png'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"r5w6lxla6f"},{"Name":"integrity","Value":"sha256-TxFrpZEUQCgsmhqITfP0lxTtLUU/tNhxT8mv2Bo3Hkk="},{"Name":"label","Value":"_content/backend/medi/smartlab-logo-3-2.png"}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"287738"},{"Name":"Content-Type","Value":"image/png"},{"Name":"ETag","Value":"\u0022TxFrpZEUQCgsmhqITfP0lxTtLUU/tNhxT8mv2Bo3Hkk=\u0022"},{"Name":"Last-Modified","Value":"Wed, 22 Jan 2025 19:14:21 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+  </ItemGroup>
+</Project>
