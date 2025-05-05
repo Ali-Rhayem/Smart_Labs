@@ -3,12 +3,12 @@ using backend.Services;
 using MongoDB.Driver;
 
 
-public class SessionService
+public class SessionService : ISessionService
 {
     private readonly IMongoCollection<Sessions> _sessions;
-    private readonly UserService _userService;
+    private readonly IUserService _userService;
 
-    public SessionService(IMongoDatabase database, UserService userService)
+    public SessionService(IMongoDatabase database, IUserService userService)
     {
         _sessions = database.GetCollection<Sessions>("Sessions");
         _userService = userService;
