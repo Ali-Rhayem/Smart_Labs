@@ -5,6 +5,7 @@ using System.Security.Claims;
 using backend.Models;
 using backend.Services;
 using System.Text.Json;
+using backend.helpers;
 
 namespace backend.Controllers
 
@@ -13,17 +14,16 @@ namespace backend.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
-        private readonly UserService _userService;
-        private readonly JwtTokenHelper _jwtTokenHelper;
+        private readonly IUserService _userService;
+        private readonly IJwtTokenHelper _jwtTokenHelper;
 
         // Inject UserService into the controller
-        public UserController(UserService userService, JwtTokenHelper jwtTokenHelper)
+        public UserController(IUserService userService, IJwtTokenHelper jwtTokenHelper)
         {
             _userService = userService;
             _jwtTokenHelper = jwtTokenHelper;
         }
 
-        // for testing purposes
         // GET: api/user
         [HttpGet]
         [Authorize(Roles = "admin")]
