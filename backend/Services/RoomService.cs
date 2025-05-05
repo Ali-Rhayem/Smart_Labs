@@ -1,7 +1,7 @@
 using MongoDB.Driver;
 namespace backend.Services;
 
-public class RoomService
+public class RoomService : IRoomService
 {
 
     private readonly IMongoCollection<Rooms> _rooms;
@@ -32,7 +32,7 @@ public class RoomService
 
     public async Task<Rooms> UpdateRoomAsync(string name, Rooms room)
     {
-        var _labService = _serviceProvider.GetRequiredService<LabService>();
+        var _labService = _serviceProvider.GetRequiredService<ILabService>();
 
         await _rooms.UpdateOneAsync(r => r.Name == name, Builders<Rooms>.Update.Set(r => r.Name, room.Name));
         var labs = await _labService.GetLabsByRoomAsync(name);
