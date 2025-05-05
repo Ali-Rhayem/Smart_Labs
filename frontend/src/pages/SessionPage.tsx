@@ -6,6 +6,9 @@ import {
 	Tab,
 	CircularProgress,
 	Tooltip,
+	Grid,
+	Card,
+	Skeleton,
 } from "@mui/material";
 import { useLocation } from "react-router-dom";
 import PeopleIcon from "@mui/icons-material/People";
@@ -87,6 +90,148 @@ const ProgressDisplay = ({
 	</Tooltip>
 );
 
+const renderLoadingSkeleton = () => (
+	<Box sx={{ p: 3 }}>
+		{/* Tab Navigation */}
+		<Box sx={{ borderBottom: 1, borderColor: "var(--color-border)" }}>
+			<Skeleton
+				variant="rectangular"
+				width={300}
+				height={48}
+				sx={{ bgcolor: "var(--color-card-hover)", borderRadius: 1 }}
+			/>
+		</Box>
+
+		{/* Content Area */}
+		<Box sx={{ mt: 3 }}>
+			{/* People Tab Skeleton */}
+			<Grid container spacing={2}>
+				{[1, 2, 3, 4, 5, 6].map((person) => (
+					<Grid item xs={12} sm={6} md={4} key={person}>
+						<Card sx={{ p: 2, bgcolor: "var(--color-card)" }}>
+							<Box sx={{ display: "flex", gap: 2, mb: 2 }}>
+								<Skeleton
+									variant="circular"
+									width={40}
+									height={40}
+									sx={{ bgcolor: "var(--color-card-hover)" }}
+								/>
+								<Box sx={{ flex: 1 }}>
+									<Skeleton
+										variant="text"
+										width="70%"
+										height={24}
+										sx={{
+											mb: 0.5,
+											bgcolor: "var(--color-card-hover)",
+										}}
+									/>
+									<Skeleton
+										variant="text"
+										width="40%"
+										height={20}
+										sx={{ bgcolor: "var(--color-card-hover)" }}
+									/>
+								</Box>
+							</Box>
+							<Box
+								sx={{
+									display: "flex",
+									justifyContent: "space-between",
+									mb: 2,
+								}}
+							>
+								<Skeleton
+									variant="rectangular"
+									width={100}
+									height={24}
+									sx={{
+										bgcolor: "var(--color-card-hover)",
+										borderRadius: 1,
+									}}
+								/>
+								<Skeleton
+									variant="rectangular"
+									width={100}
+									height={24}
+									sx={{
+										bgcolor: "var(--color-card-hover)",
+										borderRadius: 1,
+									}}
+								/>
+							</Box>
+						</Card>
+					</Grid>
+				))}
+			</Grid>
+
+			{/* Analytics Tab Skeleton */}
+			<Grid container spacing={3} sx={{ mt: 2 }}>
+				{/* Charts */}
+				{[1, 2].map((chart) => (
+					<Grid item xs={12} md={6} key={chart}>
+						<Card sx={{ p: 3, bgcolor: "var(--color-card)" }}>
+							<Skeleton
+								variant="text"
+								width={200}
+								height={32}
+								sx={{
+									mb: 2,
+									bgcolor: "var(--color-card-hover)",
+								}}
+							/>
+							<Skeleton
+								variant="rectangular"
+								height={300}
+								sx={{
+									bgcolor: "var(--color-card-hover)",
+									borderRadius: 1,
+								}}
+							/>
+						</Card>
+					</Grid>
+				))}
+
+				{/* Full Width Stats */}
+				<Grid item xs={12}>
+					<Card sx={{ p: 3, bgcolor: "var(--color-card)" }}>
+						<Box
+							sx={{
+								display: "flex",
+								justifyContent: "space-between",
+								mb: 3,
+							}}
+						>
+							{[1, 2, 3].map((stat) => (
+								<Box key={stat}>
+									<Skeleton
+										variant="text"
+										width={120}
+										height={24}
+										sx={{
+											mb: 1,
+											bgcolor: "var(--color-card-hover)",
+										}}
+									/>
+									<Skeleton
+										variant="rectangular"
+										width={100}
+										height={40}
+										sx={{
+											bgcolor: "var(--color-card-hover)",
+											borderRadius: 1,
+										}}
+									/>
+								</Box>
+							))}
+						</Box>
+					</Card>
+				</Grid>
+			</Grid>
+		</Box>
+	</Box>
+);
+
 const SessionPage: React.FC = () => {
 	const location = useLocation();
 	const session = location.state?.session as Session;
@@ -107,7 +252,7 @@ const SessionPage: React.FC = () => {
 		return values.reduce((a, b) => a + b, 0) / values.length;
 	};
 
-	if (!session) return null;
+	if (!session) return renderLoadingSkeleton();
 
 	return (
 		<Box
@@ -128,35 +273,37 @@ const SessionPage: React.FC = () => {
 
 				<Box sx={{ mt: 3, display: "flex", gap: 2, flexWrap: "wrap" }}>
 					<ProgressDisplay
-						value={session.totalAttendance}
+						value={session.totalAttendance ?? 0}
 						label="Attendance"
-						color={getStatusColor(session.totalAttendance)}
+						color={getStatusColor(session.totalAttendance ?? 0)}
 					/>
 					<ProgressDisplay
 						value={Math.round(
 							calculateAverageCompliance(
-								session.totalPPECompliance
+								session.totalPPECompliance ?? {}
 							)
 						)}
 						label="Overall PPE"
 						color={getStatusColor(
 							calculateAverageCompliance(
-								session.totalPPECompliance
+								session.totalPPECompliance ?? {}
 							)
 						)}
 					/>
-					{Object.entries(session.totalPPECompliance).map(
-						([item, value]) => (
-							<ProgressDisplay
-								key={item}
-								value={Math.round(value)}
-								label={
-									item.charAt(0).toUpperCase() + item.slice(1)
-								}
-								color={getStatusColor(value)}
-							/>
-						)
-					)}
+					{session.totalPPECompliance &&
+						Object.entries(session.totalPPECompliance).map(
+							([item, value]) => (
+								<ProgressDisplay
+									key={item}
+									value={Math.round(value)}
+									label={
+										item.charAt(0).toUpperCase() +
+										item.slice(1)
+									}
+									color={getStatusColor(value)}
+								/>
+							)
+						)}
 				</Box>
 			</Box>
 
@@ -189,10 +336,10 @@ const SessionPage: React.FC = () => {
 			<TabPanel value={tabValue} index={1}>
 				<AnalyticsSession
 					results={session.result}
-					totalPPECompliance={session.totalPPECompliance}
-					ppE_compliance_bytime={session.ppE_compliance_bytime}
+					totalPPECompliance={session.totalPPECompliance ?? {}}
+					ppE_compliance_bytime={session.ppE_compliance_bytime ?? {}}
 					total_ppe_compliance_bytime={
-						session.total_ppe_compliance_bytime
+						session.total_ppe_compliance_bytime ?? []
 					}
 				/>
 			</TabPanel>
