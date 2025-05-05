@@ -20,11 +20,11 @@ public class Announcement
     [BsonElement("Comments")]
     public List<Comment> Comments { get; set; } = [];
 
-    [BsonElement("AssignmentId")]
-    public bool Assignment { get; set; } = false;
+    [BsonElement("Assignment")]
+    public bool Assignment { get; set; }
 
-    [BsonElement("can_submit")]
-    public bool CanSubmit { get; set; } = false;
+    [BsonElement("CanSubmit")]
+    public bool CanSubmit { get; set; }
 
     [BsonElement("Deadline")]
     public DateTime Deadline { get; set; } = DateTime.UtcNow.AddDays(1);
@@ -52,7 +52,7 @@ public class Submission
     public DateTime Time { get; set; } = DateTime.UtcNow;
 
     [BsonElement("Submitted")]
-    public bool Submitted { get; set; } = false;
+    public bool Submitted { get; set; }
 
     [BsonElement("Grade")]
     public int? Grade { get; set; }
