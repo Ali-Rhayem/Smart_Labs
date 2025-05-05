@@ -12,9 +12,9 @@ namespace backend.Controllers
     public class RoomController : ControllerBase
     {
 
-        private readonly RoomService _roomService;
+        private readonly IRoomService _roomService;
 
-        public RoomController(RoomService roomService)
+        public RoomController(IRoomService roomService)
         {
             _roomService = roomService;
         }
