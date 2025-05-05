@@ -9,7 +9,6 @@ import NotFoundPage from "./pages/NotFoundPage";
 import { useUser } from "./contexts/UserContext";
 import UnauthorizedPage from "./pages/UnauthorizedPage";
 import ProtectedRoute from "./contexts/ProtectedRoute";
-import { QueryClient } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import LabPage from "./pages/LabPage";
 import SessionPage from "./pages/SessionPage";
