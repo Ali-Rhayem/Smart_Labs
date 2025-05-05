@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { Box, Typography, CircularProgress, Card, Button } from "@mui/material";
+import { Box, Typography, CircularProgress, Card, Button, Skeleton } from "@mui/material";
 import { useUser } from "../contexts/UserContext";
 import { useNotification } from "../hooks/useNotification";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -129,12 +129,96 @@ const NotificationsPage: React.FC = () => {
 		);
 	}, [notifications]);
 
+	const renderLoadingSkeleton = () => (
+		<Box sx={{ p: 3 }}>
+			{[1, 2, 3].map((dateGroup) => (
+				<Box key={`date-group-${dateGroup}`} sx={{ mb: 4 }}>
+					{/* Date Header */}
+					<Skeleton
+						variant="text"
+						width={200}
+						height={32}
+						sx={{
+							mb: 2,
+							pl: 1,
+							borderLeft: '4px solid var(--color-primary)',
+							bgcolor: 'var(--color-card-hover)'
+						}}
+					/>
+
+					{/* Notification Cards */}
+					{[1, 2, 3].map((card) => (
+						<Card
+							key={`notification-${card}`}
+							sx={{
+								p: 2,
+								mb: 2,
+								bgcolor: 'var(--color-card)',
+								borderRadius: 2
+							}}
+						>
+							<Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
+								<Skeleton
+									variant="circular"
+									width={40}
+									height={40}
+									sx={{ bgcolor: 'var(--color-card-hover)' }}
+								/>
+								<Box sx={{ flex: 1 }}>
+									<Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+										<Skeleton
+											variant="text"
+											width="60%"
+											height={24}
+											sx={{ bgcolor: 'var(--color-card-hover)' }}
+										/>
+										<Skeleton
+											variant="text"
+											width="20%"
+											height={24}
+											sx={{ bgcolor: 'var(--color-card-hover)' }}
+										/>
+									</Box>
+									<Skeleton
+										variant="rectangular"
+										height={60}
+										sx={{
+											bgcolor: 'var(--color-card-hover)',
+											borderRadius: 1,
+											mb: 1
+										}}
+									/>
+									<Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
+										<Skeleton
+											variant="rectangular"
+											width={80}
+											height={32}
+											sx={{
+												bgcolor: 'var(--color-card-hover)',
+												borderRadius: 1
+											}}
+										/>
+										<Skeleton
+											variant="rectangular"
+											width={80}
+											height={32}
+											sx={{
+												bgcolor: 'var(--color-card-hover)',
+												borderRadius: 1
+											}}
+										/>
+									</Box>
+								</Box>
+							</Box>
+						</Card>
+					))}
+				</Box>
+			))}
+		</Box>
+	);
+
 	if (isLoading) {
-		return (
-			<Box sx={{ display: "flex", justifyContent: "center", p: 3 }}>
-				<CircularProgress />
-			</Box>
-		);
+		return renderLoadingSkeleton();
 	}
 
 	if (error) {
