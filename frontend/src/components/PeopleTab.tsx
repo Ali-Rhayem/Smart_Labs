@@ -5,9 +5,11 @@ import {
 	Grid,
 	Avatar,
 	Divider,
-	CircularProgress,
 	IconButton,
 	Button,
+	Skeleton,
+	Card,
+	CardContent,
 } from "@mui/material";
 import { User } from "../types/user";
 import { imageUrl } from "../config/config";
@@ -108,8 +110,192 @@ const PeopleTab: React.FC<PeopleTabProps> = ({
 		setModalOpen(true);
 	};
 
+	const renderLoadingSkeleton = () => (
+		<Box>
+			{/* Instructors Section */}
+			<Box
+				sx={{
+					display: "flex",
+					justifyContent: "space-between",
+					alignItems: "center",
+					mb: 2,
+				}}
+			>
+				<Skeleton
+					variant="text"
+					width={150}
+					height={32}
+					sx={{ bgcolor: "var(--color-card-hover)" }}
+				/>
+				<Skeleton
+					variant="rectangular"
+					width={150}
+					height={36}
+					sx={{
+						bgcolor: "var(--color-card-hover)",
+						borderRadius: 1,
+					}}
+				/>
+			</Box>
+
+			<Grid container spacing={2} sx={{ mb: 4 }}>
+				{[1, 2, 3].map((item) => (
+					<Grid item xs={12} sm={6} md={4} key={`instructor-${item}`}>
+						<Card sx={{ bgcolor: "var(--color-card)" }}>
+							<CardContent>
+								<Box
+									sx={{
+										display: "flex",
+										alignItems: "center",
+										mb: 2,
+									}}
+								>
+									<Skeleton
+										variant="circular"
+										width={40}
+										height={40}
+										sx={{
+											bgcolor: "var(--color-card-hover)",
+											mr: 2,
+										}}
+									/>
+									<Box sx={{ flex: 1 }}>
+										<Skeleton
+											variant="text"
+											width="80%"
+											height={24}
+											sx={{
+												bgcolor: "var(--color-card-hover)",
+												mb: 0.5,
+											}}
+										/>
+										<Skeleton
+											variant="text"
+											width="60%"
+											height={20}
+											sx={{
+												bgcolor: "var(--color-card-hover)",
+											}}
+										/>
+									</Box>
+								</Box>
+								<Skeleton
+									variant="text"
+									width="40%"
+									height={20}
+									sx={{
+										bgcolor: "var(--color-card-hover)",
+										mb: 1,
+									}}
+								/>
+								<Skeleton
+									variant="text"
+									width="30%"
+									height={20}
+									sx={{
+										bgcolor: "var(--color-card-hover)",
+									}}
+								/>
+							</CardContent>
+						</Card>
+					</Grid>
+				))}
+			</Grid>
+
+			{/* Students Section */}
+			<Box
+				sx={{
+					display: "flex",
+					justifyContent: "space-between",
+					alignItems: "center",
+					mb: 2,
+				}}
+			>
+				<Skeleton
+					variant="text"
+					width={150}
+					height={32}
+					sx={{ bgcolor: "var(--color-card-hover)" }}
+				/>
+				<Skeleton
+					variant="rectangular"
+					width={150}
+					height={36}
+					sx={{
+						bgcolor: "var(--color-card-hover)",
+						borderRadius: 1,
+					}}
+				/>
+			</Box>
+
+			<Grid container spacing={2}>
+				{[1, 2, 3, 4, 5, 6].map((item) => (
+					<Grid item xs={12} sm={6} md={4} key={`student-${item}`}>
+						<Card sx={{ bgcolor: "var(--color-card)" }}>
+							<CardContent>
+								<Box
+									sx={{
+										display: "flex",
+										alignItems: "center",
+										mb: 2,
+									}}
+								>
+									<Skeleton
+										variant="circular"
+										width={40}
+										height={40}
+										sx={{
+											bgcolor: "var(--color-card-hover)",
+											mr: 2,
+										}}
+									/>
+									<Box sx={{ flex: 1 }}>
+										<Skeleton
+											variant="text"
+											width="80%"
+											height={24}
+											sx={{
+												bgcolor: "var(--color-card-hover)",
+												mb: 0.5,
+											}}
+										/>
+										<Skeleton
+											variant="text"
+											width="60%"
+											height={20}
+											sx={{
+												bgcolor: "var(--color-card-hover)",
+											}}
+										/>
+									</Box>
+								</Box>
+								<Skeleton
+									variant="text"
+									width="40%"
+									height={20}
+									sx={{
+										bgcolor: "var(--color-card-hover)",
+										mb: 1,
+									}}
+								/>
+								<Skeleton
+									variant="text"
+									width="30%"
+									height={20}
+									sx={{
+										bgcolor: "var(--color-card-hover)",
+									}}
+								/>
+							</CardContent>
+						</Card>
+					</Grid>
+				))}
+			</Grid>
+		</Box>
+	);
+
 	if (isLoading) {
-		return <CircularProgress />;
+		return renderLoadingSkeleton();
 	}
 
 	return (
