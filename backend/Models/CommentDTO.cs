@@ -11,7 +11,7 @@ public class CommentDTO
 
     public DateTime Time { get; set; } = DateTime.UtcNow;
 
-    public static async Task<List<CommentDTO>> FromCommentListAsync(List<Comment> v, UserService userService)
+    public static async Task<List<CommentDTO>> FromCommentListAsync(List<Comment> v, IUserService userService)
     {
         List<CommentDTO> results = [];
         foreach (var comment in v)
