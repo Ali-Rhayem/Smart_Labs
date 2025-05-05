@@ -1,6 +1,5 @@
 import { smart_labs } from "../utils/axios";
 import { AnnouncementDTO, CommentDTO, Comment } from "../types/announcements";
-import { labService } from "./labService";
 
 export const announcementService = {
 	sendAnnouncement: (lab_id: number, formData: FormData) =>
