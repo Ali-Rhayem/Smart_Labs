@@ -1,0 +1,2 @@
+*.pt filter=lfs diff=lfs merge=lfs -text
+AI/models/yolov8_ppe3.pt filter=lfs diff=lfs merge=lfs -text
