@@ -35,7 +35,7 @@ export interface People {
 	id: number;
 	name: string;
 	attendance_percentage: number;
-	ppe_compliance: { [key: string]: number };
+	ppE_compliance: { [key: string]: number };
 	user: UserDTO;
 }
 
@@ -43,7 +43,6 @@ export interface PeopleBytime {
 	id: number;
 	name: string;
 	attendance_percentage: number[];
-	ppe_compliance: { [key: string]: number[] };
+	ppE_compliance: { [key: string]: number[] };
 	user: UserDTO;
 }
-
