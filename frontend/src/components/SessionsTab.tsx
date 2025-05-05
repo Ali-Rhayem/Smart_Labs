@@ -7,6 +7,7 @@ import {
 	Typography,
 	Button,
 	CircularProgress,
+	Skeleton,
 } from "@mui/material";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import { useLabSessions } from "../hooks/useSessions";
@@ -86,6 +87,85 @@ const SessionsTab: React.FC<{ labId: number }> = ({ labId }) => {
 		navigate(`/labs/sessions/${session.id}`, { state: { session } });
 	};
 
+	const renderLoadingSkeleton = () => (
+		<Grid container spacing={3}>
+			{[1, 2, 3, 4, 5, 6].map((item) => (
+				<Grid item xs={12} sm={6} md={4} key={item}>
+					<Card
+						sx={{
+							height: "100%",
+							background: "var(--color-card)",
+							borderRadius: 2,
+							boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
+						}}
+					>
+						<CardContent sx={{ p: 3 }}>
+							{/* Date Skeleton */}
+							<Skeleton
+								variant="text"
+								width="70%"
+								height={32}
+								sx={{ mb: 3, bgcolor: "var(--color-card-hover)" }}
+							/>
+
+							{/* Progress Indicators */}
+							<Box
+								sx={{
+									display: "flex",
+									justifyContent: "space-around",
+									mb: 3,
+								}}
+							>
+								{/* Attendance Skeleton */}
+								<Box sx={{ textAlign: "center" }}>
+									<Skeleton
+										variant="circular"
+										width={80}
+										height={80}
+										sx={{ mb: 1, bgcolor: "var(--color-card-hover)" }}
+									/>
+									<Skeleton
+										variant="text"
+										width={60}
+										sx={{ bgcolor: "var(--color-card-hover)" }}
+									/>
+								</Box>
+
+								{/* PPE Compliance Skeleton */}
+								<Box sx={{ textAlign: "center" }}>
+									<Skeleton
+										variant="circular"
+										width={80}
+										height={80}
+										sx={{ mb: 1, bgcolor: "var(--color-card-hover)" }}
+									/>
+									<Skeleton
+										variant="text"
+										width={60}
+										sx={{ bgcolor: "var(--color-card-hover)" }}
+									/>
+								</Box>
+							</Box>
+
+							{/* View Details Button Skeleton */}
+							<Skeleton
+								variant="rectangular"
+								height={40}
+								sx={{
+									width: "100%",
+									borderRadius: 2,
+									bgcolor: "var(--color-card-hover)",
+								}}
+							/>
+						</CardContent>
+					</Card>
+				</Grid>
+			))}
+		</Grid>
+	);
+
+
+
 	return (
 		<Box sx={{ flexGrow: 1 }}>
 			<Box sx={{ mb: 2 }}>
@@ -100,9 +180,7 @@ const SessionsTab: React.FC<{ labId: number }> = ({ labId }) => {
 			</Box>
 
 			{isLoading ? (
-				<Box sx={{ display: "flex", justifyContent: "center", p: 3 }}>
-					<CircularProgress />
-				</Box>
+				renderLoadingSkeleton()
 			) : (
 				<Grid container spacing={3}>
 					{filteredSessions.map((session) => (
@@ -163,13 +241,13 @@ const SessionsTab: React.FC<{ labId: number }> = ({ labId }) => {
 												<CircularProgress
 													variant="determinate"
 													value={
-														session.totalAttendance
+														session.totalAttendance ?? 0
 													}
 													size={80}
 													thickness={4}
 													sx={{
 														color: getComplianceColor(
-															session.totalAttendance
+															session.totalAttendance ?? 0
 														),
 														"& .MuiCircularProgress-circle":
 															{
@@ -222,14 +300,14 @@ const SessionsTab: React.FC<{ labId: number }> = ({ labId }) => {
 												<CircularProgress
 													variant="determinate"
 													value={calculateAverageCompliance(
-														session.totalPPECompliance
+														session.totalPPECompliance ?? {}
 													)}
 													size={80}
 													thickness={4}
 													sx={{
 														color: getComplianceColor(
 															calculateAverageCompliance(
-																session.totalPPECompliance
+																session.totalPPECompliance ?? {}
 															)
 														),
 														"& .MuiCircularProgress-circle":
@@ -257,7 +335,7 @@ const SessionsTab: React.FC<{ labId: number }> = ({ labId }) => {
 													>
 														{`${Math.round(
 															calculateAverageCompliance(
-																session.totalPPECompliance
+																session.totalPPECompliance ?? {}
 															)
 														)}%`}
 													</Typography>
