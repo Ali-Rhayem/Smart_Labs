@@ -18,7 +18,6 @@ import {
 } from "@mui/material";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
-import PersonIcon from "@mui/icons-material/Person";
 import { imageUrl } from "../config/config";
 import { ObjectResult } from "../types/sessions";
 
